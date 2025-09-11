@@ -1,6 +1,6 @@
-import { View, Image, Button, StyleSheet, Text } from 'react-native';
-import { useRouter } from 'expo-router';
 import React from 'react';
+import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import { useRouter } from 'expo-router';
 
 export default function Index() {
   const router = useRouter();
@@ -14,13 +14,34 @@ export default function Index() {
         resizeMode="contain"
       />
 
-<Text>Welcome to SafeSpace</Text>
-      {/* Navigation buttons */}
-     
-        <Button title="Abuse Types" onPress={() => router.push('/abuse-types')} />
-        <Button title="Screen 2" onPress={() => router.push('/')} />
-        <Button title="Screen 3" onPress={() => router.push('/')} />
-     
+      {/* Welcome section */}
+      <View style={styles.welcomeContainer}>
+        <Text style={styles.welcomeText}>Welcome to SafeSpace</Text>
+      </View>
+
+      {/* Buttons section */}
+      <View style={styles.buttonsContainer}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => router.push('/abuse-types')}
+        >
+          <Text style={styles.buttonText}>Report Abuse</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => router.push('/admin-login')}
+        >
+          <Text style={styles.buttonText}>School Admin</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => router.push('/')}
+        >
+          <Text style={styles.buttonText}>Status</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -33,18 +54,42 @@ export const options = {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 40,       
-    paddingLeft: 16,      
+    paddingTop: 40,
+    paddingHorizontal: 20,
     backgroundColor: '#fff',
   },
   logo: {
     width: 120,
     height: 120,
-    marginBottom: 40,     
+    position: 'absolute',
+    top: 10,
+    left: 10,
   },
-    welcomeText: {
-    fontSize: 20,
+  welcomeContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  welcomeText: {
+    fontSize: 28,
     fontWeight: 'bold',
-    marginBottom: 20,
-  }
+    textAlign: 'center',
+    color: '#333',
+  },
+  buttonsContainer: {
+    marginBottom: 50,
+  },
+  button: {
+    backgroundColor: '#20C997',
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    marginVertical: 10,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 18,
+    textAlign: 'center',
+    fontWeight: '600',
+  },
 });
