@@ -1,15 +1,19 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function AdminLogin() {
   const router = useRouter();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {
     setError(''); // Reset error before login
+    setLoading(true);
+
     try {
       const response = await fetch('http://localhost:3000/admin/login', {
         method: 'POST',
@@ -18,13 +22,16 @@ export default function AdminLogin() {
       });
 
       const data = await response.json();
+      setLoading(false);
 
       if (response.ok && data.message.includes('Login successful')) {
+        await AsyncStorage.setItem('adminUsername', username);
         router.push(`/verify-page?username=${username}`);
       } else {
         setError(data.message || 'Invalid credentials');
       }
     } catch (err) {
+    setLoading(false);
       setError('Something went wrong. Please try again.');
     }
   };
@@ -50,8 +57,12 @@ export default function AdminLogin() {
 
       {error !== '' && <Text style={styles.error}>{error}</Text>}
 
-      <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-        <Text style={styles.buttonText}>Login</Text>
+      <TouchableOpacity style={styles.button} onPress={handleSubmit} disabled={loading}>
+        {loading ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text style={styles.buttonText}>Login</Text>
+        )}
       </TouchableOpacity>
     </View>
   );
