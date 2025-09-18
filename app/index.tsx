@@ -41,7 +41,7 @@ export default function Index() {
         <View style={styles.buttonsContainer}>
           <TouchableOpacity
             style={styles.buttonPrimary}
-            onPress={() => router.push('/abuse-types')}
+            onPress={() => router.push('/report-screen')}
           >
             <FontAwesome5 name="exclamation-triangle" size={20} color="#fff" />
             <Text style={styles.buttonText}>Report Abuse</Text>
