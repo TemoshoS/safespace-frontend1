@@ -49,7 +49,8 @@ export default function Index() {
 
           <TouchableOpacity
             style={styles.buttonSecondary}
-            onPress={() => router.push('/check-status')}
+            // onPress={() => router.push('/check-status')}
+             onPress={() => router.push('/report-form')}
           >
             <MaterialIcons name="check-circle-outline" size={20} color="#20C997" />
             <Text style={styles.buttonTextSecondary}>Check Case Status</Text>

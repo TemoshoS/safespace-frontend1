@@ -11,7 +11,9 @@ export default function DetailsScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const BACKEND_URL = 'http://10.168.231.163:3000'; // your PC IP
+  // const BACKEND_URL = 'http://10.168.231.163:3000';
+  const BACKEND_URL = 'http://10.36.109.163:3000';
+   // your PC IP
 
   // Fetch all reports on page load
   useEffect(() => {
