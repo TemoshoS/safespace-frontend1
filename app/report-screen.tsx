@@ -22,7 +22,7 @@ export default function ReportCaseScreen() {
   const handleNext = () => {
     // Navigate to case-type screen with parameters
     router.push({
-      pathname: "/case-type",
+      pathname: "/abuse-types",
       params: { 
         name: anonymous === "no" ? name : "",
         grade: anonymous === "no" ? grade : "",
