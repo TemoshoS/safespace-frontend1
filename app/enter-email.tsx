@@ -1,37 +1,41 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export default function AdminLogin() {
+export default function EnterEmail() {
+  const { username, password } = useLocalSearchParams<{ username: string; password: string }>();
   const router = useRouter();
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleNext = async () => {
-    if (!username || !password) {
-      setError('Username and password are required');
+  const handleSendCode = async () => {
+    if (!email) {
+      setError('Email is required');
       return;
     }
     setLoading(true);
     setError('');
 
     try {
-      const response = await fetch('http://localhost:3000/admin/validate-login', {
+      const response = await fetch('http://localhost:3000/admin/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ username, password, email }),
       });
 
       const data = await response.json();
       setLoading(false);
 
-      if (response.ok) {
-        // Credentials valid → go to email page
-        router.push({ pathname: '/enter-email', params: { username, password } });
+      if (response.ok && data.message.includes('Verification code sent')) {
+        // Save username in AsyncStorage for later use
+        await AsyncStorage.setItem('adminUsername', username);
+        // Move to verification page
+        router.push({ pathname: '/verify-page', params: { username } });
       } else {
-        setError(data.message || 'Invalid username or password');
+        // Display backend error (invalid credentials or email mismatch)
+        setError(data.message || 'Failed to send code');
       }
     } catch (err) {
       setLoading(false);
@@ -41,27 +45,21 @@ export default function AdminLogin() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Admin Login</Text>
+      <Text style={styles.title}>Enter Admin Email</Text>
 
       <TextInput
-        placeholder="Username"
-        value={username}
-        onChangeText={setUsername}
+        placeholder="Email"
+        value={email}
+        onChangeText={setEmail}
         style={styles.input}
         autoCapitalize="none"
-      />
-      <TextInput
-        placeholder="Password"
-        secureTextEntry
-        value={password}
-        onChangeText={setPassword}
-        style={styles.input}
+        keyboardType="email-address"
       />
 
       {error ? <Text style={styles.error}>{error}</Text> : null}
 
-      <TouchableOpacity style={styles.button} onPress={handleNext} disabled={loading}>
-        {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Login</Text>}
+      <TouchableOpacity style={styles.button} onPress={handleSendCode} disabled={loading}>
+        {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Send Code</Text>}
       </TouchableOpacity>
     </View>
   );

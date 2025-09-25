@@ -58,7 +58,7 @@ export default function AdminHome() {
   const handleLogout = async () => {
     await AsyncStorage.multiRemove(['adminToken', 'adminUsername']);
     Alert.alert('Logged out', 'You have been logged out');
-    router.push('/admin-login');
+    router.push('/');
   };
 
   const updateStatus = async (id: number, newStatus: string) => {

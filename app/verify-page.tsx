@@ -22,7 +22,8 @@ export default function VerifyPage() {
 
       if (response.ok && data.token) {
         // Save JWT to AsyncStorage
-        await AsyncStorage.setItem('adminToken', data.token);
+         await AsyncStorage.setItem('adminToken', data.token);
+         await AsyncStorage.setItem('adminUsername', data.username);
         // Navigate to admin home
         router.push('/admin-home');
       } else {
