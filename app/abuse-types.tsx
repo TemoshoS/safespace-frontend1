@@ -1,47 +1,45 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet } from 'react-native';
-
-
-type AbuseType = {
-  id: number;
-  type_name: string;
-};
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 
 export default function AbuseTypesScreen() {
-  const [abuseTypes, setAbuseTypes] = useState<AbuseType[]>([]);
-  const [loading, setLoading] = useState(true);
+  const BACKEND_URL = 'http://localhost:3000';
+  const [abuseTypes, setAbuseTypes] = useState<any[]>([]);
+  const router = useRouter();
+  const params = useLocalSearchParams(); // ✅ get params from previous screen
+  const anonymous = params.anonymous;     // 'yes' or 'no'
 
   useEffect(() => {
-    
-    fetch('http://localhost:3000/abuse_types')
-      .then(res => res.json())
-      .then((data: AbuseType[]) => {
-        setAbuseTypes(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error('Error fetching abuse types:', err);
-        setLoading(false);
-      });
+    axios.get(`${BACKEND_URL}/abuse_types`)
+      .then(res => setAbuseTypes(res.data))
+      .catch(err => console.error('Error fetching abuse types:', err));
   }, []);
 
-  if (loading) return <Text style={styles.loading}>Loading...</Text>;
-
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Abuse Types</Text>
-      <FlatList
-        data={abuseTypes}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => <Text style={styles.item}>{item.type_name}</Text>}
-      />
-    </View>
+    <ScrollView style={styles.container}>
+      <Text style={styles.title}>Select Abuse Type</Text>
+      {abuseTypes.map(type => (
+        <TouchableOpacity
+          key={type.id}
+          style={styles.button}
+          onPress={() =>
+            router.push({
+              pathname: '/report-form',
+              params: { abuseTypeId: type.id, anonymous }, // pass it correctly
+            })
+          }
+        >
+          <Text style={styles.buttonText}>{type.type_name}</Text>
+        </TouchableOpacity>
+      ))}
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: '#fff' },
-  title: { fontSize: 24, fontWeight: 'bold', marginBottom: 16 },
-  item: { fontSize: 18, paddingVertical: 8 },
-  loading: { fontSize: 18, textAlign: 'center', marginTop: 50 },
+  container: { flex: 1, padding: 20, backgroundColor: '#fff' },
+  title: { fontSize: 24, fontWeight: 'bold', marginBottom: 20, textAlign: 'center' },
+  button: { marginBottom: 15, backgroundColor: 'purple', padding: 15, borderRadius: 8, alignItems: 'center' },
+  buttonText: { color: '#fff', fontWeight: 'bold' },
 });

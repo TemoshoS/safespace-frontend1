@@ -41,20 +41,13 @@ export default function Index() {
         <View style={styles.buttonsContainer}>
           <TouchableOpacity
             style={styles.buttonPrimary}
-            onPress={() => router.push('/abuse-types')}
+            onPress={() => router.push('/report-screen')}
           >
             <FontAwesome5 name="exclamation-triangle" size={20} color="#fff" />
             <Text style={styles.buttonText}>Report Abuse</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.buttonSecondary}
-            onPress={() => router.push('/status')}
-          >
-            <MaterialIcons name="check-circle-outline" size={20} color="#20C997" />
-            <Text style={styles.buttonTextSecondary}>Check Case Status</Text>
-          </TouchableOpacity>
-
+         
           <TouchableOpacity
             style={styles.buttonSecondary}
             onPress={() => router.push('/admin-login')}
@@ -62,6 +55,15 @@ export default function Index() {
             <FontAwesome5 name="user-shield" size={20} color="#20C997" />
             <Text style={styles.buttonTextSecondary}>School Admin Login</Text>
           </TouchableOpacity>
+
+           <TouchableOpacity
+            style={styles.buttonSecondary}
+            onPress={() => router.push('/check-status')}
+          >
+            <MaterialIcons name="check-circle-outline" size={20} color="#20C997" />
+            <Text style={styles.buttonTextSecondary}>Check Case Status</Text>
+          </TouchableOpacity>
+
         </View>
       </ScrollView>
     </LinearGradient>
