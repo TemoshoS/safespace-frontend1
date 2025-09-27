@@ -135,6 +135,25 @@ export default function DetailsScreen() {
               <Text style={styles.detailLabel}>School: </Text>
               <Text>{String(searchResult.school_name || '')}</Text>
             </Text>
+
+            {/* ✅ Edit Report Button */}
+            {/* <TouchableOpacity
+              style={styles.editButton}
+              onPress={() => router.push(`/edit-report/${searchResult.case_number}`)}
+            >
+              <Text style={styles.editButtonText}>Edit Report</Text>
+            </TouchableOpacity> */}
+            <TouchableOpacity
+  style={styles.editButton}
+  onPress={() =>
+    router.push({
+      pathname: "/edit-report",
+      params: { case_number: searchResult.case_number },
+    })
+  }
+>
+  <Text style={styles.editButtonText}>Edit Report</Text>
+</TouchableOpacity>
           </View>
         </ScrollView>
       )}
@@ -167,4 +186,8 @@ const styles = StyleSheet.create({
   detailLabel: { fontWeight: 'bold' },
   button: { backgroundColor: '#FF3B30', padding: 15, borderRadius: 8, marginTop: 20 },
   buttonText: { color: 'white', fontWeight: 'bold', fontSize: 16 },
+
+  /* ✅ New Edit Button */
+  editButton: { marginTop: 15, backgroundColor: 'orange', padding: 12, borderRadius: 8, alignItems: 'center' },
+  editButtonText: { color: '#fff', fontWeight: 'bold' },
 });
