@@ -1,8 +1,8 @@
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Alert } from 'react-native';
-import { useState, useEffect } from 'react';
-import axios from 'axios';
 import { Picker } from '@react-native-picker/picker';
+import axios from 'axios';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity } from 'react-native';
 
 export default function CreateReportScreen() {
   const BACKEND_URL = 'http://10.36.109.163:3000';
@@ -20,19 +20,32 @@ export default function CreateReportScreen() {
   const [school, setSchool] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Fetch subtypes for selected abuse type
-  useEffect(() => {
-    if (!abuseTypeId) return;
-    axios.get(`${BACKEND_URL}/reports/subtypes/${abuseTypeId}`)
-      .then(res => setSubtypes(res.data))
-      .catch(err => console.error('Error fetching subtypes:', err));
-  }, [abuseTypeId]);
+    // Fetch subtypes
+    useEffect(() => {
+        if (!abuseTypeId) return;
+        axios.get(`${BACKEND_URL}/reports/subtypes/${abuseTypeId}`)
+            .then(res => setSubtypes(res.data))
+            .catch(err => console.error('Error fetching subtypes:', err));
+    }, [abuseTypeId]);
 
-  const handleSubmit = async () => {
-    if (!selectedSubtype || !description || !email) {
-      Alert.alert('Error', 'Please fill all required fields.');
-      return;
-    }
+    const handleSubmit = async () => {
+        const selectedSubtypeObj = subtypes.find(s => s.id === selectedSubtype);
+
+        if (!selectedSubtype) {
+            Alert.alert('Error', 'Please select a subtype.');
+            return;
+        }
+
+        // Description required only if subtype = "Other"
+        if (selectedSubtypeObj?.sub_type_name === "Other" && !description) {
+            Alert.alert('Error', 'Please provide a description for "Other".');
+            return;
+        }
+
+        if (anonymous === "no" && !email) {
+            Alert.alert('Error', 'Email is required.');
+            return;
+        }
 
     setLoading(true);
     try {
@@ -53,11 +66,9 @@ export default function CreateReportScreen() {
       const res = await axios.post(`${BACKEND_URL}/reports`, payload);
       const caseNumber = res.data.case_number;
 
-      Alert.alert(
-        'Success',
-        `Report created successfully!\n\nCase Number: ${caseNumber}`,
-        [{ text: 'OK', onPress: () => router.push('/admin-home') }] // ✅ navigate after OK
-      );
+            Alert.alert('Success', 'Report created successfully!', [
+                { text: 'OK', onPress: () => router.replace('/') },
+            ]);
 
       // Clear form
       setSelectedSubtype('');
@@ -80,28 +91,28 @@ export default function CreateReportScreen() {
     <ScrollView style={styles.container}>
       <Text style={styles.title}>Create Report</Text>
 
-      <Text style={styles.label}>Subtype *</Text>
-      <Picker selectedValue={selectedSubtype} onValueChange={setSelectedSubtype}>
-        <Picker.Item label="Select subtype" value="" />
-        {subtypes.map(sub => (
-          <Picker.Item key={sub.id} label={sub.sub_type_name} value={sub.id} />
-        ))}
-      </Picker>
+            <Text style={styles.label}>Subtype *</Text>
+            <Picker selectedValue={selectedSubtype} onValueChange={setSelectedSubtype}>
+                <Picker.Item label="Select subtype" value="" />
+                {[...subtypes.filter(s => s.sub_type_name !== "Other"), 
+                  ...subtypes.filter(s => s.sub_type_name === "Other")
+                ].map(sub => (
+                    <Picker.Item key={sub.id} label={sub.sub_type_name} value={sub.id} />
+                ))}
+            </Picker>
 
-      <Text style={styles.label}>Description *</Text>
-      <TextInput style={styles.input} value={description} onChangeText={setDescription} multiline />
+            <Text style={styles.label}>Description {selectedSubtype ? (subtypes.find(s => s.id === selectedSubtype)?.sub_type_name === "Other" ? '*' : '') : ''}</Text>
+            <TextInput style={styles.input} value={description} onChangeText={setDescription} multiline />
 
-      <Text style={styles.label}>Full Name</Text>
-      <TextInput style={styles.input} value={fullName} onChangeText={setFullName} />
+            {anonymous === "no" && (
+                <>
+                    <Text style={styles.label}>Full Name</Text>
+                    <TextInput style={styles.input} value={fullName} onChangeText={setFullName} />
+                </>
+            )}
 
-      <Text style={styles.label}>Email *</Text>
-      <TextInput style={styles.input} value={email} onChangeText={setEmail} keyboardType="email-address" />
-
-      <Text style={styles.label}>Phone</Text>
-      <TextInput style={styles.input} value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
-
-      <Text style={styles.label}>Age</Text>
-      <TextInput style={styles.input} value={age} onChangeText={setAge} keyboardType="numeric" />
+            <Text style={styles.label}>Email *</Text>
+            <TextInput style={styles.input} value={email} onChangeText={setEmail} keyboardType="email-address" />
 
       <Text style={styles.label}>Location</Text>
       <TextInput style={styles.input} value={location} onChangeText={setLocation} />

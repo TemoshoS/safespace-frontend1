@@ -9,7 +9,6 @@ import { useRouter } from 'expo-router';
 import { exportPDF } from '../utils/exportPDF';
 import { styles } from '../styles/adminHomeStyles';
 
-
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
@@ -61,6 +60,7 @@ export default function AdminHome() {
     router.push('/');
   };
 
+  // Updated function
   const updateStatus = async (id: number, newStatus: string) => {
     const token = await AsyncStorage.getItem('adminToken');
     if (!token) return Alert.alert('Error', 'No token found');
@@ -73,7 +73,27 @@ export default function AdminHome() {
       });
 
       if (response.ok) {
-        setReports((prev) => prev.map((r) => (r.id === id ? { ...r, status: newStatus } : r)));
+        // Update the reports in state
+        const updatedReports = reports.map((r) => (r.id === id ? { ...r, status: newStatus } : r));
+        setReports(updatedReports);
+
+        // ✅ Show pop-up alert for admin
+        Alert.alert('Status Updated', `You have set this report to "${newStatus}"`);
+
+        // ✅ Send email notification via backend
+        const report = updatedReports.find((r) => r.id === id);
+        if (report && report.email) {
+          await fetch(`http://localhost:3000/send_status_email`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              to: report.email,
+              case_number: report.case_number,
+              status: newStatus,
+            }),
+          });
+        }
+
       } else {
         Alert.alert('Error', 'Failed to update status');
       }
@@ -110,6 +130,7 @@ export default function AdminHome() {
             <Picker selectedValue={item.status} onValueChange={(value: string) => updateStatus(item.id, value)} style={styles.picker}>
               <Picker.Item label="Pending" value="Pending" />
               <Picker.Item label="In Progress" value="In Progress" />
+              <Picker.Item label="Escalated" value="Escalated" />
               <Picker.Item label="Resolved" value="Resolved" />
             </Picker>
           </View>
@@ -178,6 +199,3 @@ export default function AdminHome() {
     </View>
   );
 }
-
-
-

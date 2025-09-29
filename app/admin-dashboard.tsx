@@ -18,6 +18,27 @@ export default function AdminDashboard() {
   const router = useRouter();
 
   useEffect(() => {
+    // DEV only: auto-inject a dummy admin token + username so the dashboard works without login.
+    // This will NOT run in production builds because __DEV__ is false there.
+    (async () => {
+      try {
+        if (__DEV__) {
+          const existingToken = await AsyncStorage.getItem("adminToken");
+          const existingName = await AsyncStorage.getItem("adminUsername");
+          if (!existingToken) {
+            await AsyncStorage.setItem("adminToken", "dev-dummy-token");
+            console.log("DEV: injected adminToken");
+          }
+          if (!existingName) {
+            await AsyncStorage.setItem("adminUsername", "devAdmin");
+            console.log("DEV: injected adminUsername");
+          }
+        }
+      } catch (e) {
+        console.warn("DEV: failed to inject dummy admin credentials", e);
+      }
+    })();
+
     const loadAdminName = async () => {
       const storedName = await AsyncStorage.getItem("adminUsername");
       if (storedName) setAdminName(storedName);
@@ -31,9 +52,13 @@ export default function AdminDashboard() {
         const response = await fetch("http://localhost:3000/abuse_reports", {
           headers: { Authorization: `Bearer ${token}` },
         });
+        if (!response.ok) {
+          throw new Error("Failed to fetch");
+        }
         const data = await response.json();
         setReports(data);
       } catch (err) {
+        console.error(err);
         Alert.alert("Error", "Failed to fetch reports");
       }
     };
@@ -66,10 +91,18 @@ export default function AdminDashboard() {
         setReports((prev) =>
           prev.map((r) => (r.id === id ? { ...r, status: newStatus } : r))
         );
+
+        // Feedback to admin
+        Alert.alert(
+          "Status Updated",
+          `Report status has been changed to "${newStatus}"`,
+          [{ text: "OK" }]
+        );
       } else {
         Alert.alert("Error", "Failed to update status");
       }
     } catch (err) {
+      console.error(err);
       Alert.alert("Error", "Something went wrong");
     }
   };
