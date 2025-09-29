@@ -1,11 +1,20 @@
 import React, { useEffect, useState, useRef } from 'react';
 import {
-  View, Text, FlatList, TouchableOpacity, LayoutAnimation,
-  UIManager, Platform, Modal, Image, ScrollView, StyleSheet, Alert
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  LayoutAnimation,
+  UIManager,
+  Platform,
+  Modal,
+  Image,
+  ScrollView,
+  Alert,
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { exportPDF } from '../utils/exportPDF';
 import { styles } from '../styles/adminHomeStyles';
 
@@ -20,8 +29,11 @@ export default function AdminHome() {
   const [newCount, setNewCount] = useState(0);
   const [modalVisible, setModalVisible] = useState(false);
   const [modalImage, setModalImage] = useState('');
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const lastCount = useRef(0);
   const router = useRouter();
+  const { filter } = useLocalSearchParams(); // Read filter from AdminDashboard
 
   useEffect(() => {
     const loadAdminName = async () => {
@@ -38,11 +50,14 @@ export default function AdminHome() {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await response.json();
-        setReports(data);
 
-        const diff = data.length - lastCount.current;
+        // Apply filter if exists
+        const filtered = filter ? data.filter((r: any) => r.status === filter) : data;
+        setReports(filtered);
+
+        const diff = filtered.length - lastCount.current;
         if (diff > 0) setNewCount((prev) => prev + diff);
-        lastCount.current = data.length;
+        lastCount.current = filtered.length;
       } catch (err) {
         Alert.alert('Error', 'Failed to fetch reports');
       }
@@ -50,9 +65,9 @@ export default function AdminHome() {
 
     loadAdminName();
     fetchReports();
-    const interval = setInterval(fetchReports, 10000);
+    const interval = setInterval(fetchReports, 10000); // auto-refresh
     return () => clearInterval(interval);
-  }, []);
+  }, [filter]);
 
   const handleLogout = async () => {
     await AsyncStorage.multiRemove(['adminToken', 'adminUsername']);
@@ -60,7 +75,7 @@ export default function AdminHome() {
     router.push('/');
   };
 
-  // Updated function
+  // ✅ Updated function (merged cleanly)
   const updateStatus = async (id: number, newStatus: string) => {
     const token = await AsyncStorage.getItem('adminToken');
     if (!token) return Alert.alert('Error', 'No token found');
@@ -74,7 +89,9 @@ export default function AdminHome() {
 
       if (response.ok) {
         // Update the reports in state
-        const updatedReports = reports.map((r) => (r.id === id ? { ...r, status: newStatus } : r));
+        const updatedReports = reports.map((r) =>
+          r.id === id ? { ...r, status: newStatus } : r
+        );
         setReports(updatedReports);
 
         // ✅ Show pop-up alert for admin
@@ -93,7 +110,6 @@ export default function AdminHome() {
             }),
           });
         }
-
       } else {
         Alert.alert('Error', 'Failed to update status');
       }
@@ -118,36 +134,37 @@ export default function AdminHome() {
       <TouchableOpacity onPress={() => toggleExpand(item.id)} activeOpacity={0.8}>
         <View style={[styles.row, isExpanded && styles.expandedRow]}>
           <Text style={[styles.cell, { flex: 1 }]}>{item.case_number}</Text>
-          <Text style={[styles.cell, { flex: 2 }]}>{item.anonymous ? 'Anonymous' : `${item.first_name} ${item.surname}`}</Text>
-          <View style={[styles.cell, { flex: 2 }]}>
-            {item.attachment_path !== 'N/A' && (
-              <TouchableOpacity style={styles.viewButton} onPress={() => openAttachment(item.attachment_path)}>
-                <Text style={styles.viewButtonText}>View</Text>
-              </TouchableOpacity>
-            )}
-          </View>
+          <Text style={[styles.cell, { flex: 2 }]}>{item.reporter_email}</Text>
           <View style={[styles.cell, { flex: 1, padding: 0 }]}>
-            <Picker selectedValue={item.status} onValueChange={(value: string) => updateStatus(item.id, value)} style={styles.picker}>
+            <Picker
+              selectedValue={item.status}
+              onValueChange={(value: string) => updateStatus(item.id, value)}
+              style={styles.picker}
+            >
               <Picker.Item label="Pending" value="Pending" />
               <Picker.Item label="In Progress" value="In Progress" />
               <Picker.Item label="Escalated" value="Escalated" />
               <Picker.Item label="Resolved" value="Resolved" />
+              <Picker.Item label="Unresolved" value="Unresolved" />
             </Picker>
           </View>
         </View>
 
         {isExpanded && (
           <View style={styles.detailsBox}>
-            <Text style={styles.detail}>📍 Location: {item.location}</Text>
-            <Text style={styles.detail}>📞 Phone: {item.phone}</Text>
-            <Text style={styles.detail}>📧 Email: {item.email}</Text>
-            <Text style={styles.detail}>📝 Description: {item.description}</Text>
-            {item.attachment_path !== 'N/A' && (
-              <TouchableOpacity style={styles.viewButton} onPress={() => openAttachment(item.attachment_path)}>
+            <Text style={styles.detail}>Contact Number: {item.phone_number}</Text>
+            <Text style={styles.detail}>Abuse Type: {item.abuse_type}</Text>
+            <Text style={styles.detail}>Subtype: {item.subtype}</Text>
+            <Text style={styles.detail}>Description: {item.description}</Text>
+
+            {item.image_path && item.image_path !== 'N/A' && (
+              <TouchableOpacity
+                style={styles.viewButton}
+                onPress={() => openAttachment(item.image_path)}
+              >
                 <Text style={styles.viewButtonText}>View Attachment</Text>
               </TouchableOpacity>
             )}
-            <Text style={styles.detail}>📅 Created: {item.created_at}</Text>
           </View>
         )}
       </TouchableOpacity>
@@ -158,35 +175,57 @@ export default function AdminHome() {
     <View style={styles.container}>
       {/* Top Bar */}
       <View style={styles.topBar}>
-        <Text style={styles.adminName}>Welcome, {adminName}</Text>
-
-        <TouchableOpacity style={styles.exportBtn} onPress={() => exportPDF(reports)}>
-          <Text style={styles.exportText}>Export PDF</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.notificationContainer} onPress={() => setNewCount(0)}>
-          <Text style={styles.bell}>🔔</Text>
-          {newCount > 0 && <View style={styles.badge}><Text style={styles.badgeText}>{newCount}</Text></View>}
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
-          <Text style={styles.logoutText}>Logout</Text>
+        <Text style={styles.adminName}>{adminName}</Text>
+        <TouchableOpacity style={styles.menuBtn} onPress={() => setMenuOpen(!menuOpen)}>
+          <Text>Menu </Text>
         </TouchableOpacity>
       </View>
 
-      <Text style={styles.title}>Abuse Reports</Text>
+      {/* Dropdown Menu */}
+      {menuOpen && (
+        <TouchableOpacity
+          style={styles.menuOverlay}
+          activeOpacity={1}
+          onPress={() => setMenuOpen(false)}
+        >
+          <View style={styles.menuDropdown}>
+            <TouchableOpacity style={styles.menuItem} onPress={() => exportPDF(reports)}>
+              <Text>Export PDF</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.menuItem} onPress={() => setNotifOpen(true)}>
+              <Text>Notifications {newCount > 0 && `(${newCount})`}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.menuItem} onPress={() => router.push('/admin-dashboard')}>
+              <Text>Dashboard</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.menuItem} onPress={() => router.push('/admin-profile')}>
+              <Text>Profile</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
+              <Text>Logout</Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      )}
 
+      <Text style={styles.title}>{filter ? `${filter} Reports` : 'Abuse Reports'}</Text>
+
+      {/* Table Header */}
       <View style={[styles.row, styles.header]}>
         <Text style={[styles.cell, { flex: 1, fontWeight: 'bold' }]}>Case #</Text>
-        <Text style={[styles.cell, { flex: 2, fontWeight: 'bold' }]}>Name</Text>
-        <Text style={[styles.cell, { flex: 2, fontWeight: 'bold' }]}>Attachment</Text>
+        <Text style={[styles.cell, { flex: 2, fontWeight: 'bold' }]}>Email</Text>
         <Text style={[styles.cell, { flex: 1, fontWeight: 'bold' }]}>Status</Text>
       </View>
 
-      <FlatList data={reports} keyExtractor={(item) => item.id.toString()} renderItem={renderItem} />
+      {/* Reports List */}
+      <FlatList
+        data={reports}
+        keyExtractor={(item, index) => (item.id ? item.id.toString() : index.toString())}
+        renderItem={renderItem}
+      />
 
-      {/* Modal */}
-      <Modal visible={modalVisible} transparent={true}>
+      {/* Attachment Modal */}
+      <Modal visible={modalVisible} transparent>
         <View style={styles.modalContainer}>
           <TouchableOpacity style={styles.modalClose} onPress={() => setModalVisible(false)}>
             <Text style={{ color: '#fff', fontSize: 18 }}>Close</Text>
@@ -194,6 +233,24 @@ export default function AdminHome() {
           <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', alignItems: 'center' }}>
             <Image source={{ uri: modalImage }} style={styles.modalImage} resizeMode="contain" />
           </ScrollView>
+        </View>
+      </Modal>
+
+      {/* Notifications Modal */}
+      <Modal visible={notifOpen} transparent animationType="fade">
+        <View style={styles.notifModal}>
+          <ScrollView>
+            {newCount === 0 ? (
+              <Text style={styles.notifText}>No new notifications</Text>
+            ) : (
+              reports.slice(-newCount).map((report) => (
+                <Text key={report.id} style={styles.notifText}>New report: {report.case_number}</Text>
+              ))
+            )}
+          </ScrollView>
+          <TouchableOpacity onPress={() => setNotifOpen(false)}>
+            <Text style={styles.closeNotif}>Close</Text>
+          </TouchableOpacity>
         </View>
       </Modal>
     </View>
