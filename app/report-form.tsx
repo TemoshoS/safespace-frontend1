@@ -1,12 +1,12 @@
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Alert } from 'react-native';
-import { useState, useEffect } from 'react';
-import axios from 'axios';
 import { Picker } from '@react-native-picker/picker';
+import axios from 'axios';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity } from 'react-native';
 
 export default function CreateReportScreen() {
     const BACKEND_URL = 'http://localhost:3000';
-    const { abuseTypeId, anonymous } = useLocalSearchParams(); // pick up anonymous param
+    const { abuseTypeId, anonymous } = useLocalSearchParams(); 
     const router = useRouter();
 
     const [subtypes, setSubtypes] = useState<any[]>([]);
@@ -20,7 +20,7 @@ export default function CreateReportScreen() {
     const [school, setSchool] = useState('');
     const [loading, setLoading] = useState(false);
 
-    // Fetch subtypes for selected abuse type
+    // Fetch subtypes
     useEffect(() => {
         if (!abuseTypeId) return;
         axios.get(`${BACKEND_URL}/reports/subtypes/${abuseTypeId}`)
@@ -29,9 +29,21 @@ export default function CreateReportScreen() {
     }, [abuseTypeId]);
 
     const handleSubmit = async () => {
-        // If anonymous = no, name/email are required
-        if (!selectedSubtype || !description || (anonymous === "no" && !email)) {
-            Alert.alert('Error', 'Please fill all required fields.');
+        const selectedSubtypeObj = subtypes.find(s => s.id === selectedSubtype);
+
+        if (!selectedSubtype) {
+            Alert.alert('Error', 'Please select a subtype.');
+            return;
+        }
+
+        // Description required only if subtype = "Other"
+        if (selectedSubtypeObj?.sub_type_name === "Other" && !description) {
+            Alert.alert('Error', 'Please provide a description for "Other".');
+            return;
+        }
+
+        if (anonymous === "no" && !email) {
+            Alert.alert('Error', 'Email is required.');
             return;
         }
 
@@ -54,10 +66,7 @@ export default function CreateReportScreen() {
             await axios.post(`${BACKEND_URL}/reports`, payload);
 
             Alert.alert('Success', 'Report created successfully!', [
-                {
-                    text: 'OK',
-                    onPress: () => router.replace('/'),
-                },
+                { text: 'OK', onPress: () => router.replace('/') },
             ]);
 
             // Reset form
@@ -84,23 +93,22 @@ export default function CreateReportScreen() {
             <Text style={styles.label}>Subtype *</Text>
             <Picker selectedValue={selectedSubtype} onValueChange={setSelectedSubtype}>
                 <Picker.Item label="Select subtype" value="" />
-                {subtypes.map(sub => (
+                {[...subtypes.filter(s => s.sub_type_name !== "Other"), 
+                  ...subtypes.filter(s => s.sub_type_name === "Other")
+                ].map(sub => (
                     <Picker.Item key={sub.id} label={sub.sub_type_name} value={sub.id} />
                 ))}
             </Picker>
 
-            <Text style={styles.label}>Description *</Text>
+            <Text style={styles.label}>Description {selectedSubtype ? (subtypes.find(s => s.id === selectedSubtype)?.sub_type_name === "Other" ? '*' : '') : ''}</Text>
             <TextInput style={styles.input} value={description} onChangeText={setDescription} multiline />
 
-            {/* Only show name/email if not anonymous */}
             {anonymous === "no" && (
                 <>
                     <Text style={styles.label}>Full Name</Text>
                     <TextInput style={styles.input} value={fullName} onChangeText={setFullName} />
-
                 </>
             )}
-
 
             <Text style={styles.label}>Email *</Text>
             <TextInput style={styles.input} value={email} onChangeText={setEmail} keyboardType="email-address" />
