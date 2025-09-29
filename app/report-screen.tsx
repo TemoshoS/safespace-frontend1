@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function ReportCaseScreen() {
   const router = useRouter();
@@ -14,9 +15,16 @@ export default function ReportCaseScreen() {
 
   const handleSelect = (choice: string) => {
     setAnonymous(choice);
+    // router.push({
+    //   pathname: "/abuse-types",
+    //   params: { anonymous: choice },
+    // });
+  };
+
+  const handleNext = () => {
     router.push({
       pathname: "/abuse-types",
-      params: { anonymous: choice },
+      params: { anonymous: anonymous },
     });
   };
 
@@ -53,6 +61,11 @@ export default function ReportCaseScreen() {
           <Text style={styles.choiceText}>No</Text>
         </TouchableOpacity>
       </View>
+
+      {/* Next Arrow Button - Added at the bottom */}
+      <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
+        <Ionicons name="arrow-forward" size={24} color="#24ae1a" />
+      </TouchableOpacity>
     </View>
   );
 }
@@ -60,7 +73,7 @@ export default function ReportCaseScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fff", padding: 20 },
   logo: { width: 350, height: 200, marginTop: 10, marginLeft: -125 },
-  title: { fontSize: 22, fontWeight: "bold", marginVertical: 15 },
+  title: { fontSize: 22, fontWeight: "bold", marginVertical: 15 ,textAlign: "center" },
   question: { fontSize: 16, textAlign: "center", marginBottom: 20 },
   buttonRow: { flexDirection: "row", justifyContent: "center", gap: 15 },
   choiceButton: {
@@ -73,4 +86,19 @@ const styles = StyleSheet.create({
   },
   selectedButton: { backgroundColor: "#24ae1a11" },
   choiceText: { fontSize: 16, color: "#24ae1a", fontWeight: "600" },
+  
+  // New next button styles - added without changing existing ones
+  nextButton: {
+    position: "absolute",
+    bottom: 30,
+    right: 30,
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "#24ae1a",
+    borderRadius: 50,
+    width: 50,
+    height: 50,
+    justifyContent: "center",
+    alignItems: "center",
+  },
 });
