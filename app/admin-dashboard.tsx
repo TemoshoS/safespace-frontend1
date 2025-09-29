@@ -1,20 +1,36 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   View,
   Text,
-  StyleSheet,
+  ScrollView,
   TouchableOpacity,
-  FlatList,
   Alert,
+  Modal,
+  Image,
+  FlatList,
+  LayoutAnimation,
+  UIManager,
+  Platform,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
+import { MaterialIcons } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
-import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import axios from "axios";
+import { styles } from "../styles/adminHomeStyles";
+import { exportPDF } from "../utils/exportPDF";
+
+if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 
 export default function AdminDashboard() {
   const [reports, setReports] = useState<any[]>([]);
   const [adminName, setAdminName] = useState("");
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [newCount, setNewCount] = useState(0);
+  const lastCount = useRef(0);
   const router = useRouter();
 
   useEffect(() => {
@@ -24,199 +40,134 @@ export default function AdminDashboard() {
     };
 
     const fetchReports = async () => {
-      const token = await AsyncStorage.getItem("adminToken");
-      if (!token) return Alert.alert("Error", "No token found");
-
       try {
-        const response = await fetch("http://localhost:3000/abuse_reports", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const data = await response.json();
-        setReports(data);
+        const res = await axios.get("http://localhost:3000/reports");
+        setReports(res.data);
+        const diff = res.data.length - lastCount.current;
+        if (diff > 0) setNewCount((prev) => prev + diff);
+        lastCount.current = res.data.length;
       } catch (err) {
+        console.error(err);
         Alert.alert("Error", "Failed to fetch reports");
       }
     };
 
     loadAdminName();
     fetchReports();
+    const interval = setInterval(fetchReports, 10000); // auto-refresh
+    return () => clearInterval(interval);
   }, []);
 
   const handleLogout = async () => {
     await AsyncStorage.multiRemove(["adminToken", "adminUsername"]);
     Alert.alert("Logged out", "You have been logged out");
-    router.push("/admin-login");
+    router.push("/");
   };
-
-  const updateStatus = async (id: number, newStatus: string) => {
-    const token = await AsyncStorage.getItem("adminToken");
-    if (!token) return Alert.alert("Error", "No token found");
-
-    try {
-      const response = await fetch(`http://localhost:3000/abuse_reports/${id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ status: newStatus }),
-      });
-
-      if (response.ok) {
-        setReports((prev) =>
-          prev.map((r) => (r.id === id ? { ...r, status: newStatus } : r))
-        );
-      } else {
-        Alert.alert("Error", "Failed to update status");
-      }
-    } catch (err) {
-      Alert.alert("Error", "Something went wrong");
-    }
-  };
-
-  const renderItem = ({ item }: { item: any }) => (
-    <View style={styles.reportCard}>
-      <View style={styles.reportHeader}>
-        <Text style={styles.caseNumber}>#{item.case_number}</Text>
-        <Text
-          style={[
-            styles.statusBadge,
-            item.status === "Pending"
-              ? styles.pending
-              : item.status === "In Progress"
-              ? styles.inProgress
-              : styles.resolved,
-          ]}
-        >
-          {item.status}
-        </Text>
-      </View>
-      <Text style={styles.description}>{item.description}</Text>
-      <Picker
-        selectedValue={item.status}
-        onValueChange={(value: string) => updateStatus(item.id, value)}
-        style={styles.picker}
-      >
-        <Picker.Item label="Pending" value="Pending" />
-        <Picker.Item label="In Progress" value="In Progress" />
-        <Picker.Item label="Resolved" value="Resolved" />
-      </Picker>
-    </View>
-  );
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       {/* Top Bar */}
       <View style={styles.topBar}>
-        <Text style={styles.welcome}>👋 Hi, {adminName}</Text>
-        <TouchableOpacity onPress={handleLogout}>
-          <Ionicons name="log-out-outline" size={26} color="#fff" />
+        <Text style={styles.adminName}>{adminName}</Text>
+        <TouchableOpacity style={styles.menuBtn} onPress={() => setMenuOpen(!menuOpen)}>
+          <Text>Menu</Text>
         </TouchableOpacity>
       </View>
 
-      {/* Quick Stats */}
-      <View style={styles.statsRow}>
-        <View style={[styles.statCard, { backgroundColor: "#FF6B6B" }]}>
+      {/* Dropdown Menu */}
+      {menuOpen && (
+        <TouchableOpacity
+          style={styles.menuOverlay}
+          activeOpacity={1}
+          onPress={() => setMenuOpen(false)}
+        >
+          <View style={styles.menuDropdown}>
+            <TouchableOpacity style={styles.menuItem} onPress={() => exportPDF(reports)}>
+              <Text>Export PDF</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.menuItem} onPress={() => setNotifOpen(true)}>
+              <Text>Notifications {newCount > 0 && `(${newCount})`}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.menuItem} onPress={() => router.push("/admin-dashboard")}>
+              <Text>Dashboard</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.menuItem} onPress={() => router.push("/admin-profile")}>
+              <Text>Profile</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
+              <Text>Logout</Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      )}
+
+      <Text style={styles.title}>Admin Dashboard</Text>
+
+      <View style={styles.statsContainer}>
+        {/* Pending */}
+        <TouchableOpacity
+          style={[styles.statCard, { backgroundColor: "#FF6B6B" }]}
+          onPress={() => router.push({ pathname: "/admin-home", params: { filter: "Pending" } })}
+        >
           <MaterialIcons name="pending-actions" size={28} color="#fff" />
           <Text style={styles.statText}>
             {reports.filter((r) => r.status === "Pending").length} Pending
           </Text>
-        </View>
-        <View style={[styles.statCard, { backgroundColor: "#FFA94D" }]}>
-          <Ionicons name="time-outline" size={28} color="#fff" />
+        </TouchableOpacity>
+
+        {/* In Progress */}
+        <TouchableOpacity
+          style={[styles.statCard, { backgroundColor: "#FFA500" }]}
+          onPress={() => router.push({ pathname: "/admin-home", params: { filter: "In Progress" } })}
+        >
+          <MaterialIcons name="work" size={28} color="#fff" />
           <Text style={styles.statText}>
             {reports.filter((r) => r.status === "In Progress").length} In Progress
           </Text>
-        </View>
-        <View style={[styles.statCard, { backgroundColor: "#51CF66" }]}>
-          <Ionicons name="checkmark-done-circle" size={28} color="#fff" />
+        </TouchableOpacity>
+
+        {/* Resolved */}
+        <TouchableOpacity
+          style={[styles.statCard, { backgroundColor: "#20C997" }]}
+          onPress={() => router.push({ pathname: "/admin-home", params: { filter: "Resolved" } })}
+        >
+          <MaterialIcons name="check-circle" size={28} color="#fff" />
           <Text style={styles.statText}>
             {reports.filter((r) => r.status === "Resolved").length} Resolved
           </Text>
-        </View>
+        </TouchableOpacity>
+
+        {/* Unresolved */}
+        <TouchableOpacity
+          style={[styles.statCard, { backgroundColor: "#6C757D" }]}
+          onPress={() => router.push({ pathname: "/admin-home", params: { filter: "Unresolved" } })}
+        >
+          <MaterialIcons name="cancel" size={28} color="#fff" />
+          <Text style={styles.statText}>
+            {reports.filter((r) => r.status === "Unresolved").length} Unresolved
+          </Text>
+        </TouchableOpacity>
       </View>
 
-      {/* Report List */}
-      <Text style={styles.sectionTitle}>📑 Latest Reports</Text>
-      <FlatList
-        data={reports}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={renderItem}
-        contentContainerStyle={{ paddingBottom: 100 }}
-      />
-    </View>
+      {/* Notifications Modal */}
+      <Modal visible={notifOpen} transparent animationType="fade">
+        <View style={styles.notifModal}>
+          <ScrollView>
+            {newCount === 0 ? (
+              <Text style={styles.notifText}>No new notifications</Text>
+            ) : (
+              reports.slice(-newCount).map((report) => (
+                <Text key={report.id} style={styles.notifText}>
+                  New report: {report.case_number}
+                </Text>
+              ))
+            )}
+          </ScrollView>
+          <TouchableOpacity onPress={() => setNotifOpen(false)}>
+            <Text style={styles.closeNotif}>Close</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
+    </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f9fafc" },
-
-  topBar: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    backgroundColor: "#1C7ED6",
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-  },
-  welcome: { color: "#fff", fontSize: 18, fontWeight: "600" },
-
-  statsRow: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    marginVertical: 20,
-  },
-  statCard: {
-    flex: 1,
-    marginHorizontal: 5,
-    borderRadius: 12,
-    padding: 16,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 3,
-  },
-  statText: { color: "#fff", marginTop: 8, fontWeight: "600" },
-
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-    marginHorizontal: 16,
-    marginBottom: 10,
-    color: "#333",
-  },
-
-  reportCard: {
-    backgroundColor: "#fff",
-    marginHorizontal: 16,
-    marginVertical: 8,
-    padding: 14,
-    borderRadius: 12,
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
-    elevation: 2,
-  },
-  reportHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 6,
-  },
-  caseNumber: { fontWeight: "700", fontSize: 14, color: "#1C7ED6" },
-
-  statusBadge: {
-    paddingVertical: 2,
-    paddingHorizontal: 10,
-    borderRadius: 12,
-    fontSize: 12,
-    fontWeight: "600",
-    color: "#fff",
-  },
-  pending: { backgroundColor: "#FF6B6B" },
-  inProgress: { backgroundColor: "#FFA94D" },
-  resolved: { backgroundColor: "#51CF66" },
-
-  description: { fontSize: 14, color: "#444", marginBottom: 8 },
-  picker: { height: 40, width: "100%" },
-});

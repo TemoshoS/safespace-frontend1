@@ -11,7 +11,7 @@ export const exportPDF = async (reports: any[]) => {
         <style>
           table { width: 100%; border-collapse: collapse; }
           th, td { border: 1px solid #333; padding: 8px; text-align: left; }
-          th { background-color: #20C997; color: white; }
+          th { background-color: #CCDD45; color: white; }
         </style>
       </head>
       <body>
