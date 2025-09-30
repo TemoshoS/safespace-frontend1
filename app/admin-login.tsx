@@ -41,6 +41,11 @@ export default function AdminLogin() {
 
   return (
     <View style={styles.container}>
+      {/* ✅ Go Back button */}
+      <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+        <Text style={styles.backButtonText}>← Back</Text>
+      </TouchableOpacity>
+
       <Text style={styles.title}>Admin Login</Text>
 
       <TextInput
@@ -63,15 +68,33 @@ export default function AdminLogin() {
       <TouchableOpacity style={styles.button} onPress={handleNext} disabled={loading}>
         {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Login</Text>}
       </TouchableOpacity>
+
+      <TouchableOpacity
+        style={{ marginTop: 20, alignItems: 'center' }}
+        onPress={() => router.push('/forgot-password')}
+      >
+        <Text style={{ color: '#CCDD45', textAlign: 'center' }}>Forgot Password?</Text>
+      </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, justifyContent: 'center', paddingHorizontal: 24, backgroundColor: '#fff' },
-  title: { fontSize: 28, fontWeight: 'bold', marginBottom: 32, textAlign: 'center', color: '#20C997' },
+  backButton: {
+    position: 'absolute',
+    top: 50, // adjust for safe area
+    left: 20,
+    padding: 8,
+  },
+  backButtonText: {
+    fontSize: 16,
+    color: '#CCDD45',
+    fontWeight: 'bold',
+  },
+  title: { fontSize: 28, fontWeight: 'bold', marginBottom: 32, textAlign: 'center', color: '#CCDD45' },
   input: { borderWidth: 1, borderColor: '#ccc', padding: 12, marginBottom: 16, borderRadius: 8, fontSize: 16 },
-  button: { backgroundColor: '#20C997', paddingVertical: 14, borderRadius: 8, marginTop: 10 },
+  button: { backgroundColor: '#CCDD45', paddingVertical: 14, borderRadius: 8, marginTop: 10 },
   buttonText: { color: '#fff', fontSize: 18, textAlign: 'center', fontWeight: '600' },
   error: { color: 'red', marginBottom: 12, textAlign: 'center' },
 });

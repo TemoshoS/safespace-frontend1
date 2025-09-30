@@ -7,7 +7,7 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#20C997',
+    backgroundColor: '#CCDD45',
     paddingVertical: 14,
     paddingHorizontal: 16,
   },
@@ -40,7 +40,7 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: 6,
   },
-  logoutText: { color: '#20C997', fontWeight: '600' },
+  logoutText: { color: '#CCDD45', fontWeight: '600' },
 
   exportBtn: {
     backgroundColor: '#fff',
@@ -49,7 +49,46 @@ export const styles = StyleSheet.create({
     borderRadius: 6,
     marginRight: 10,
   },
-  exportText: { color: '#20C997', fontWeight: '600' },
+  exportText: { color: '#CCDD45', fontWeight: '600' },
+
+ menuBtn: {
+  backgroundColor: '#fff',
+  paddingVertical: 6,
+  paddingHorizontal: 12,
+  borderRadius: 6,
+},
+menuOverlay: {
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  zIndex: 1000,
+  backgroundColor: 'transparent',
+  justifyContent: 'flex-start',
+  alignItems: 'flex-end',
+},
+menuDropdown: {
+  marginTop: 60, 
+  marginRight: 16,
+  backgroundColor: '#CCDD45',
+  borderRadius: 6,
+  paddingVertical: 8,
+  paddingHorizontal: 12,
+  shadowColor: '#000',
+  shadowOpacity: 0.3,
+  shadowRadius: 5,
+  elevation: 10,
+  zIndex: 1001,
+},
+
+menuItem: {
+  paddingVertical: 10,
+  paddingHorizontal: 12,
+  borderBottomWidth: 1,
+  borderColor: '#ccc',
+},
+
 
   title: { fontSize: 24, marginVertical: 16, textAlign: 'center', fontWeight: 'bold' },
 
@@ -70,7 +109,7 @@ export const styles = StyleSheet.create({
   picker: { height: 40, width: '100%' },
 
   viewButton: {
-    backgroundColor: '#20C997',
+    backgroundColor: '#CCDD45',
     paddingVertical: 4,
     paddingHorizontal: 8,
     borderRadius: 4,
@@ -91,4 +130,46 @@ export const styles = StyleSheet.create({
     zIndex: 10,
   },
   modalImage: { width: '90%', height: '80%' },
+
+  // Notifications modal
+  notifModal: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    padding: 20,
+  },
+  notifText: {
+    padding: 10,
+    backgroundColor: '#fff',
+    marginBottom: 5,
+    borderRadius: 6,
+    fontWeight: '500',
+  },
+  closeNotif: {
+    color: '#fff',
+    textAlign: 'center',
+    marginTop: 10,
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  //dashboard styles
+
+  statsContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+  },
+  statCard: {
+    width: "48%",
+    padding: 20,
+    borderRadius: 12,
+    marginBottom: 15,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  statText: {
+    marginTop: 10,
+    color: "#fff",
+    fontWeight: "600",
+  },
 });

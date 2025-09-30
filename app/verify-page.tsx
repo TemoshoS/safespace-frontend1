@@ -25,7 +25,7 @@ export default function VerifyPage() {
          await AsyncStorage.setItem('adminToken', data.token);
          await AsyncStorage.setItem('adminUsername', data.username);
         // Navigate to admin home
-        router.push('/admin-home');
+        router.push('/admin-dashboard');
       } else {
         setError(data.message || 'Verification failed');
       }
@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 32,
     textAlign: 'center',
-    color: '#20C997',
+    color: '#CCDD45',
   },
   input: {
     borderWidth: 1,
@@ -78,7 +78,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   button: {
-    backgroundColor: '#20C997',
+    backgroundColor: '#CCDD45',
     paddingVertical: 14,
     borderRadius: 8,
     marginTop: 10,

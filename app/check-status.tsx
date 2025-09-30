@@ -135,6 +135,25 @@ export default function DetailsScreen() {
               <Text style={styles.detailLabel}>School: </Text>
               <Text>{String(searchResult.school_name || '')}</Text>
             </Text>
+
+            {/* ✅ Edit Report Button */}
+            {/* <TouchableOpacity
+              style={styles.editButton}
+              onPress={() => router.push(`/edit-report/${searchResult.case_number}`)}
+            >
+              <Text style={styles.editButtonText}>Edit Report</Text>
+            </TouchableOpacity> */}
+            <TouchableOpacity
+  style={styles.editButton}
+  onPress={() =>
+    router.push({
+      pathname: "/edit-report",
+      params: { case_number: searchResult.case_number },
+    })
+  }
+>
+  <Text style={styles.editButtonText}>Edit Report</Text>
+</TouchableOpacity>
           </View>
         </ScrollView>
       )}
@@ -155,7 +174,7 @@ const styles = StyleSheet.create({
   subtitle: { fontSize: 16, color: '#666', textAlign: 'center', marginBottom: 20, paddingHorizontal: 20 },
   inputRow: { flexDirection: 'row', alignItems: 'center', marginTop: 20, width: '80%', gap: 10 },
   input: { flex: 2, height: 50, borderWidth: 1, borderColor: '#ccc', borderRadius: 8, paddingHorizontal: 15, fontSize: 16 },
-  statusButton: { backgroundColor: 'purple', padding: 15, borderRadius: 8, height: 50, justifyContent: 'center', alignItems: 'center', flex: 1 },
+  statusButton: { backgroundColor: '#CCDD45', padding: 15, borderRadius: 8, height: 50, justifyContent: 'center', alignItems: 'center', flex: 1 },
   statusButtonText: { color: 'white', fontWeight: 'bold', fontSize: 14 },
   statusContainer: { width: '100%', maxHeight: 500, marginTop: 20 },
   caseItem: { backgroundColor: '#f9f9f9', padding: 15, borderRadius: 8, borderWidth: 1, borderColor: '#eee', marginBottom: 10 },
@@ -167,4 +186,8 @@ const styles = StyleSheet.create({
   detailLabel: { fontWeight: 'bold' },
   button: { backgroundColor: '#FF3B30', padding: 15, borderRadius: 8, marginTop: 20 },
   buttonText: { color: 'white', fontWeight: 'bold', fontSize: 16 },
+
+  /* ✅ New Edit Button */
+  editButton: { marginTop: 15, backgroundColor: 'orange', padding: 12, borderRadius: 8, alignItems: 'center' },
+  editButtonText: { color: '#fff', fontWeight: 'bold' },
 });
