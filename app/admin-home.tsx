@@ -143,14 +143,17 @@ export default function AdminHome() {
             <Text style={styles.detail}>Subtype: {item.subtype}</Text>
             <Text style={styles.detail}>Description: {item.description}</Text>
 
-            {item.image_path && item.image_path !== 'N/A' && (
+            {item.image_path && item.image_path !== 'N/A' ? (
               <TouchableOpacity
                 style={styles.viewButton}
                 onPress={() => openAttachment(item.image_path)}
               >
                 <Text style={styles.viewButtonText}>View Attachment</Text>
               </TouchableOpacity>
+            ) : (
+              <Text style={styles.detail}>Attachment: N/A</Text>
             )}
+
           </View>
         )}
       </TouchableOpacity>

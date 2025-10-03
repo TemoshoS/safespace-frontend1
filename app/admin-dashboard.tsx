@@ -15,7 +15,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
 import axios from "axios";
 import { styles } from "../styles/adminHomeStyles";
-import { exportPDF } from "../utils/exportPDF";
+
 
 if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -25,7 +25,6 @@ export default function AdminDashboard() {
   const [reports, setReports] = useState<any[]>([]);
   const [adminName, setAdminName] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
-  const [notifOpen, setNotifOpen] = useState(false);
   const [newCount, setNewCount] = useState(0);
   const lastCount = useRef(0);
   const router = useRouter();
@@ -138,14 +137,8 @@ export default function AdminDashboard() {
           onPress={() => setMenuOpen(false)}
         >
           <View style={styles.menuDropdown}>
-            <TouchableOpacity style={styles.menuItem} onPress={() => exportPDF(reports)}>
-              <Text>Export PDF</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.menuItem} onPress={() => setNotifOpen(true)}>
-              <Text>Notifications {newCount > 0 && `(${newCount})`}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.menuItem} onPress={() => router.push("/admin-dashboard")}>
-              <Text>Dashboard</Text>
+            <TouchableOpacity style={styles.menuItem} onPress={() => router.push("/admin-home")}>
+              <Text>Reports</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.menuItem} onPress={() => router.push("/admin-profile")}>
               <Text>Profile</Text>
@@ -168,19 +161,10 @@ export default function AdminDashboard() {
         >
           <MaterialIcons name="list-alt" size={28} color="#fff" />
           <Text style={styles.statText}>
-            {reports.length} All
+            {reports.length} Total Reports
           </Text>
         </TouchableOpacity>
-        {/* Pending */}
-        <TouchableOpacity
-          style={[styles.statCard, { backgroundColor: "#FF6B6B" }]}
-          onPress={() => router.push({ pathname: "/admin-home", params: { filter: "Pending" } })}
-        >
-          <MaterialIcons name="pending-actions" size={28} color="#fff" />
-          <Text style={styles.statText}>
-            {reports.filter((r) => r.status === "Pending").length} Pending
-          </Text>
-        </TouchableOpacity>
+      
 
         {/* In Progress */}
         <TouchableOpacity
@@ -226,26 +210,6 @@ export default function AdminDashboard() {
             {reports.filter((r) => r.status === "Escalated").length} Escalated
           </Text>
         </TouchableOpacity>
-
-      {/* Notifications Modal */}
-      <Modal visible={notifOpen} transparent animationType="fade">
-        <View style={styles.notifModal}>
-          <ScrollView>
-            {newCount === 0 ? (
-              <Text style={styles.notifText}>No new notifications</Text>
-            ) : (
-              reports.slice(-newCount).map((report) => (
-                <Text key={report.id} style={styles.notifText}>
-                  New report: {report.case_number}
-                </Text>
-              ))
-            )}
-          </ScrollView>
-          <TouchableOpacity onPress={() => setNotifOpen(false)}>
-            <Text style={styles.closeNotif}>Close</Text>
-          </TouchableOpacity>
-        </View>
-      </Modal>
     </ScrollView>
   );
 }

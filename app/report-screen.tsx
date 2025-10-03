@@ -20,8 +20,16 @@ export default function ReportCaseScreen() {
     });
   };
 
+   const handleBack = () => {
+    router.back();
+  };
+
   return (
     <View style={styles.container}>
+            {/* Go Back button */}
+            <TouchableOpacity style={styles.backButton} onPress={handleBack}>
+              <Text style={styles.backButtonText}>← Back</Text>
+            </TouchableOpacity>
       {/* Logo */}
       <Image
         source={require("../assets/images/Logo.jpg")}
@@ -59,6 +67,16 @@ export default function ReportCaseScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fff", padding: 20 },
+   backButton: {
+    marginBottom: 10,
+    padding: 8,
+    alignSelf: 'flex-start',
+  },
+  backButtonText: {
+    color: '#CCDD45',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
   logo: { width: 350, height: 200, marginTop: 10, marginLeft: -125 },
   title: { fontSize: 22, fontWeight: "bold", marginVertical: 15 },
   question: { fontSize: 16, textAlign: "center", marginBottom: 20 },

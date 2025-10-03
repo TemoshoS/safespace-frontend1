@@ -32,7 +32,7 @@ export default function EnterEmail() {
         // Save username in AsyncStorage for later use
         await AsyncStorage.setItem('adminUsername', username);
         // Move to verification page
-        router.push({ pathname: '/verify-page', params: { username } });
+        router.push({ pathname: '/verify-page', params: { username, email } });
       } else {
         // Display backend error (invalid credentials or email mismatch)
         setError(data.message || 'Failed to send code');
@@ -45,10 +45,11 @@ export default function EnterEmail() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Enter Admin Email</Text>
-
+      <Text style={styles.title}>Admin Verification</Text>
+      <Text style={styles.titleInfo}>Enter your email to receive a login code</Text>
+      <Text style={styles.label}>Email Address</Text>
       <TextInput
-        placeholder="Email"
+        
         value={email}
         onChangeText={setEmail}
         style={styles.input}
@@ -59,7 +60,7 @@ export default function EnterEmail() {
       {error ? <Text style={styles.error}>{error}</Text> : null}
 
       <TouchableOpacity style={styles.button} onPress={handleSendCode} disabled={loading}>
-        {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Send Code</Text>}
+        {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Send OTP</Text>}
       </TouchableOpacity>
     </View>
   );
@@ -68,6 +69,8 @@ export default function EnterEmail() {
 const styles = StyleSheet.create({
   container: { flex: 1, justifyContent: 'center', paddingHorizontal: 24, backgroundColor: '#fff' },
   title: { fontSize: 28, fontWeight: 'bold', marginBottom: 32, textAlign: 'center', color: '#CCDD45' },
+  titleInfo: { fontSize: 18, marginBottom: 32, textAlign: 'center', color: 'grey' },
+  label:{fontSize:16, textAlign:'center',marginBottom: 12,color: 'grey'},
   input: { borderWidth: 1, borderColor: '#ccc', padding: 12, marginBottom: 16, borderRadius: 8, fontSize: 16 },
   button: { backgroundColor: '#CCDD45', paddingVertical: 14, borderRadius: 8, marginTop: 10 },
   buttonText: { color: '#fff', fontSize: 18, textAlign: 'center', fontWeight: '600' },
