@@ -84,7 +84,7 @@
 // //   title: { fontSize: 22, fontWeight: 'bold', marginBottom: 20 },
 // //   label: { marginTop: 10, fontWeight: 'bold' },
 // //   input: { borderWidth: 1, borderColor: '#ccc', borderRadius: 6, padding: 10, marginTop: 5 },
-// //   button: { marginTop: 20, backgroundColor: '#CCDD45', padding: 15, borderRadius: 8, alignItems: 'center' },
+// //   button: { marginTop: 20, backgroundColor: '#c7da30', padding: 15, borderRadius: 8, alignItems: 'center' },
 // //   buttonText: { color: '#fff', fontWeight: 'bold' },
 // // });
 
@@ -238,7 +238,7 @@
 //   },
 //   button: {
 //     marginTop: 20,
-//     backgroundColor: "#CCDD45",
+//     backgroundColor: "#c7da30",
 //     padding: 15,
 //     borderRadius: 8,
 //     alignItems: "center",
@@ -404,7 +404,7 @@ const styles = StyleSheet.create({
   },
   button: {
     marginTop: 20,
-    backgroundColor: "#CCDD45",
+    backgroundColor: "#c7da30",
     padding: 15,
     borderRadius: 8,
     alignItems: "center",

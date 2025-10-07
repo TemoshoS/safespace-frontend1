@@ -32,7 +32,7 @@ export default function Index() {
           <FontAwesome5 
             name="hands-helping" 
             size={50} 
-            color="#CCDD45" 
+            color="#c7da30" 
             style={styles.icon} 
           />
         </View>
@@ -52,7 +52,7 @@ export default function Index() {
             style={styles.buttonSecondary}
             onPress={() => router.push('/admin-login')}
           >
-            <FontAwesome5 name="user-shield" size={20} color="#CCDD45" />
+            <FontAwesome5 name="user-shield" size={20} color="#c7da30" />
             <Text style={styles.buttonTextSecondary}>School Admin Login</Text>
           </TouchableOpacity>
 
@@ -60,7 +60,7 @@ export default function Index() {
             style={styles.buttonSecondary}
             onPress={() => router.push('/check-status')}
           >
-            <MaterialIcons name="check-circle-outline" size={20} color="#CCDD45" />
+            <MaterialIcons name="check-circle-outline" size={20} color="#c7da30" />
             <Text style={styles.buttonTextSecondary}>Check Case Status</Text>
           </TouchableOpacity>
 
@@ -102,7 +102,7 @@ const styles = StyleSheet.create({
   titleHighlight: {
     fontSize: 36,
     fontWeight: 'bold',
-    color: '#CCDD45',
+    color: '#c7da30',
   },
   subtitle: {
     fontSize: 16,
@@ -121,7 +121,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#CCDD45',
+    backgroundColor: '#c7da30',
     paddingVertical: 15,
     borderRadius: 10,
     marginBottom: 15,
@@ -138,14 +138,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: '#fff',
     borderWidth: 1,
-    borderColor: '#CCDD45',
+    borderColor: '#c7da30',
     paddingVertical: 15,
     borderRadius: 10,
     marginBottom: 15,
     gap: 10,
   },
   buttonTextSecondary: {
-    color: '#CCDD45',
+    color: '#c7da30',
     fontSize: 18,
     fontWeight: '600',
   },

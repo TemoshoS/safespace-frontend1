@@ -181,9 +181,7 @@ export default function AdminHome() {
             <TouchableOpacity style={styles.menuItem} onPress={() => exportPDF(reports)}>
               <Text>Export PDF</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.menuItem} onPress={() => setNotifOpen(true)}>
-              <Text>Notifications {newCount > 0 && `(${newCount})`}</Text>
-            </TouchableOpacity>
+           
             <TouchableOpacity style={styles.menuItem} onPress={() => router.push('/admin-dashboard')}>
               <Text>Dashboard</Text>
             </TouchableOpacity>
@@ -201,7 +199,7 @@ export default function AdminHome() {
 
       {/* Table Header */}
       <View style={[styles.row, styles.header]}>
-        <Text style={[styles.cell, { flex: 1, fontWeight: 'bold' }]}>Case #</Text>
+        <Text style={[styles.cell, { flex: 1, fontWeight: 'bold' }]}>Case Number</Text>
         <Text style={[styles.cell, { flex: 2, fontWeight: 'bold' }]}>Email</Text>
         <Text style={[styles.cell, { flex: 1, fontWeight: 'bold' }]}>Status</Text>
       </View>

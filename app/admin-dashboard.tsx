@@ -15,6 +15,8 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
 import axios from "axios";
 import { styles } from "../styles/adminHomeStyles";
+import { exportDashboardPDF } from "../utils/exportDashboardPDF";
+
 
 
 if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -143,73 +145,92 @@ export default function AdminDashboard() {
             <TouchableOpacity style={styles.menuItem} onPress={() => router.push("/admin-profile")}>
               <Text>Profile</Text>
             </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => exportDashboardPDF(adminName, reports)}
+            >
+              <Text>Export PDF</Text>
+            </TouchableOpacity>
+
+
             <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
-              <Text>Logout</Text>
+              <Text>Sign Out</Text>
             </TouchableOpacity>
           </View>
         </TouchableOpacity>
       )}
 
-      <Text style={styles.title}>Admin Dashboard</Text>
+      <Text style={styles.title}>ADMIN DASHBOARD</Text>
 
       {/* Stats Section */}
       <View style={styles.statsContainer}>
         {/* All Reports */}
         <TouchableOpacity
-          style={[styles.statCard, { backgroundColor: "#17A2B8" }]} // blue for all
-          onPress={() => router.push({ pathname: "/admin-home", params: { filter: "" } })}
+          style={styles.statCard}
+          onPress={() =>
+            router.push({ pathname: "/admin-home", params: { filter: "" } })
+          }
         >
-          <MaterialIcons name="list-alt" size={28} color="#fff" />
-          <Text style={styles.statText}>
-            {reports.length} Total Reports
+          <Text style={{ ...styles.statText, color: "#17A2B8" }}>Total Reports</Text>
+          <Text style={{ ...styles.statText, color: "#17A2B8", fontSize: 25, fontWeight: 900 }}>
+            {reports.length}
           </Text>
         </TouchableOpacity>
-      
 
         {/* In Progress */}
         <TouchableOpacity
-          style={[styles.statCard, { backgroundColor: "#FFA500" }]}
-          onPress={() => router.push({ pathname: "/admin-home", params: { filter: "In Progress" } })}
+          style={styles.statCard}
+          onPress={() =>
+            router.push({ pathname: "/admin-home", params: { filter: "In Progress" } })
+          }
         >
-          <MaterialIcons name="work" size={28} color="#fff" />
-          <Text style={styles.statText}>
-            {reports.filter((r) => r.status === "In Progress").length} In Progress
+          <Text style={{ ...styles.statText, color: "#FFA500" }}>In Progress</Text>
+          <Text style={{ ...styles.statText, color: "#FFA500", fontSize: 25, fontWeight: 900 }}>
+            {reports.filter((r) => r.status === "In Progress").length}
           </Text>
         </TouchableOpacity>
 
         {/* Resolved */}
         <TouchableOpacity
-          style={[styles.statCard, { backgroundColor: "#20C997" }]}
-          onPress={() => router.push({ pathname: "/admin-home", params: { filter: "Resolved" } })}
+          style={styles.statCard}
+          onPress={() =>
+            router.push({ pathname: "/admin-home", params: { filter: "Resolved" } })
+          }
         >
-          <MaterialIcons name="check-circle" size={28} color="#fff" />
-          <Text style={styles.statText}>
-            {reports.filter((r) => r.status === "Resolved").length} Resolved
+          <Text style={{ ...styles.statText, color: "#20C997" }}>Resolved</Text>
+          <Text style={{ ...styles.statText, color: "#20C997", fontSize: 25, fontWeight: 900 }}>
+            {reports.filter((r) => r.status === "Resolved").length}
           </Text>
         </TouchableOpacity>
 
         {/* Unresolved */}
         <TouchableOpacity
-          style={[styles.statCard, { backgroundColor: "#6C757D" }]}
-          onPress={() => router.push({ pathname: "/admin-home", params: { filter: "Unresolved" } })}
+          style={styles.statCard}
+          onPress={() =>
+            router.push({ pathname: "/admin-home", params: { filter: "Unresolved" } })
+          }
         >
-          <MaterialIcons name="cancel" size={28} color="#fff" />
-          <Text style={styles.statText}>
-            {reports.filter((r) => r.status === "Unresolved").length} Unresolved
+          <Text style={{ ...styles.statText, color: "#6C757D" }}>Unresolved</Text>
+          <Text style={{ ...styles.statText, color: "#6C757D", fontSize: 25, fontWeight: 900 }}>
+            {reports.filter((r) => r.status === "Unresolved").length}
+          </Text>
+        </TouchableOpacity>
+
+        {/* Escalated */}
+        <TouchableOpacity
+          style={styles.statCard}
+          onPress={() =>
+            router.push({ pathname: "/admin-home", params: { filter: "Escalated" } })
+          }
+        >
+          <Text style={{ ...styles.statText, color: "#c73b3b" }}>Escalated</Text>
+          <Text style={{ ...styles.statText, color: "#c73b3b", fontSize: 25, fontWeight: 900 }}>
+            {reports.filter((r) => r.status === "Escalated").length}
           </Text>
         </TouchableOpacity>
       </View>
 
-       {/* Escalated */}
-        <TouchableOpacity
-          style={[styles.statCard, { backgroundColor: "#c73b3bff" }]}
-          onPress={() => router.push({ pathname: "/admin-home", params: { filter: "Escalated" } })}
-        >
-          <MaterialIcons name="work" size={28} color="#fff" />
-          <Text style={styles.statText}>
-            {reports.filter((r) => r.status === "Escalated").length} Escalated
-          </Text>
-        </TouchableOpacity>
+
     </ScrollView>
   );
 }

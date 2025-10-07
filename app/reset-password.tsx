@@ -78,7 +78,7 @@ export default function ResetPassword() {
       {passwordError ? <Text style={styles.error}>{passwordError}</Text> : null}
 
       <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={{ marginBottom: 16 }}>
-        <Text style={{ color: '#CCDD45', textAlign: 'center' }}>
+        <Text style={{ color: '#c7da30', textAlign: 'center' }}>
           {showPassword ? 'Hide Password' : 'Show Password'}
         </Text>
       </TouchableOpacity>
@@ -96,9 +96,9 @@ export default function ResetPassword() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, justifyContent: 'center', padding: 24, backgroundColor: '#fff' },
-  title: { fontSize: 28, fontWeight: 'bold', marginBottom: 24, textAlign: 'center', color: '#CCDD45' },
+  title: { fontSize: 28, fontWeight: 'bold', marginBottom: 24, textAlign: 'center', color: '#c7da30' },
   input: { borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 12, marginBottom: 16 },
-  button: { backgroundColor: '#CCDD45', padding: 14, borderRadius: 8 },
+  button: { backgroundColor: '#c7da30', padding: 14, borderRadius: 8 },
   buttonText: { color: '#fff', textAlign: 'center', fontWeight: '600', fontSize: 16 },
   error: { color: 'red', marginBottom: 12, textAlign: 'center' },
 });

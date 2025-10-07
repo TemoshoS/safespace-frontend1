@@ -59,7 +59,7 @@ export default function ForgotPassword() {
       </TouchableOpacity>
 
       <TouchableOpacity style={{ marginTop: 20, alignItems: 'center' }} onPress={() => router.push('/admin-login')}>
-        <Text style={{ color: '#CCDD45' }}>Back to Login</Text>
+        <Text style={{ color: '#c7da30' }}>Back to Login</Text>
       </TouchableOpacity>
     </View>
   );
@@ -67,10 +67,10 @@ export default function ForgotPassword() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, justifyContent: 'center', paddingHorizontal: 24, backgroundColor: '#fff' },
-  title: { fontSize: 28, fontWeight: 'bold', marginBottom: 32, textAlign: 'center', color: '#CCDD45' },
+  title: { fontSize: 28, fontWeight: 'bold', marginBottom: 32, textAlign: 'center', color: '#c7da30' },
   subtitle: { fontSize: 16, marginBottom: 24, textAlign: 'center', color: '#555' },
   input: { borderWidth: 1, borderColor: '#ccc', padding: 12, marginBottom: 16, borderRadius: 8, fontSize: 16, color: '#727171ff' },
-  button: { backgroundColor: '#CCDD45', paddingVertical: 14, borderRadius: 8, marginTop: 10 },
+  button: { backgroundColor: '#c7da30', paddingVertical: 14, borderRadius: 8, marginTop: 10 },
   buttonText: { color: '#fff', fontSize: 18, textAlign: 'center', fontWeight: '600' },
   error: { color: 'red', marginBottom: 12, textAlign: 'center' },
 });

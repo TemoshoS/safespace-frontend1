@@ -73,7 +73,7 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   backButtonText: {
-    color: '#CCDD45',
+    color: '#c7da30',
     fontSize: 16,
     fontWeight: 'bold',
   },

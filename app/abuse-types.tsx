@@ -54,11 +54,11 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   backButtonText: {
-    color: '#CCDD45',
+    color: '#c7da30',
     fontSize: 16,
     fontWeight: 'bold',
   },
   title: { fontSize: 24, fontWeight: 'bold', marginBottom: 20, textAlign: 'center' },
-  button: { marginBottom: 15, backgroundColor: '#CCDD45', padding: 15, borderRadius: 8, alignItems: 'center' },
+  button: { marginBottom: 15, backgroundColor: '#c7da30', padding: 15, borderRadius: 8, alignItems: 'center' },
   buttonText: { color: '#fff', fontWeight: 'bold' },
 });

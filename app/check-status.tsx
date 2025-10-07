@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
   subtitle: { fontSize: 16, color: '#666', textAlign: 'center', marginBottom: 20, paddingHorizontal: 20 },
   inputRow: { flexDirection: 'row', alignItems: 'center', marginTop: 20, width: '80%', gap: 10 },
   input: { flex: 2, height: 50, borderWidth: 1, borderColor: '#ccc', borderRadius: 8, paddingHorizontal: 15, fontSize: 16 },
-  statusButton: { backgroundColor: '#CCDD45', padding: 15, borderRadius: 8, height: 50, justifyContent: 'center', alignItems: 'center', flex: 1 },
+  statusButton: { backgroundColor: '#c7da30', padding: 15, borderRadius: 8, height: 50, justifyContent: 'center', alignItems: 'center', flex: 1 },
   statusButtonText: { color: 'white', fontWeight: 'bold', fontSize: 14 },
   statusContainer: { width: '100%', maxHeight: 500, marginTop: 20 },
   caseItem: { backgroundColor: '#f9f9f9', padding: 15, borderRadius: 8, borderWidth: 1, borderColor: '#eee', marginBottom: 10 },

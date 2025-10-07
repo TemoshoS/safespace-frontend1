@@ -7,7 +7,7 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#CCDD45',
+    backgroundColor: '#c7da30',
     paddingVertical: 14,
     paddingHorizontal: 16,
   },
@@ -40,7 +40,7 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: 6,
   },
-  logoutText: { color: '#CCDD45', fontWeight: '600' },
+  logoutText: { color: '#c7da30', fontWeight: '600' },
 
   exportBtn: {
     backgroundColor: '#fff',
@@ -49,67 +49,83 @@ export const styles = StyleSheet.create({
     borderRadius: 6,
     marginRight: 10,
   },
-  exportText: { color: '#CCDD45', fontWeight: '600' },
+  exportText: { color: '#c7da30', fontWeight: '600' },
 
- menuBtn: {
-  backgroundColor: '#fff',
-  paddingVertical: 6,
-  paddingHorizontal: 12,
-  borderRadius: 6,
-},
-menuOverlay: {
-  position: 'absolute',
-  top: 0,
-  left: 0,
-  right: 0,
-  bottom: 0,
-  zIndex: 1000,
-  backgroundColor: 'transparent',
-  justifyContent: 'flex-start',
-  alignItems: 'flex-end',
-},
-menuDropdown: {
-  marginTop: 60, 
-  marginRight: 16,
-  backgroundColor: '#CCDD45',
-  borderRadius: 6,
-  paddingVertical: 8,
-  paddingHorizontal: 12,
-  shadowColor: '#000',
-  shadowOpacity: 0.3,
-  shadowRadius: 5,
-  elevation: 10,
-  zIndex: 1001,
-},
+  menuBtn: {
+    backgroundColor: '#fff',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+  },
+  menuOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 1000,
+    backgroundColor: 'transparent',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-end',
+  },
+  menuDropdown: {
+    marginTop: 60,
+    marginRight: 16,
+    backgroundColor: '#c7da30',
+    borderRadius: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    shadowColor: '#000',
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 10,
+    zIndex: 1001,
+  },
 
-menuItem: {
-  paddingVertical: 10,
-  paddingHorizontal: 12,
-  borderBottomWidth: 1,
-  borderColor: '#ccc',
-},
+  menuItem: {
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderBottomWidth: 1,
+    borderColor: '#ccc',
+  },
 
 
   title: { fontSize: 24, marginVertical: 16, textAlign: 'center', fontWeight: 'bold' },
+  header: {
+    backgroundColor: "#c7da30",
+    paddingVertical: 10,
+    color: "#fff",
+  },
+
 
   row: {
-    flexDirection: 'row',
+    flexDirection: "row",
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderColor: '#ccc',
-    backgroundColor: '#f9f9f9',
+    borderColor: "#ccc",
+    backgroundColor: "#dadada",
   },
-  expandedRow: { backgroundColor: '#e9fdf6' },
-  cell: { paddingHorizontal: 8, justifyContent: 'center' },
-  header: { backgroundColor: '#e0f7f1' },
+  expandedRow: { backgroundColor: "#6c6c6c" },
+  cell: {
+    paddingHorizontal: 8,
+    justifyContent: "center",
+    color: "black",
+  },
+  detailsBox: {
+    backgroundColor: "#f1fdf9",
+    padding: 10,
+    paddingHorizontal: 16,
+  },
+  detail: { fontSize: 14, marginVertical: 2, color: "#333" },
 
-  detailsBox: { backgroundColor: '#f1fdf9', padding: 10, paddingHorizontal: 16 },
-  detail: { fontSize: 14, marginVertical: 2, color: '#333' },
-
-  picker: { height: 40, width: '100%' },
+  picker: {
+    height: 40,
+    width: "100%",
+    color: "#000",
+  },
 
   viewButton: {
-    backgroundColor: '#CCDD45',
+    backgroundColor: '#c7da30',
     paddingVertical: 4,
     paddingHorizontal: 8,
     borderRadius: 4,
@@ -158,18 +174,23 @@ menuItem: {
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",
+    marginLeft: 10,
+    marginRight: 10,
   },
   statCard: {
     width: "48%",
-    padding: 20,
-    borderRadius: 12,
+    padding: 10,
     marginBottom: 15,
     alignItems: "center",
     justifyContent: "center",
+    borderWidth: 2,
+    borderColor: "#c7da30",
   },
+
   statText: {
     marginTop: 10,
-    color: "#fff",
     fontWeight: "600",
+
   },
+
 });
