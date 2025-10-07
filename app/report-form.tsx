@@ -2,7 +2,8 @@ import { Picker } from '@react-native-picker/picker';
 import axios from 'axios';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, Image } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
 
 export default function CreateReportScreen() {
     const BACKEND_URL = 'http://localhost:3000';
@@ -20,6 +21,10 @@ export default function CreateReportScreen() {
     const [school, setSchool] = useState('');
     const [schools, setSchools] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
+    const [image, setImage] = useState<string | null>(null);
+    const [uploading, setUploading] = useState(false);
+    const [fileName, setFileName] = useState('No file chosen');
+    const [imageUrl, setImageUrl] = useState<string | null>(null);
 
     // Fetch subtypes
     useEffect(() => {
@@ -34,6 +39,78 @@ export default function CreateReportScreen() {
             .then(res => setSchools(res.data))
             .catch(err => console.error('Error fetching schools:', err));
     }, []);
+
+    const uploadImage = async (imageUri: string, name: string) => {
+        setUploading(true);
+        try {
+            // Add a small delay to make the uploading text visible
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            
+            const formData = new FormData();
+            formData.append('image', {
+                uri: imageUri,
+                type: 'image/jpeg',
+                name: name,
+            } as any);
+
+            const uploadResponse = await axios.post(`${BACKEND_URL}/upload`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+            setImageUrl(uploadResponse.data.imageUrl);
+            return uploadResponse.data.imageUrl;
+        } catch (uploadError) {
+            console.error('Image upload failed:', uploadError);
+            throw new Error('Image upload failed');
+        } finally {
+            setUploading(false);
+        }
+    };
+
+    const pickFile = async () => {
+        try {
+            const result = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                allowsEditing: true,
+                aspect: [4, 3],
+                quality: 0.8,
+                allowsMultipleSelection: false,
+            });
+
+            if (!result.canceled && result.assets && result.assets.length > 0) {
+                const selectedImage = result.assets[0].uri;
+                setImage(selectedImage);
+                
+                // Better filename handling
+                let name = 'selected_image.jpg'; // Default name
+                
+                // Try to get filename from asset
+                if (result.assets[0].fileName) {
+                    name = result.assets[0].fileName;
+                } else {
+                    // Fallback: extract from URI or use generic name
+                    const uriParts = result.assets[0].uri.split('/');
+                    const extractedName = uriParts[uriParts.length - 1];
+                    if (extractedName && extractedName.includes('.')) {
+                        name = extractedName;
+                    }
+                }
+                
+                setFileName(name);
+                
+                // Upload image immediately after selection
+                try {
+                    await uploadImage(selectedImage, name);
+                } catch (error) {
+                    Alert.alert('Warning', 'Image upload failed, but you can still submit the report.');
+                }
+            }
+        } catch (error) {
+            console.error('Error picking file:', error);
+            Alert.alert('Error', 'Failed to pick file');
+        }
+    };
 
     const handleBack = () => {
         router.back(); // Goes back to previous screen
@@ -58,6 +135,7 @@ export default function CreateReportScreen() {
         }
 
         setLoading(true);
+        
         try {
             const payload = {
                 abuse_type_id: abuseTypeId,
@@ -70,7 +148,8 @@ export default function CreateReportScreen() {
                 location,
                 school_name: school,
                 status: 'Pending',
-                is_anonymous: anonymous === "yes" ? 1 : 0, 
+                is_anonymous: anonymous === "yes" ? 1 : 0,
+                image_url: imageUrl, // Use the already uploaded image URL
             };
 
             await axios.post(`${BACKEND_URL}/reports`, payload);
@@ -79,6 +158,7 @@ export default function CreateReportScreen() {
                 { text: 'OK', onPress: () => router.replace('/') },
             ]);
 
+            // Reset form
             setSelectedSubtype('');
             setDescription('');
             setEmail('');
@@ -87,8 +167,12 @@ export default function CreateReportScreen() {
             setAge('');
             setLocation('');
             setSchool('');
+            setImage(null);
+            setFileName('No file chosen');
+            setImageUrl(null);
+            
         } catch (err) {
-            console.error(err);
+            console.error('Report submission error:', err);
             Alert.alert('Error', 'Failed to create report.');
         } finally {
             setLoading(false);
@@ -153,7 +237,41 @@ export default function CreateReportScreen() {
                 </Picker>
             </View>
 
-            <TouchableOpacity style={styles.button} onPress={handleSubmit} disabled={loading}>
+            {/* Image Upload Section - Structured like file input */}
+            <Text style={styles.label}>Upload Image (Optional)</Text>
+            <View style={styles.fileInputContainer}>
+                <TouchableOpacity 
+                    style={styles.chooseFileButton} 
+                    onPress={pickFile}
+                    disabled={loading || uploading}
+                >
+                    <Text style={styles.chooseFileButtonText}>Choose File</Text>
+                </TouchableOpacity>
+                <Text style={styles.fileNameText} numberOfLines={1} ellipsizeMode="middle">
+                    {fileName}
+                </Text>
+            </View>
+
+            {/* Uploading status - shows immediately when image is selected and uploading */}
+            {uploading && (
+                <Text style={styles.uploadingText}>Uploading image...</Text>
+            )}
+
+            {image && !uploading && (
+                <View style={styles.imagePreviewContainer}>
+                    <Text style={styles.label}>Image Preview:</Text>
+                    <Image source={{ uri: image }} style={styles.imagePreview} />
+                    <TouchableOpacity style={styles.removeImageButton} onPress={() => {
+                        setImage(null);
+                        setFileName('No file chosen');
+                        setImageUrl(null);
+                    }}>
+                        <Text style={styles.removeImageButtonText}>Remove Image</Text>
+                    </TouchableOpacity>
+                </View>
+            )}
+
+            <TouchableOpacity style={styles.button} onPress={handleSubmit} disabled={loading || uploading}>
                 <Text style={styles.buttonText}>{loading ? 'Submitting...' : 'Submit Report'}</Text>
             </TouchableOpacity>
         </ScrollView>
@@ -190,5 +308,58 @@ const styles = StyleSheet.create({
         width: '100%',
         color: '#333',
         paddingHorizontal: 10,
+    },
+    fileInputContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 5,
+        borderWidth: 1,
+        borderColor: '#ccc',
+        borderRadius: 6,
+        overflow: 'hidden',
+    },
+    chooseFileButton: {
+        backgroundColor: '#f0f0f0',
+        padding: 12,
+        borderRightWidth: 1,
+        borderRightColor: '#ccc',
+    },
+    chooseFileButtonText: {
+        color: '#333',
+        fontWeight: 'bold',
+    },
+    fileNameText: {
+        flex: 1,
+        paddingHorizontal: 10,
+        color: '#666',
+        fontSize: 14,
+    },
+    uploadingText: {
+        marginTop: 4,
+        color: '#666',
+        fontWeight: 'normal',
+        fontSize: 12,
+        fontStyle: 'italic',
+        marginLeft: 4,
+    },
+    imagePreviewContainer: {
+        marginTop: 10,
+        alignItems: 'center',
+    },
+    imagePreview: {
+        width: 200,
+        height: 150,
+        borderRadius: 8,
+        marginTop: 5,
+    },
+    removeImageButton: {
+        marginTop: 5,
+        padding: 8,
+        backgroundColor: '#ff4444',
+        borderRadius: 6,
+    },
+    removeImageButtonText: {
+        color: '#fff',
+        fontWeight: 'bold',
     },
 });
