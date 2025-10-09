@@ -9,7 +9,7 @@ export default function Index() {
 
   return (
     <LinearGradient
-      colors={['#6DD5FA', '#FFFFFF']}
+      colors={['#e9ebdcff', '#dee988ff']}
       style={styles.container}
     >
       <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -43,8 +43,8 @@ export default function Index() {
             style={styles.buttonPrimary}
             onPress={() => router.push('/report-screen')}
           >
-            <FontAwesome5 name="exclamation-triangle" size={20} color="#fff" />
-            <Text style={styles.buttonText}>Report Abuse</Text>
+            
+            <Text style={styles.buttonText}>Report Now</Text>
           </TouchableOpacity>
 
          
@@ -52,16 +52,16 @@ export default function Index() {
             style={styles.buttonSecondary}
             onPress={() => router.push('/admin-login')}
           >
-            <FontAwesome5 name="user-shield" size={20} color="#c7da30" />
-            <Text style={styles.buttonTextSecondary}>School Admin Login</Text>
+            
+            <Text style={styles.buttonTextSecondary}>School Admin </Text>
           </TouchableOpacity>
 
            <TouchableOpacity
             style={styles.buttonSecondary}
             onPress={() => router.push('/check-status')}
           >
-            <MaterialIcons name="check-circle-outline" size={20} color="#c7da30" />
-            <Text style={styles.buttonTextSecondary}>Check Case Status</Text>
+            
+            <Text style={styles.buttonTextSecondary}>Check Status</Text>
           </TouchableOpacity>
 
         </View>
@@ -123,30 +123,27 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: '#c7da30',
     paddingVertical: 15,
-    borderRadius: 10,
+    borderRadius: 50,
     marginBottom: 15,
     gap: 10,
   },
   buttonText: {
-    color: '#fff',
+    color: 'black',
     fontSize: 18,
-    fontWeight: '600',
+    
   },
   buttonSecondary: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#fff',
-    borderWidth: 1,
-    borderColor: '#c7da30',
+    backgroundColor: '#c7da30', 
     paddingVertical: 15,
-    borderRadius: 10,
+    borderRadius: 50,
     marginBottom: 15,
     gap: 10,
   },
   buttonTextSecondary: {
-    color: '#c7da30',
+    color: 'black',
     fontSize: 18,
-    fontWeight: '600',
   },
 });
