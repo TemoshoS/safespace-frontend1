@@ -5,90 +5,190 @@ import {
   StyleSheet,
   Image,
   TouchableOpacity,
+  Animated,
+  Dimensions,
 } from "react-native";
 import { useRouter } from "expo-router";
+import { LinearGradient } from "expo-linear-gradient";
+import { Ionicons } from "@expo/vector-icons";
+
+const { width } = Dimensions.get("window");
 
 export default function ReportCaseScreen() {
   const router = useRouter();
-  const [anonymous, setAnonymous] = useState("no");
+  const [menuVisible, setMenuVisible] = useState(false);
+  const slideAnim = useState(new Animated.Value(width))[0];
 
   const handleSelect = (choice: string) => {
-    setAnonymous(choice);
     router.push({
       pathname: "/abuse-types",
       params: { anonymous: choice },
     });
   };
 
-   const handleBack = () => {
-    router.back();
+  const toggleMenu = () => {
+    if (menuVisible) {
+      Animated.timing(slideAnim, {
+        toValue: width,
+        duration: 250,
+        useNativeDriver: true,
+      }).start(() => setMenuVisible(false));
+    } else {
+      setMenuVisible(true);
+      Animated.timing(slideAnim, {
+        toValue: width * 0.3,
+        duration: 250,
+        useNativeDriver: true,
+      }).start();
+    }
+  };
+
+  const navigate = (path: string) => {
+    toggleMenu();
+    setTimeout(() => {
+      router.push({ pathname: path as any });
+    }, 250);
   };
 
   return (
     <View style={styles.container}>
-            {/* Go Back button */}
-            <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-              <Text style={styles.backButtonText}>← Back</Text>
-            </TouchableOpacity>
-      {/* Logo */}
-      <Image
-        source={require("../assets/images/Logo.jpg")}
-        style={styles.logo}
-        resizeMode="contain"
-      />
-
-      <Text style={styles.title}>Report Case</Text>
-      <Text style={styles.question}>Would you like to report anonymously?</Text>
-
-      <View style={styles.buttonRow}>
-        <TouchableOpacity
-          style={[
-            styles.choiceButton,
-            anonymous === "yes" && styles.selectedButton,
-          ]}
-          onPress={() => handleSelect("yes")}
-        >
-          <Text style={styles.choiceText}>Yes</Text>
+      {/* Top bar: logo and menu icon */}
+      <View style={styles.topBar}>
+        <TouchableOpacity onPress={() => router.back()}>
+          <Image
+            source={require('../assets/images/Logo.jpg')}
+            style={styles.logo}
+            resizeMode="contain"
+          />
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={[
-            styles.choiceButton,
-            anonymous === "no" && styles.selectedButton,
-          ]}
-          onPress={() => handleSelect("no")}
-        >
-          <Text style={styles.choiceText}>No</Text>
+        <TouchableOpacity onPress={toggleMenu}>
+          <Ionicons name="menu" size={30} color="#c7da30" />
         </TouchableOpacity>
       </View>
+
+      {/* Centered content */}
+      <View style={styles.centerContent}>
+        <Text style={styles.questionText}>REPORT ANONYMOUSLY?</Text>
+
+        <View style={styles.buttonRow}>
+          <TouchableOpacity onPress={() => handleSelect("yes")}>
+            <LinearGradient
+              colors={["#c7da30", "#b8d020"]}
+              style={styles.gradientButton}
+              start={[0, 0]}
+              end={[1, 1]}
+            >
+              <Text style={styles.choiceText}>Yes</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => handleSelect("no")}>
+            <LinearGradient
+              colors={["#c7da30", "#b8d020"]}
+              style={styles.gradientButton}
+              start={[0, 0]}
+              end={[1, 1]}
+            >
+              <Text style={styles.choiceText}>No</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {/* Slide-in menu from right */}
+      {menuVisible && (
+        <TouchableOpacity style={styles.overlay} onPress={toggleMenu} />
+      )}
+      <Animated.View style={[styles.menu, { transform: [{ translateX: slideAnim }] }]}>
+        <TouchableOpacity style={styles.menuItem} onPress={() => navigate("/")}>
+          <Text style={styles.menuText}>Home</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.menuItem} onPress={() => navigate("/about-us")}>
+          <Text style={styles.menuText}>About Us</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.menuItem} onPress={() => navigate("/contact-us")}>
+          <Text style={styles.menuText}>Contact Us</Text>
+        </TouchableOpacity>
+      </Animated.View>
     </View>
   );
 }
-
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff", padding: 20 },
-   backButton: {
-    marginBottom: 10,
-    padding: 8,
-    alignSelf: 'flex-start',
-  },
-  backButtonText: {
-    color: '#c7da30',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  logo: { width: 350, height: 200, marginTop: 10, marginLeft: -125 },
-  title: { fontSize: 22, fontWeight: "bold", marginVertical: 15 },
-  question: { fontSize: 16, textAlign: "center", marginBottom: 20 },
-  buttonRow: { flexDirection: "row", justifyContent: "center", gap: 15 },
-  choiceButton: {
-    borderWidth: 1,
-    borderColor: "#24ae1a",
-    paddingVertical: 10,
-    paddingHorizontal: 30,
-    borderRadius: 8,
+  container: {
+    flex: 1,
     backgroundColor: "#fff",
+    paddingHorizontal: 20,
   },
-  selectedButton: { backgroundColor: "#24ae1a11" },
-  choiceText: { fontSize: 16, color: "#24ae1a", fontWeight: "600" },
+  logo: {
+    width: 100,
+    height: 100,
+
+  },
+  centerContent: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  questionText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 40,
+    textAlign: "center",
+    color: "#000",
+  },
+  buttonRow: {
+    flexDirection: "row",
+    gap: 20,
+  },
+  gradientButton: {
+    paddingVertical: 12,
+    paddingHorizontal: 30,
+    borderRadius: 25,
+    minWidth: 100,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  choiceText: {
+    color: "#000",
+    fontSize: 16,
+  },
+  topBar: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 40,
+    paddingHorizontal: 10,
+  },
+
+  menu: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    width: width * 0.7,
+    height: "100%",
+    backgroundColor: "#c7da30",
+    paddingTop: 100,
+    paddingHorizontal: 20,
+    zIndex: 10,
+  },
+  overlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+    backgroundColor: "rgba(0,0,0,0.3)",
+    zIndex: 5,
+  },
+  menuItem: {
+    paddingVertical: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: "#fff",
+  },
+  menuText: {
+    fontSize: 18,
+    color: "#333",
+  },
+
 });

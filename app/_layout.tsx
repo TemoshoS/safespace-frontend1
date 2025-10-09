@@ -1,5 +1,19 @@
-import { Stack } from "expo-router";
+import React from 'react';
+import { View } from 'react-native';
+import { Stack, usePathname } from 'expo-router';
+import ToggleMenu from './toggle-menu';
 
 export default function RootLayout() {
-  return <Stack screenOptions={{ headerShown: false }} />;
+  const pathname = usePathname();
+
+  // Show menu only on index, contact-us, and about-us pages
+  const showMenu = pathname === '/' || pathname === '/contact-us' || pathname === '/about-us';
+
+  return (
+    <View style={{ flex: 1 }}>
+      {showMenu && <ToggleMenu />}
+
+      <Stack screenOptions={{ headerShown: false }} />
+    </View>
+  );
 }

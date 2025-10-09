@@ -8,6 +8,7 @@ import {
   Modal,
   Platform,
   UIManager,
+  Image,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
@@ -123,13 +124,21 @@ export default function AdminDashboard() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      {/* Top Bar */}
       <View style={styles.topBar}>
-        <Text style={styles.adminName}>{adminName}</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <Image
+            source={require('../assets/images/Logo.jpg')}
+            style={styles.logo}
+            resizeMode="contain"
+          />
+          <Text style={styles.adminName}>{adminName}</Text>
+        </View>
+
         <TouchableOpacity style={styles.menuBtn} onPress={() => setMenuOpen(!menuOpen)}>
-          <Text>Menu</Text>
+          <MaterialIcons name="menu" size={32} color="#c7da30" />
         </TouchableOpacity>
       </View>
+
 
       {/* Dropdown Menu */}
       {menuOpen && (

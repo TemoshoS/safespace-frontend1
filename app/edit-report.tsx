@@ -274,7 +274,7 @@ export default function EditReportScreen() {
   useEffect(() => {
     if (!case_number) return;
     axios
-      .get(`${BACKEND_URL}/reports/${case_number}`)
+      .get(`${BACKEND_URL}/reports/case/${case_number}`)
       .then((res) => setReport(res.data))
       .catch((err) => {
         console.error(err);
@@ -296,6 +296,7 @@ export default function EditReportScreen() {
         location: report.location,
         school_name: report.school_name,
         status: report.status,
+        reason: report.reason
       });
 
       // ✅ Clear the form

@@ -54,14 +54,14 @@ export default function AdminLogin() {
 
       <View style={styles.inputContainer}>
         <TextInput
-          placeholder="USERNAME"
+          placeholder="Username"
           value={username}
           onChangeText={setUsername}
           style={styles.input}
           autoCapitalize="none"
         />
         <TextInput
-          placeholder="PASSWORD"
+          placeholder="Password"
           secureTextEntry
           value={password}
           onChangeText={setPassword}

@@ -1,17 +1,23 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Dimensions } from 'react-native';
+
+const { width } = Dimensions.get("window");
 
 export const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
-
+  logo: {
+    width: 80,
+    height: 80,
+    borderRadius: 10,
+  },
   topBar: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#c7da30',
+    
     paddingVertical: 14,
     paddingHorizontal: 16,
   },
-  adminName: { color: '#fff', fontSize: 16, fontWeight: '600' },
+  adminName: { color: '#424141ff', fontSize: 16, fontWeight: '600' },
 
   notificationContainer: {
     flexDirection: 'row',
@@ -72,17 +78,16 @@ export const styles = StyleSheet.create({
     marginTop: 60,
     marginRight: 16,
     backgroundColor: '#c7da30',
-    borderRadius: 6,
     paddingVertical: 8,
     paddingHorizontal: 12,
-    shadowColor: '#000',
+    shadowColor: '#c7da30',
     shadowOpacity: 0.3,
     shadowRadius: 5,
     elevation: 10,
     zIndex: 1001,
   },
 
-  menuItem: {
+  menuDropdownItem: {
     paddingVertical: 10,
     paddingHorizontal: 12,
     borderBottomWidth: 1,
@@ -192,5 +197,91 @@ export const styles = StyleSheet.create({
     fontWeight: "600",
 
   },
+  //mobile
+  modalOverlay: {
+  flex: 1,
+  backgroundColor: 'rgba(0,0,0,0.6)',
+  justifyContent: 'center',
+  alignItems: 'center',
+  padding: 20,
+},
+
+justifyModalBox: {
+  backgroundColor: 'white',
+  padding: 20,
+  borderRadius: 10,
+  width: '100%',
+  maxWidth: 400,
+  elevation: 10,
+},
+
+modalTitle: {
+  fontSize: 18,
+  fontWeight: 'bold',
+  marginBottom: 10,
+},
+
+modalText: {
+  fontSize: 14,
+  marginBottom: 10,
+},
+
+modalLabel: {
+  fontWeight: 'bold',
+  marginBottom: 5,
+},
+
+textArea: {
+  borderWidth: 1,
+  borderColor: '#c7da30',
+  borderRadius: 5,
+  height: 100,
+  padding: 10,
+  textAlignVertical: 'top',
+  marginBottom: 15,
+},
+
+modalBtnRow: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+},
+
+modalBtn: {
+  backgroundColor: '#c7da30',
+  paddingVertical: 10,
+  paddingHorizontal: 15,
+  borderRadius: 5,
+},
+ menu: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    width: width * 0.7,
+    height: "100%",
+    backgroundColor: "#c7da30",
+    paddingTop: 100,
+    paddingHorizontal: 20,
+    zIndex: 10,
+  },
+  overlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+    backgroundColor: "rgba(0,0,0,0.3)",
+    zIndex: 5,
+  },
+  menuItem: {
+    paddingVertical: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: "#fff",
+  },
+  menuText: {
+    fontSize: 18,
+    color: "#333",
+  },
+
+
 
 });

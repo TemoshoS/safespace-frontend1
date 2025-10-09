@@ -2,7 +2,6 @@ import React, { useEffect, useState, useRef } from 'react';
 import {
   View,
   Text,
-  FlatList,
   TouchableOpacity,
   LayoutAnimation,
   UIManager,
@@ -11,16 +10,22 @@ import {
   Image,
   ScrollView,
   Alert,
+  TextInput,
+  Dimensions,
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { exportPDF } from '../utils/exportPDF';
 import { styles } from '../styles/adminHomeStyles';
+import { MaterialIcons } from "@expo/vector-icons";
 
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+const { width } = Dimensions.get("window");
+
+if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
+
 
 export default function AdminHome() {
   const [reports, setReports] = useState<any[]>([]);
@@ -31,9 +36,17 @@ export default function AdminHome() {
   const [modalImage, setModalImage] = useState('');
   const [notifOpen, setNotifOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+
+  const [justificationModalVisible, setJustificationModalVisible] = useState(false);
+  const [selectedReportId, setSelectedReportId] = useState<number | null>(null);
+  const [selectedCaseNumber, setSelectedCaseNumber] = useState('');
+  const [selectedNewStatus, setSelectedNewStatus] = useState('');
+  const [currentStatus, setCurrentStatus] = useState('');
+  const [statusChangeReason, setStatusChangeReason] = useState('');
+
   const lastCount = useRef(0);
   const router = useRouter();
-  const { filter } = useLocalSearchParams(); // Read filter from AdminDashboard
+  const { filter } = useLocalSearchParams();
 
   useEffect(() => {
     const loadAdminName = async () => {
@@ -50,8 +63,6 @@ export default function AdminHome() {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await response.json();
-
-        // Apply filter if exists
         const filtered = filter ? data.filter((r: any) => r.status === filter) : data;
         setReports(filtered);
 
@@ -65,7 +76,7 @@ export default function AdminHome() {
 
     loadAdminName();
     fetchReports();
-    const interval = setInterval(fetchReports, 10000); // auto-refresh
+    const interval = setInterval(fetchReports, 10000);
     return () => clearInterval(interval);
   }, [filter]);
 
@@ -75,28 +86,28 @@ export default function AdminHome() {
     router.push('/');
   };
 
-  // ✅ Updated function (backend also handles sending the email)
-  const updateStatus = async (id: number, newStatus: string) => {
+  const updateStatus = async (id: number, newStatus: string, reason: string) => {
     const token = await AsyncStorage.getItem('adminToken');
     if (!token) return Alert.alert('Error', 'No token found');
 
     try {
       const response = await fetch(`http://localhost:3000/abuse_reports/${id}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ status: newStatus }),
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ status: newStatus, reason }),
       });
 
       if (response.ok) {
-        // Update reports locally
         const updatedReports = reports.map((r) =>
-          r.id === id ? { ...r, status: newStatus } : r
+          r.id === id ? { ...r, status: newStatus, reason: reason } : r
         );
         setReports(updatedReports);
-
-        // Show success message
-        Alert.alert('Status Updated', `You have set this report to "${newStatus}"`);
-      } else {
+        Alert.alert('Status Updated', `Report #${selectedCaseNumber} updated to "${newStatus}"`);
+      }
+      else {
         Alert.alert('Error', 'Failed to update status');
       }
     } catch (err) {
@@ -116,6 +127,7 @@ export default function AdminHome() {
 
   const renderItem = ({ item }: { item: any }) => {
     const isExpanded = expanded === item.id;
+
     return (
       <TouchableOpacity onPress={() => toggleExpand(item.id)} activeOpacity={0.8}>
         <View style={[styles.row, isExpanded && styles.expandedRow]}>
@@ -124,7 +136,15 @@ export default function AdminHome() {
           <View style={[styles.cell, { flex: 1, padding: 0 }]}>
             <Picker
               selectedValue={item.status}
-              onValueChange={(value: string) => updateStatus(item.id, value)}
+              onValueChange={(value: string) => {
+                if (value !== item.status) {
+                  setSelectedReportId(item.id);
+                  setCurrentStatus(item.status);
+                  setSelectedNewStatus(value);
+                  setSelectedCaseNumber(item.case_number);
+                  setJustificationModalVisible(true);
+                }
+              }}
               style={styles.picker}
             >
               <Picker.Item label="Pending" value="Pending" />
@@ -142,7 +162,6 @@ export default function AdminHome() {
             <Text style={styles.detail}>Abuse Type: {item.abuse_type}</Text>
             <Text style={styles.detail}>Subtype: {item.subtype}</Text>
             <Text style={styles.detail}>Description: {item.description}</Text>
-
             {item.image_path && item.image_path !== 'N/A' ? (
               <TouchableOpacity
                 style={styles.viewButton}
@@ -153,7 +172,6 @@ export default function AdminHome() {
             ) : (
               <Text style={styles.detail}>Attachment: N/A</Text>
             )}
-
           </View>
         )}
       </TouchableOpacity>
@@ -162,15 +180,23 @@ export default function AdminHome() {
 
   return (
     <View style={styles.container}>
-      {/* Top Bar */}
+      {/* Top bar */}
       <View style={styles.topBar}>
-        <Text style={styles.adminName}>{adminName}</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <Image
+            source={require('../assets/images/Logo.jpg')}
+            style={styles.logo}
+            resizeMode="contain"
+          />
+          <Text style={styles.adminName}>{adminName}</Text>
+        </View>
+
         <TouchableOpacity style={styles.menuBtn} onPress={() => setMenuOpen(!menuOpen)}>
-          <Text>Menu </Text>
+          <MaterialIcons name="menu" size={32} color="#c7da30" />
         </TouchableOpacity>
       </View>
 
-      {/* Dropdown Menu */}
+      {/* Menu dropdown */}
       {menuOpen && (
         <TouchableOpacity
           style={styles.menuOverlay}
@@ -181,7 +207,6 @@ export default function AdminHome() {
             <TouchableOpacity style={styles.menuItem} onPress={() => exportPDF(reports)}>
               <Text>Export PDF</Text>
             </TouchableOpacity>
-           
             <TouchableOpacity style={styles.menuItem} onPress={() => router.push('/admin-dashboard')}>
               <Text>Dashboard</Text>
             </TouchableOpacity>
@@ -189,29 +214,26 @@ export default function AdminHome() {
               <Text>Profile</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
-              <Text>Logout</Text>
+              <Text>Sign Out</Text>
             </TouchableOpacity>
           </View>
         </TouchableOpacity>
       )}
 
+      {/* Title */}
       <Text style={styles.title}>{filter ? `${filter} Reports` : 'Abuse Reports'}</Text>
 
-      {/* Table Header */}
-      <View style={[styles.row, styles.header]}>
-        <Text style={[styles.cell, { flex: 1, fontWeight: 'bold' }]}>Case Number</Text>
-        <Text style={[styles.cell, { flex: 2, fontWeight: 'bold' }]}>Email</Text>
-        <Text style={[styles.cell, { flex: 1, fontWeight: 'bold' }]}>Status</Text>
-      </View>
+      {/* Table */}
+      <ScrollView style={{ marginHorizontal: 10 }} contentContainerStyle={{ paddingBottom: 20 }}>
+        <View style={[styles.row, styles.header]}>
+          <Text style={[styles.cell, { flex: 1, fontWeight: 'bold' }]}>Case Number</Text>
+          <Text style={[styles.cell, { flex: 2, fontWeight: 'bold' }]}>Email</Text>
+          <Text style={[styles.cell, { flex: 1, fontWeight: 'bold' }]}>Status</Text>
+        </View>
+        {reports.map((item) => renderItem({ item }))}
+      </ScrollView>
 
-      {/* Reports List */}
-      <FlatList
-        data={reports}
-        keyExtractor={(item, index) => (item.id ? item.id.toString() : index.toString())}
-        renderItem={renderItem}
-      />
-
-      {/* Attachment Modal */}
+      {/* Image Modal */}
       <Modal visible={modalVisible} transparent>
         <View style={styles.modalContainer}>
           <TouchableOpacity style={styles.modalClose} onPress={() => setModalVisible(false)}>
@@ -223,7 +245,59 @@ export default function AdminHome() {
         </View>
       </Modal>
 
-      {/* Notifications Modal */}
+      {/* Justification Modal */}
+      <Modal visible={justificationModalVisible} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.justifyModalBox}>
+            <Text style={styles.modalTitle}>JUSTIFY STATUS CHANGE</Text>
+            <Text style={styles.modalText}>
+              You are changing <Text style={{ fontWeight: 'bold' }}>Case #{selectedCaseNumber}</Text> status from <Text style={{ fontWeight: 'bold' }}>{currentStatus}</Text> to <Text style={{ fontWeight: 'bold' }}>{selectedNewStatus}</Text>.
+            </Text>
+
+            <Text style={styles.modalLabel}>Reason for status change:</Text>
+            <TextInput
+              multiline
+              style={styles.textArea}
+              value={statusChangeReason}
+              onChangeText={setStatusChangeReason}
+              placeholder="Enter justification..."
+            />
+
+            <View style={styles.modalBtnRow}>
+              <TouchableOpacity
+                style={styles.modalBtn}
+                onPress={() => {
+                  setJustificationModalVisible(false);
+                  setStatusChangeReason('');
+                  setSelectedNewStatus('');
+                }}
+              >
+                <Text>Cancel</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.modalBtn}
+                onPress={() => {
+                  if (!statusChangeReason.trim()) {
+                    Alert.alert('Error', 'Please provide a justification.');
+                    return;
+                  }
+                  if (selectedReportId && selectedNewStatus) {
+                    updateStatus(selectedReportId, selectedNewStatus, statusChangeReason);
+                  }
+                  setJustificationModalVisible(false);
+                  setStatusChangeReason('');
+                  setSelectedNewStatus('');
+                }}
+              >
+                <Text>Confirm & Update</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Notification Modal */}
       <Modal visible={notifOpen} transparent animationType="fade">
         <View style={styles.notifModal}>
           <ScrollView>

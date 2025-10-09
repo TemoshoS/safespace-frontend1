@@ -87,7 +87,7 @@ export default function VerifyPage() {
           style={[styles.button, { opacity: loading ? 0.7 : 1 }]}
         >
           <TouchableOpacity onPress={handleVerify} disabled={loading} style={{ alignItems: 'center' }}>
-            {loading ? <ActivityIndicator color="black" /> : <Text style={styles.buttonText}>Verify & Login</Text>}
+            {loading ? <ActivityIndicator color="black" /> : <Text style={styles.buttonText}>Verify</Text>}
           </TouchableOpacity>
         </LinearGradient>
       </View>
