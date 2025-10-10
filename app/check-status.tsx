@@ -282,13 +282,14 @@ const styles = StyleSheet.create({
   detailLabel: { fontWeight: 'bold' },
 
   button: {
-    backgroundColor: '#FF3B30',
+    backgroundColor: '#c7da30',
     padding: 15,
-    borderRadius: 8,
+    borderRadius: 40,
     marginTop: 20,
+    
   },
 
-  buttonText: { color: 'white', fontWeight: 'bold', fontSize: 16 },
+  buttonText: { color: 'black', fontSize: 16 },
 
   editButton: {
     marginTop: 15,

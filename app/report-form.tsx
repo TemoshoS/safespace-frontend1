@@ -167,7 +167,7 @@ export default function CreateReportScreen() {
 
             <Text style={styles.title}>REPORT  CASE</Text>
             {isAnonymous && (
-                <Text style={{ fontStyle: 'italic', color: '#555', marginBottom: 10 }}>
+                <Text style={{  color: 'black', marginBottom: 10 }}>
                     You are reporting anonymously
                 </Text>
             )}
