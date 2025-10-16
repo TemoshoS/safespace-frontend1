@@ -7,6 +7,7 @@ import {
   Image,
   Animated,
   Dimensions,
+  Platform
 } from 'react-native';
 import axios from 'axios';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -15,7 +16,13 @@ import { Ionicons } from '@expo/vector-icons';
 const { width, height } = Dimensions.get('window');
 
 export default function AbuseTypesScreen() {
-  const BACKEND_URL = 'http://localhost:3000';
+  const BACKEND_URL =
+  Platform.OS === "web"
+    ? "http://localhost:3000"     // ✅ Web browser
+    : Platform.OS === "android"
+    ? "http://10.0.2.2:3000"      // ✅ Android emulator
+    : "http://192.168.2.116:3000" // ✅ iOS sim or Physical Device
+
   const [abuseTypes, setAbuseTypes] = useState<any[]>([]);
   const [menuVisible, setMenuVisible] = useState(false);
   const slideAnim = useState(new Animated.Value(width))[0];

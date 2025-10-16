@@ -32,7 +32,13 @@ export default function AdminProfile() {
   const [showPassword, setShowPassword] = useState(false);
 
   const router = useRouter();
-  const SERVER_URL = "http://localhost:3000";
+  const BACKEND_URL =
+  Platform.OS === "web"
+    ? "http://localhost:3000"     // ✅ Web browser
+    : Platform.OS === "android"
+    ? "http://10.0.2.2:3000"      // ✅ Android emulator
+    : "http://192.168.2.116:3000" // ✅ iOS sim or Physical Device
+
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -41,7 +47,7 @@ export default function AdminProfile() {
 
       try {
         setLoading(true);
-        const res = await fetch(`${SERVER_URL}/admin-profile`, {
+        const res = await fetch(`${BACKEND_URL}/admin-profile`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
@@ -52,7 +58,7 @@ export default function AdminProfile() {
           if (data.profile_image) {
             setServerImage(
               Platform.OS === "web"
-                ? `${SERVER_URL}${data.profile_image}`
+                ? `${BACKEND_URL}${data.profile_image}`
                 : data.profile_image
             );
           }
@@ -134,7 +140,7 @@ export default function AdminProfile() {
 
     try {
       setLoading(true);
-      const res = await fetch(`${SERVER_URL}/admin-profile`, {
+      const res = await fetch(`${BACKEND_URL}/admin-profile`, {
         method: "PUT",
         headers: { Authorization: `Bearer ${token}` },
         body: formData,
@@ -148,7 +154,7 @@ export default function AdminProfile() {
         if (data.profile_image) {
           setServerImage(
             Platform.OS === "web"
-              ? `${SERVER_URL}${data.profile_image}`
+              ? `${BACKEND_URL}${data.profile_image}`
               : data.profile_image
           );
         }

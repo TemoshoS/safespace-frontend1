@@ -25,6 +25,15 @@ if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental
 }
 
 export default function AdminDashboard() {
+
+   const BACKEND_URL =
+        Platform.OS === "web"
+          ? "http://localhost:3000" // ✅ Web browser
+          : Platform.OS === "android"
+          ? "http://10.0.2.2:3000" // ✅ Android emulator
+          : "http://192.168.2.116:3000"; // ✅ iOS simulator (Mac) or physical device
+        
+
   const [reports, setReports] = useState<any[]>([]);
   const [adminName, setAdminName] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
@@ -63,7 +72,7 @@ export default function AdminDashboard() {
         const token = await AsyncStorage.getItem("adminToken");
         if (!token) throw new Error("No token found");
 
-        const response = await fetch("http://localhost:3000/abuse_reports", {
+        const response = await fetch(`${BACKEND_URL}/abuse_reports`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -99,7 +108,7 @@ export default function AdminDashboard() {
       const token = await AsyncStorage.getItem("adminToken");
       if (!token) return Alert.alert("Error", "No token found");
 
-      const response = await fetch(`http://localhost:3000/abuse_reports/${id}`, {
+      const response = await fetch(`${BACKEND_URL}/abuse_reports/${id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -232,9 +241,22 @@ export default function AdminDashboard() {
             router.push({ pathname: "/admin-home", params: { filter: "Escalated" } })
           }
         >
-          <Text style={{ ...styles.statText, color: "#c73b3b" }}>Escalated</Text>
-          <Text style={{ ...styles.statText, color: "#c73b3b", fontSize: 25, fontWeight: 900 }}>
+          <Text style={{ ...styles.statText, color: "black" }}>Escalated</Text>
+          <Text style={{ ...styles.statText, color: "black", fontSize: 25, fontWeight: 900 }}>
             {reports.filter((r) => r.status === "Escalated").length}
+          </Text>
+        </TouchableOpacity>
+
+         {/* False Report */}
+        <TouchableOpacity
+          style={styles.statCard}
+          onPress={() =>
+            router.push({ pathname: "/admin-home", params: { filter: "False-report" } })
+          }
+        >
+          <Text style={{ ...styles.statText, color: "#c73b3b" }}>False Report</Text>
+          <Text style={{ ...styles.statText, color: "#c73b3b", fontSize: 25, fontWeight: 900 }}>
+            {reports.filter((r) => r.status === "False-report").length}
           </Text>
         </TouchableOpacity>
       </View>

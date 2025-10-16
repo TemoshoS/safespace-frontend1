@@ -28,6 +28,13 @@ if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental
 
 
 export default function AdminHome() {
+  const BACKEND_URL =
+  Platform.OS === "web"
+    ? "http://localhost:3000"     // ✅ Web browser
+    : Platform.OS === "android"
+    ? "http://10.0.2.2:3000"      // ✅ Android emulator
+    : "http://192.168.2.116:3000" // ✅ iOS sim or Physical Device
+
   const [reports, setReports] = useState<any[]>([]);
   const [expanded, setExpanded] = useState<number | null>(null);
   const [adminName, setAdminName] = useState('');
@@ -59,7 +66,7 @@ export default function AdminHome() {
       if (!token) return;
 
       try {
-        const response = await fetch('http://localhost:3000/abuse_reports', {
+        const response = await fetch(`${BACKEND_URL}/abuse_reports`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await response.json();
@@ -91,7 +98,7 @@ export default function AdminHome() {
     if (!token) return Alert.alert('Error', 'No token found');
 
     try {
-      const response = await fetch(`http://localhost:3000/abuse_reports/${id}`, {
+      const response = await fetch(`${BACKEND_URL}/abuse_reports/${id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -121,7 +128,7 @@ export default function AdminHome() {
   };
 
   const openAttachment = (path: string) => {
-    setModalImage(`http://localhost:3000${path}`);
+    setModalImage(`${BACKEND_URL}${path}`);
     setModalVisible(true);
   };
 
@@ -152,6 +159,7 @@ export default function AdminHome() {
               <Picker.Item label="Escalated" value="Escalated" />
               <Picker.Item label="Resolved" value="Resolved" />
               <Picker.Item label="Unresolved" value="Unresolved" />
+              <Picker.Item label="False-report" value="False-report" />
             </Picker>
           </View>
         </View>

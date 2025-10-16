@@ -1,10 +1,17 @@
 import React, { useState } from 'react';
-import { View, Text, Image, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, Image, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Alert, Platform } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
 
 export default function EnterEmail() {
+  const BACKEND_URL =
+  Platform.OS === "web"
+    ? "http://localhost:3000" // ✅ Web browser
+    : Platform.OS === "android"
+    ? "http://10.0.2.2:3000" // ✅ Android emulator
+    : "http://192.168.2.116:3000"; // ✅ iOS simulator (Mac) or physical device
+  
   const { username, password } = useLocalSearchParams<{ username: string; password: string }>();
   const router = useRouter();
   const [email, setEmail] = useState('');
@@ -20,7 +27,7 @@ export default function EnterEmail() {
     setError('');
 
     try {
-      const response = await fetch('http://localhost:3000/admin/login', {
+      const response = await fetch(`${BACKEND_URL}/admin/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password, email }),

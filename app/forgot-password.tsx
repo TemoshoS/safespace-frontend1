@@ -1,8 +1,15 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Alert, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 
 export default function ForgotPassword() {
+   const BACKEND_URL =
+    Platform.OS === "web"
+      ? "http://localhost:3000" // ✅ Web browser
+      : Platform.OS === "android"
+      ? "http://10.0.2.2:3000" // ✅ Android emulator
+      : "http://192.168.2.116:3000"; // ✅ iOS simulator (Mac) or physical device
+    
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
@@ -17,7 +24,7 @@ export default function ForgotPassword() {
     setError('');
 
     try {
-      const response = await fetch('http://localhost:3000/admin/forgot-password', {
+      const response = await fetch(`${BACKEND_URL}/admin/forgot-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),

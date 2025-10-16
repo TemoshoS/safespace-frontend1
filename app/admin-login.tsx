@@ -1,9 +1,16 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Alert, Image } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Alert, Image,Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 
 export default function AdminLogin() {
+  const BACKEND_URL =
+  Platform.OS === "web"
+    ? "http://localhost:3000" // ✅ Web browser
+    : Platform.OS === "android"
+    ? "http://10.0.2.2:3000" // ✅ Android emulator
+    : "http://192.168.2.116:3000"; // ✅ iOS simulator (Mac) or physical device
+    
   const router = useRouter();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -19,7 +26,7 @@ export default function AdminLogin() {
     setError('');
 
     try {
-      const response = await fetch('http://localhost:3000/admin/validate-login', {
+      const response = await fetch(`${BACKEND_URL}/admin/validate-login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
