@@ -1,16 +1,7 @@
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  TextInput,
-  ScrollView,
-  Image,
-  Platform
-} from 'react-native';
+import axios from 'axios';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import axios from 'axios';
+import { Image, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 export default function DetailsScreen() {
   const router = useRouter();
@@ -18,15 +9,22 @@ export default function DetailsScreen() {
   const [searchResult, setSearchResult] = useState<any | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [isFocused, setIsFocused] = useState(false);
 
-   const BACKEND_URL =
-    Platform.OS === "web"
-      ? "http://localhost:3000"     // ✅ Web browser
-      : Platform.OS === "android"
-      ? "http://10.0.2.2:3000"      // ✅ Android emulator
-      : "http://192.168.2.116:3000" // ✅ iOS sim or Physical Device
-  
-  
+
+  const BACKEND_URL =
+  Platform.OS === "web"
+    ? "http://localhost:3000"
+    : "http://192.168.2.116:3000";
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'completed': return '#4CAF50';
+      case 'escalated': return '#FF9800';
+      case 'pending': return '#9E9E9E';
+      default: return '#000';
+    }
+  };
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) {
@@ -54,163 +52,146 @@ export default function DetailsScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      {/* Logo */}
-      <View style={styles.logoContainer}>
-        <Image
-          source={require('../assets/images/Logo.jpg')}
-          style={styles.logo}
-          resizeMode="contain"
-        />
-      </View>
+<View style={styles.container}>
+  {/* Logo */}
+  <View style={styles.logoContainer}>
+    <Image
+      source={require('../assets/images/Logo.jpg')}
+      style={styles.logo}
+      resizeMode="contain"
+    />
+  </View>
 
-      {/* Main content container */}
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <Text style={styles.title}>TRACK STATUS</Text>
+  {/* Title outside form */}
+  <Text style={styles.title}>TRACK STATUS</Text>
 
-        <View style={styles.formContainer}>
-          <TextInput
-            style={styles.input}
-            placeholder="CASE NUMBER"
-            placeholderTextColor="#999"
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            onSubmitEditing={handleSearch}
-            returnKeyType="search"
-          />
+  {/* Form container */}
+  <View style={styles.formContainer}>
+    {/* Search input */}
+    <TextInput
+      style={styles.input}
+      placeholder="CASE NUMBER"
+      placeholderTextColor="#999"
+      value={searchQuery}
+      onChangeText={setSearchQuery}
+      onSubmitEditing={handleSearch}
+      returnKeyType="search"
+    />
 
-          <TouchableOpacity style={styles.statusButton} onPress={handleSearch}>
-            <Text style={styles.statusButtonText}>Check Status</Text>
+    {/* Search button */}
+    <TouchableOpacity style={styles.statusButton} onPress={handleSearch}>
+      <Text style={styles.statusButtonText}>Search</Text>
+    </TouchableOpacity>
+
+    {/* Your Case Status label */}
+    <Text style={styles.caseStatusLabel}>Your Case Status</Text>
+
+    {/* Loading/Error */}
+    {loading && <Text style={{ marginTop: 10 }}>Loading...</Text>}
+    {error && <Text style={{ color: 'red', marginTop: 10 }}>{error}</Text>}
+
+    {/* Search results */}
+    {searchResult && (
+      <ScrollView style={styles.statusContainer}>
+        <View style={styles.caseItem}>
+          <View style={styles.caseHeader}>
+            <Text style={styles.caseNumber}>{String(searchResult.case_number || '')}</Text>
+            <Text
+              style={[
+                styles.statusBadge,
+                { backgroundColor: getStatusColor(String(searchResult.status || '')) },
+              ]}
+            >
+              {String(searchResult.status || '')}
+            </Text>
+          </View>
+
+          <Text style={styles.caseDate}>
+            Submitted: {new Date(searchResult.created_at || '').toLocaleDateString()}
+          </Text>
+
+          {/* Case details */}
+          <Text style={styles.detail}>
+            <Text style={styles.detailLabel}>Abuse Type: </Text>
+            {String(searchResult.abuse_type_id || '')}
+          </Text>
+          <Text style={styles.detail}>
+            <Text style={styles.detailLabel}>Subtype: </Text>
+            {String(searchResult.subtype_id || '')}
+          </Text>
+          <Text style={styles.detail}>
+            <Text style={styles.detailLabel}>Description: </Text>
+            {String(searchResult.description || '')}
+          </Text>
+          <Text style={styles.detail}>
+            <Text style={styles.detailLabel}>Reporter Email: </Text>
+            {String(searchResult.reporter_email || '')}
+          </Text>
+          <Text style={styles.detail}>
+            <Text style={styles.detailLabel}>Phone: </Text>
+            {String(searchResult.phone_number || '')}
+          </Text>
+          <Text style={styles.detail}>
+            <Text style={styles.detailLabel}>Full Name: </Text>
+            {String(searchResult.full_name || 'Anonymous')}
+          </Text>
+          <Text style={styles.detail}>
+            <Text style={styles.detailLabel}>Age: </Text>
+            {String(searchResult.age || '')}
+          </Text>
+          <Text style={styles.detail}>
+            <Text style={styles.detailLabel}>Location: </Text>
+            {String(searchResult.location || '')}
+          </Text>
+          <Text style={styles.detail}>
+            <Text style={styles.detailLabel}>School: </Text>
+            {String(searchResult.school_name || '')}
+          </Text>
+           <Text style={styles.detail}>
+            <Text style={styles.detailLabel}>Reason: </Text>
+            {String(searchResult.reason || '')}
+          </Text>
+
+          {/* Edit Button */}
+          <TouchableOpacity
+            style={styles.editButton}
+            onPress={() =>
+              router.push({
+                pathname: '/edit-report',
+                params: { case_number: searchResult.case_number },
+              })
+            }
+          >
+            <Text style={styles.editButtonText}>Edit Report</Text>
           </TouchableOpacity>
-
-          <Text style={styles.caseStatusLabel}>YOUR CASE STATUS</Text>
-
-          {loading && <Text style={{ marginTop: 10 }}>Loading...</Text>}
-          {error && <Text style={{ color: 'red', marginTop: 10 }}>{error}</Text>}
-
-          {searchResult && (
-            <View style={styles.statusContainer}>
-              <View style={styles.caseItem}>
-                <View style={styles.caseHeader}>
-                  <Text style={styles.caseNumber}>
-                    Case Number: <Text style={styles.caseValue}>{searchResult.case_number}</Text>
-                  </Text>
-                 
-                </View>
-
-                {/*<Text style={styles.detail}>
-                  Report Type: <Text style={styles.caseValue}> {searchResult.abuse_type}</Text>
-                </Text>*/}
-
-                 
-                    <Text style={styles.detail}>Status:
-                    <Text style={styles.statusBadge}>
-                      {String(searchResult.status || 'Unknown')}
-                    </Text>
-                    </Text>
-                  
-                <Text style={styles.detail}>
-                  Full Name: <Text style={styles.caseValue}>{searchResult.full_name}</Text>
-                </Text>
-                <Text style={styles.detail}>
-                  Abuse Type: <Text style={styles.caseValue}>{searchResult.abuse_type}</Text>
-                </Text>
-                <Text style={styles.detail}>
-                  Subtype: <Text style={styles.caseValue}>{searchResult.subtype}</Text>
-                </Text>
-                <Text style={styles.detail}>
-                  Email: <Text style={styles.caseValue}>{searchResult.reporter_email}</Text>
-                </Text>
-                <Text style={styles.detail}>
-                  Phone Number: <Text style={styles.caseValue}>{searchResult.phone_number}</Text>
-                </Text>
-                <Text style={styles.detail}>
-                  Address: <Text style={styles.caseValue}>{searchResult.location}</Text>
-                </Text>
-                <Text style={styles.detail}>
-                  Grade: <Text style={styles.caseValue}>{searchResult.grade || ''}</Text>
-                </Text>
-                <Text style={styles.detail}>
-                  School Name: <Text style={styles.caseValue}>{searchResult.school_name}</Text>
-                </Text>
-                <Text style={styles.detail}>
-                  Age: <Text style={styles.caseValue}>{searchResult.age}</Text>
-                </Text>
-
-                {/* Reason Box */}
-                {searchResult.reason && (
-                  <View style={styles.reasonBox}>
-                    <Text style={styles.reasonTitle}>Latest Update Reason:</Text>
-                    <Text style={styles.reasonText}>{searchResult.reason}</Text>
-                  </View>
-                )}
-
-                {/* Description */}
-                <Text style={styles.description}>
-                  <Text style={styles.descriptionLabel}>Description:</Text>{' '}
-                  {searchResult.description}
-                </Text>
-
-{searchResult.image_path && (
-  <Image
-    source={{ uri: BACKEND_URL + searchResult.image_path }}
-    style={styles.caseImage}
-    resizeMode="cover"
-  />
-)}
-
-                {/* Edit Button */}
-                <TouchableOpacity
-                  style={styles.editButton}
-                  onPress={() =>
-                    router.push({
-                      pathname: '/edit-report',
-                      params: { case_number: searchResult.case_number },
-                    })
-                  }
-                >
-                  <Text style={styles.editButtonText}>Edit Report</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          )}
         </View>
-
-        {/* Go Back */}
-        <TouchableOpacity style={styles.button} onPress={() => router.back()}>
-          <Text style={styles.buttonText}>Go Back</Text>
-        </TouchableOpacity>
       </ScrollView>
-    </View>
+    )}
+  </View>
+
+  {/* Go Back Button */}
+  <TouchableOpacity style={styles.button} onPress={() => router.back()}>
+    <Text style={styles.buttonText}>Go Back</Text>
+  </TouchableOpacity>
+</View>
+
+
   );
 }
+
+
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    justifyContent: 'center', // vertically center
+    alignItems: 'center',     // horizontally center
+    padding: 20,
     backgroundColor: '#fff',
-    paddingTop: 40,
   },
 
-  logoContainer: {
-    position: 'absolute',
-    top: 20,
-    left: 20,
-    zIndex: 10,
-  },
-
-  logo: {
-    width: 100,
-    height: 90,
-   
-  },
-
-  scrollContent: {
-    alignItems: 'center',
-    paddingTop: 80, // ensures content appears below logo
-    paddingHorizontal: 20,
-    paddingBottom: 30,
-  },
+  logoContainer: { position: 'absolute', top: 50, left: 20, zIndex: 10 },
+  logo: { width: 50, height: 50, borderRadius: 8 },
 
   title: {
     fontSize: 24,
@@ -220,20 +201,23 @@ const styles = StyleSheet.create({
   },
 
   formContainer: {
-    width: '100%',
+    width: '90%',
     maxWidth: 400,
+    maxHeight: 500,           // prevent form from stretching too tall
     borderWidth: 2,
     borderColor: '#c7da30',
     borderRadius: 10,
     padding: 20,
+    alignItems: 'center',
     backgroundColor: '#fff',
+    flexShrink: 0,             // input/button won't shrink
   },
 
   input: {
     width: '100%',
     height: 50,
     borderWidth: 2,
-    borderColor: '#c7da30',
+    borderColor: '#c7da30',   
     borderRadius: 8,
     paddingHorizontal: 15,
     fontSize: 16,
@@ -243,15 +227,16 @@ const styles = StyleSheet.create({
   statusButton: {
     backgroundColor: '#c7da30',
     width: '100%',
-    padding: 15,
-    borderRadius: 8,
+    padding: 10,
+    borderRadius: 48,
+    justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 10,
   },
 
   statusButtonText: {
     color: '#000',
-    fontWeight: 'bold',
+    fontWeight: 'medium',
     fontSize: 14,
   },
 
@@ -259,123 +244,68 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     marginVertical: 10,
-    textAlign: 'center',
     color: '#333',
   },
 
   statusContainer: {
+    width: '100%',
+    maxHeight: 300,   // Scrollable results
     marginTop: 10,
+    flexGrow: 0,
   },
+
   caseItem: {
+    backgroundColor: '#f9f9f9',
     padding: 15,
     borderRadius: 8,
-    borderWidth: 2,
-    borderColor: '#c7da30',
+    borderWidth: 1,
+    borderColor: '#eee',
+    marginBottom: 10,
   },
 
   caseHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 5,
   },
 
-  caseNumber: {
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-
-  caseValue: {
-    fontWeight: '500',
-    color: '#333',
-  },
-
-  statusWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
+  caseNumber: { fontSize: 16, fontWeight: 'bold' },
 
   statusBadge: {
-    backgroundColor: '#c7da30',
-    paddingHorizontal: 12,
+    color: 'white',
+    paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 999,
-    fontSize: 13,
-    marginLeft: 6,
-
-  },
-
-  detail: {
-    fontSize: 14,
-    color: 'black',
-    marginBottom: 4,
+    borderRadius: 12,
+    fontSize: 12,
     fontWeight: 'bold',
   },
 
-  reasonBox: {
-    backgroundColor: '#f1fbdc',
-    borderRadius: 8,
-    padding: 10,
-    marginTop: 10,
-    marginBottom: 10,
-  },
+  caseDate: { fontSize: 14, color: '#666', marginBottom: 5 },
 
-  reasonTitle: {
-    fontWeight: 'bold',
-    color: '#889e0c',
-    marginBottom: 4,
-  },
-
-  reasonText: {
-    fontStyle: 'italic',
-    color: '#556000',
-  },
-
-  description: {
-    marginTop: 5,
-    fontSize: 14,
-    color: '#333',
-    borderTopWidth: 1,
-    borderColor: '#eee',
-    paddingTop: 10,
-  },
-
-  descriptionLabel: {
-    fontWeight: 'bold',
-  },
-
-  editButton: {
-    marginTop: 20,
-    backgroundColor: '#c7da30',
-    paddingVertical: 12,
-    paddingHorizontal: 25,
-    borderRadius: 30,
-    alignSelf: 'flex-start',
-  },
-caseImage: {
-  width: '100%',
-  height: 200,
-  borderRadius: 10,
-  marginVertical: 10,
-  borderWidth: 2,
-  borderColor: '#c7da30',
-},
-
-  editButtonText: {
-    color: '#333',
-    fontSize: 14,
-  },
+  detail: { fontSize: 14, color: '#333', marginBottom: 3 },
+  detailLabel: { fontWeight: 'bold' },
 
   button: {
     backgroundColor: '#c7da30',
     padding: 15,
     borderRadius: 40,
     marginTop: 20,
+    
   },
 
-  buttonText: {
-    color: 'black',
-    fontSize: 16,
+  buttonText: { color: 'black', fontSize: 16 },
+
+  editButton: {
+    marginTop: 15,
+    backgroundColor: '#c7da30',
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
   },
+
+  editButtonText: { color: '#fff', fontWeight: 'bold' },
 });
+
+
+

@@ -1,33 +1,31 @@
-import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-  Alert,
-  Image,
-  Modal,
-  Dimensions,
-  Platform
-} from "react-native";
+import { MaterialIcons } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
 import axios from "axios";
-import { useLocalSearchParams, useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
-import { MaterialIcons } from "@expo/vector-icons";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
+import {
+  Alert,
+  Dimensions,
+  Image,
+  Modal,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
+} from "react-native";
 
 const { width } = Dimensions.get('window');
 
 export default function EditReportScreen() {
   const BACKEND_URL =
   Platform.OS === "web"
-    ? "http://localhost:3000" // ✅ Web browser
-    : Platform.OS === "android"
-    ? "http://10.0.2.2:3000" // ✅ Android emulator
-    : "http://192.168.2.116:3000"; // ✅ iOS simulator (Mac) or physical device
-  
+    ? "http://localhost:3000"     // ✅ Web browser
+    : "http://192.168.2.116:3000" // ✅ iOS sim or Physical Device
+
   const { case_number } = useLocalSearchParams();
   const router = useRouter();
 

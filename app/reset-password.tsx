@@ -1,16 +1,14 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Alert, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
+import React, { useState } from 'react';
+import { ActivityIndicator, Alert, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 export default function ResetPassword() {
 
- const BACKEND_URL =
+  const BACKEND_URL =
   Platform.OS === "web"
-    ? "http://localhost:3000" // ✅ Web browser
-    : Platform.OS === "android"
-    ? "http://10.0.2.2:3000" // ✅ Android emulator
-    : "http://192.168.2.116:3000"; // ✅ iOS simulator (Mac) or physical device
-  
+    ? "http://localhost:3000"     // ✅ Web browser
+    : "http://192.168.2.116:3000" // ✅ iOS sim or Physical Device
+
 
   const router = useRouter();
   const [code, setCode] = useState('');

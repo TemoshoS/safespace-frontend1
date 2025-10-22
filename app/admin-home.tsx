@@ -1,24 +1,24 @@
-import React, { useEffect, useState, useRef } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  LayoutAnimation,
-  UIManager,
-  Platform,
-  Modal,
-  Image,
-  ScrollView,
-  Alert,
-  TextInput,
-  Dimensions,
-} from 'react-native';
-import { Picker } from '@react-native-picker/picker';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useRouter, useLocalSearchParams } from 'expo-router';
-import { exportPDF } from '../utils/exportPDF';
-import { styles } from '../styles/adminHomeStyles';
 import { MaterialIcons } from "@expo/vector-icons";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Picker } from '@react-native-picker/picker';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  Dimensions,
+  Image,
+  Modal,
+  Platform,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  UIManager,
+  View,
+} from 'react-native';
+import { styles } from '../styles/adminHomeStyles';
+import { exportPDF } from '../utils/exportPDF';
 
 const { width } = Dimensions.get("window");
 
@@ -26,23 +26,20 @@ if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-
 export default function AdminHome() {
   const BACKEND_URL =
-  Platform.OS === "web"
-    ? "http://localhost:3000"     // ✅ Web browser
-    : Platform.OS === "android"
-    ? "http://10.0.2.2:3000"      // ✅ Android emulator
-    : "http://192.168.2.116:3000" // ✅ iOS sim or Physical Device
+    Platform.OS === "web"
+      ? "http://localhost:3000"
+      : "http://192.168.2.116:3000";
 
   const [reports, setReports] = useState<any[]>([]);
-  const [expanded, setExpanded] = useState<number | null>(null);
   const [adminName, setAdminName] = useState('');
   const [newCount, setNewCount] = useState(0);
   const [modalVisible, setModalVisible] = useState(false);
   const [modalImage, setModalImage] = useState('');
   const [notifOpen, setNotifOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const [justificationModalVisible, setJustificationModalVisible] = useState(false);
   const [selectedReportId, setSelectedReportId] = useState<number | null>(null);
@@ -97,6 +94,8 @@ export default function AdminHome() {
     const token = await AsyncStorage.getItem('adminToken');
     if (!token) return Alert.alert('Error', 'No token found');
 
+    setLoading(true); // START LOADING
+
     try {
       const response = await fetch(`${BACKEND_URL}/abuse_reports/${id}`, {
         method: 'PATCH',
@@ -112,77 +111,92 @@ export default function AdminHome() {
           r.id === id ? { ...r, status: newStatus, reason: reason } : r
         );
         setReports(updatedReports);
+
+        setJustificationModalVisible(false);
+        setStatusChangeReason('');
+        setSelectedNewStatus('');
         Alert.alert('Status Updated', `Report #${selectedCaseNumber} updated to "${newStatus}"`);
-      }
-      else {
+      } else {
         Alert.alert('Error', 'Failed to update status');
       }
     } catch (err) {
       Alert.alert('Error', 'Something went wrong');
+    } finally {
+      setLoading(false); // STOP LOADING
     }
   };
 
-  const toggleExpand = (id: number) => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    setExpanded(expanded === id ? null : id);
-  };
 
   const openAttachment = (path: string) => {
     setModalImage(`${BACKEND_URL}${path}`);
     setModalVisible(true);
   };
 
-  const renderItem = ({ item }: { item: any }) => {
-    const isExpanded = expanded === item.id;
-
+  const renderCard = (item: any) => {
     return (
-      <TouchableOpacity onPress={() => toggleExpand(item.id)} activeOpacity={0.8}>
-        <View style={[styles.row, isExpanded && styles.expandedRow]}>
-          <Text style={[styles.cell, { flex: 1 }]}>{item.case_number}</Text>
-          <Text style={[styles.cell, { flex: 2 }]}>{item.reporter_email}</Text>
-          <View style={[styles.cell, { flex: 1, padding: 0 }]}>
-            <Picker
-              selectedValue={item.status}
-              onValueChange={(value: string) => {
-                if (value !== item.status) {
-                  setSelectedReportId(item.id);
-                  setCurrentStatus(item.status);
-                  setSelectedNewStatus(value);
-                  setSelectedCaseNumber(item.case_number);
-                  setJustificationModalVisible(true);
-                }
-              }}
-              style={styles.picker}
-            >
-              <Picker.Item label="Pending" value="Pending" />
-              <Picker.Item label="In Progress" value="In Progress" />
-              <Picker.Item label="Escalated" value="Escalated" />
-              <Picker.Item label="Resolved" value="Resolved" />
-              <Picker.Item label="Unresolved" value="Unresolved" />
-              <Picker.Item label="False-report" value="False-report" />
-            </Picker>
+      <View key={item.id} style={styles.cardContainer}>
+        <Text style={styles.cardTitle}>Case #{item.case_number}</Text>
+        <Text style={styles.detail}>Email: {item.reporter_email}</Text>
+
+        <View style={{ marginVertical: 4 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 4 }}>
+
+            <Text style={styles.detail}>Status:</Text>
+
+            <View style={{
+              width: 170,
+              borderWidth: 1,
+              borderColor: '#ccc',
+              borderRadius: 8,
+              overflow: 'hidden',
+              paddingHorizontal: 8,
+            }}>
+              <Picker
+                selectedValue={item.status}
+                onValueChange={(value: string) => {
+                  if (value !== item.status) {
+                    setSelectedReportId(item.id);
+                    setCurrentStatus(item.status);
+                    setSelectedNewStatus(value);
+                    setSelectedCaseNumber(item.case_number);
+                    setJustificationModalVisible(true);
+                  }
+                }}
+                style={{
+                  height: 50,
+                  width: '100%',
+                  color: '#000',
+                }}
+                dropdownIconColor="#000"
+              >
+                <Picker.Item label="Pending" value="Pending" />
+                <Picker.Item label="In Progress" value="In Progress" />
+                <Picker.Item label="Escalated" value="Escalated" />
+                <Picker.Item label="Resolved" value="Resolved" />
+                <Picker.Item label="Unresolved" value="Unresolved" />
+                <Picker.Item label="False-report" value="False-report" />
+              </Picker>
+            </View>
           </View>
         </View>
 
-        {isExpanded && (
-          <View style={styles.detailsBox}>
-            <Text style={styles.detail}>Contact Number: {item.phone_number}</Text>
-            <Text style={styles.detail}>Abuse Type: {item.abuse_type}</Text>
-            <Text style={styles.detail}>Subtype: {item.subtype}</Text>
-            <Text style={styles.detail}>Description: {item.description}</Text>
-            {item.image_path && item.image_path !== 'N/A' ? (
-              <TouchableOpacity
-                style={styles.viewButton}
-                onPress={() => openAttachment(item.image_path)}
-              >
-                <Text style={styles.viewButtonText}>View Attachment</Text>
-              </TouchableOpacity>
-            ) : (
-              <Text style={styles.detail}>Attachment: N/A</Text>
-            )}
-          </View>
+
+        <Text style={styles.detail}>Contact Number: {item.phone_number}</Text>
+        <Text style={styles.detail}>Abuse Type: {item.abuse_type}</Text>
+        <Text style={styles.detail}>Subtype: {item.subtype}</Text>
+        <Text style={styles.detail}>Description: {item.description}</Text>
+
+        {item.image_path && item.image_path !== 'N/A' ? (
+          <TouchableOpacity
+            style={styles.viewButton}
+            onPress={() => openAttachment(item.image_path)}
+          >
+            <Text style={styles.viewButtonText}>View Attachment</Text>
+          </TouchableOpacity>
+        ) : (
+          <Text style={styles.detail}>Attachment: N/A</Text>
         )}
-      </TouchableOpacity>
+      </View>
     );
   };
 
@@ -231,14 +245,9 @@ export default function AdminHome() {
       {/* Title */}
       <Text style={styles.title}>{filter ? `${filter} Reports` : 'Abuse Reports'}</Text>
 
-      {/* Table */}
+      {/* Cards */}
       <ScrollView style={{ marginHorizontal: 10 }} contentContainerStyle={{ paddingBottom: 20 }}>
-        <View style={[styles.row, styles.header]}>
-          <Text style={[styles.cell, { flex: 1, fontWeight: 'bold' }]}>Case Number</Text>
-          <Text style={[styles.cell, { flex: 2, fontWeight: 'bold' }]}>Email</Text>
-          <Text style={[styles.cell, { flex: 1, fontWeight: 'bold' }]}>Status</Text>
-        </View>
-        {reports.map((item) => renderItem({ item }))}
+        {reports.map(renderCard)}
       </ScrollView>
 
       {/* Image Modal */}
@@ -283,8 +292,8 @@ export default function AdminHome() {
                 <Text>Cancel</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity
-                style={styles.modalBtn}
+              <TouchableOpacity style={[styles.modalBtn, { opacity: loading ? 0.6 : 1 }]}
+                disabled={loading}
                 onPress={() => {
                   if (!statusChangeReason.trim()) {
                     Alert.alert('Error', 'Please provide a justification.');
@@ -293,13 +302,15 @@ export default function AdminHome() {
                   if (selectedReportId && selectedNewStatus) {
                     updateStatus(selectedReportId, selectedNewStatus, statusChangeReason);
                   }
-                  setJustificationModalVisible(false);
-                  setStatusChangeReason('');
-                  setSelectedNewStatus('');
                 }}
               >
-                <Text>Confirm & Update</Text>
+                {loading ? (
+                  <ActivityIndicator size="small" color="#000" />
+                ) : (
+                  <Text>Confirm & Update</Text>
+                )}
               </TouchableOpacity>
+
             </View>
           </View>
         </View>

@@ -1,20 +1,17 @@
-import React, { useEffect, useState, useRef } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  Alert,
-  Modal,
-  Platform,
-  UIManager,
-  Image,
-} from "react-native";
+import { MaterialIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
-import { MaterialIcons } from "@expo/vector-icons";
-import { Picker } from "@react-native-picker/picker";
-import axios from "axios";
+import React, { useEffect, useRef, useState } from "react";
+import {
+  Alert,
+  Image,
+  Platform,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  UIManager,
+  View
+} from "react-native";
 import { styles } from "../styles/adminHomeStyles";
 import { exportDashboardPDF } from "../utils/exportDashboardPDF";
 
@@ -26,13 +23,10 @@ if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental
 
 export default function AdminDashboard() {
 
-   const BACKEND_URL =
-        Platform.OS === "web"
-          ? "http://localhost:3000" // ✅ Web browser
-          : Platform.OS === "android"
-          ? "http://10.0.2.2:3000" // ✅ Android emulator
-          : "http://192.168.2.116:3000"; // ✅ iOS simulator (Mac) or physical device
-        
+  const BACKEND_URL =
+  Platform.OS === "web"
+    ? "http://localhost:3000"
+    : "http://192.168.2.116:3000";
 
   const [reports, setReports] = useState<any[]>([]);
   const [adminName, setAdminName] = useState("");

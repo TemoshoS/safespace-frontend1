@@ -1,17 +1,16 @@
+import axios from 'axios';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Image,
   Animated,
   Dimensions,
-  Platform
+  Image,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
-import axios from 'axios';
-import { useRouter, useLocalSearchParams } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
 
 const { width, height } = Dimensions.get('window');
 
@@ -19,8 +18,6 @@ export default function AbuseTypesScreen() {
   const BACKEND_URL =
   Platform.OS === "web"
     ? "http://localhost:3000"     // ✅ Web browser
-    : Platform.OS === "android"
-    ? "http://10.0.2.2:3000"      // ✅ Android emulator
     : "http://192.168.2.116:3000" // ✅ iOS sim or Physical Device
 
   const [abuseTypes, setAbuseTypes] = useState<any[]>([]);
@@ -81,9 +78,7 @@ export default function AbuseTypesScreen() {
           />
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={toggleMenu}>
-          <Ionicons name="menu" size={30} color="#c7da30" />
-        </TouchableOpacity>
+       
       </View>
 
       {/* Centered Content */}

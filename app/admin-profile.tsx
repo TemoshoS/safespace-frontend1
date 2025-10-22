@@ -1,28 +1,29 @@
+import { MaterialIcons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as ImagePicker from "expo-image-picker";
+import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-  View,
-  Text,
-  TextInput,
-  StyleSheet,
-  TouchableOpacity,
+  ActivityIndicator,
   Alert,
-  ScrollView,
   Image,
   Platform,
-  ActivityIndicator,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useRouter } from "expo-router";
-import * as ImagePicker from "expo-image-picker";
-import { MaterialIcons } from "@expo/vector-icons";
+
+const IMAGE_KEY = "adminProfileImage"; // Key for AsyncStorage
 
 export default function AdminProfile() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [imageUri, setImageUri] = useState<string | null>(null);
-  const [serverImage, setServerImage] = useState<string | null>(null);
-  const [selectedFile, setSelectedFile] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -32,14 +33,8 @@ export default function AdminProfile() {
   const [showPassword, setShowPassword] = useState(false);
 
   const router = useRouter();
-  const BACKEND_URL =
-  Platform.OS === "web"
-    ? "http://localhost:3000"     // ✅ Web browser
-    : Platform.OS === "android"
-    ? "http://10.0.2.2:3000"      // ✅ Android emulator
-    : "http://192.168.2.116:3000" // ✅ iOS sim or Physical Device
 
-
+  // Load profile from backend + local image
   useEffect(() => {
     const loadProfile = async () => {
       const token = await AsyncStorage.getItem("adminToken");
@@ -47,7 +42,7 @@ export default function AdminProfile() {
 
       try {
         setLoading(true);
-        const res = await fetch(`${BACKEND_URL}/admin-profile`, {
+        const res = await fetch("http://192.168.2.116:3000/admin-profile", {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
@@ -55,16 +50,14 @@ export default function AdminProfile() {
           setName(data.name || "");
           setEmail(data.email || "");
           setUsername(data.username || "");
-          if (data.profile_image) {
-            setServerImage(
-              Platform.OS === "web"
-                ? `${BACKEND_URL}${data.profile_image}`
-                : data.profile_image
-            );
-          }
+          setPhoneNumber(data.phoneNumber || "");
         } else {
           Alert.alert("Error", data.message || "Failed to fetch profile");
         }
+
+        // Load saved image from AsyncStorage
+        const savedImage = await AsyncStorage.getItem(IMAGE_KEY);
+        if (savedImage) setImageUri(savedImage);
       } catch (err) {
         Alert.alert("Error", "Could not load profile");
       } finally {
@@ -74,21 +67,8 @@ export default function AdminProfile() {
     loadProfile();
   }, []);
 
+  // Pick image from gallery
   const pickImage = async () => {
-    if (Platform.OS === "web") {
-      const input = document.createElement("input");
-      input.type = "file";
-      input.accept = "image/*";
-      input.onchange = () => {
-        if (input.files && input.files[0]) {
-          setImageUri(URL.createObjectURL(input.files[0]));
-          setSelectedFile(input.files[0]);
-        }
-      };
-      input.click();
-      return;
-    }
-
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted)
       return Alert.alert("Permission required", "Access to gallery needed.");
@@ -99,67 +79,91 @@ export default function AdminProfile() {
       quality: 0.7,
     });
 
-    if (!result.canceled) {
-      setImageUri(result.assets[0].uri);
-      setSelectedFile(result.assets[0]);
+    if (!result.canceled && result.assets.length > 0) {
+      const uri = result.assets[0].uri;
+      setImageUri(uri);
+      await AsyncStorage.setItem(IMAGE_KEY, uri); // Save locally
     }
   };
+
+  // Logout
   const handleLogout = async () => {
-    await AsyncStorage.multiRemove(['adminToken', 'adminUsername']);
-    Alert.alert('Logged out', 'You have been logged out');
-    router.push('/');
+    await AsyncStorage.multiRemove(["adminToken", "adminUsername"]);
+    Alert.alert("Logged out", "You have been logged out");
+    router.push("/");
   };
 
+  // Email & phone validation
+  const isValidEmail = (email: string) => {
+    const trimmed = email.trim().toLowerCase();
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/;
+    return emailRegex.test(trimmed);
+  };
+  const isValidPhoneNumber = (phone: string) => /^[0-9]{10}$/.test(phone);
+
+  const handleEmailChange = (text: string) => setEmail(text.trim());
+
+  // Save profile (text fields + password)
   const handleSave = async () => {
+    const trimmedName = name.trim();
+    const trimmedEmail = email.trim();
+    const trimmedUsername = username.trim();
+    const trimmedPhone = phoneNumber.trim();
+
+    if (!trimmedEmail || !isValidEmail(trimmedEmail)) {
+      return Alert.alert(
+        "Error",
+        "Please enter a valid email address (e.g. username@gmail.com)"
+      );
+    }
+
+    if (trimmedPhone && !isValidPhoneNumber(trimmedPhone)) {
+      return Alert.alert(
+        "Error",
+        "Invalid phone number format. Use 10 digits, e.g., 0791234567"
+      );
+    }
+
+    if (newPassword || confirmPassword) {
+      if (!currentPassword)
+        return Alert.alert("Error", "Please enter your current password");
+      if (newPassword !== confirmPassword)
+        return Alert.alert("Error", "Passwords do not match");
+    }
+
     const token = await AsyncStorage.getItem("adminToken");
     if (!token) return Alert.alert("Error", "No token found");
 
-    const formData = new FormData();
-    formData.append("name", name);
-    formData.append("email", email);
-    formData.append("username", username);
+    const payload: any = {
+      name: trimmedName,
+      email: trimmedEmail,
+      username: trimmedUsername,
+      phoneNumber: trimmedPhone,
+    };
 
-    if (selectedFile) {
-      if (Platform.OS === "web") {
-        formData.append("profile_image", selectedFile, selectedFile.name);
-      } else {
-        const uri = selectedFile.uri;
-        const filename = uri.split("/").pop()!;
-        const type = selectedFile.type || `image/${filename.split(".").pop()}`;
-        formData.append("profile_image", { uri, name: filename, type } as any);
-      }
-    }
-
-    if (currentPassword && newPassword && confirmPassword) {
-      if (newPassword !== confirmPassword) {
-        return Alert.alert("Error", "New passwords do not match");
-      }
-      formData.append("currentPassword", currentPassword);
-      formData.append("newPassword", newPassword);
+    if (currentPassword && newPassword) {
+      payload.currentPassword = currentPassword;
+      payload.newPassword = newPassword;
     }
 
     try {
       setLoading(true);
-      const res = await fetch(`${BACKEND_URL}/admin-profile`, {
+      const res = await fetch("http://192.168.2.116:3000/admin-profile", {
         method: "PUT",
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData,
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
       });
-      const data = await res.json();
 
+      const data = await res.json();
       if (res.ok) {
         setName(data.name);
         setEmail(data.email);
         setUsername(data.username);
-        if (data.profile_image) {
-          setServerImage(
-            Platform.OS === "web"
-              ? `${BACKEND_URL}${data.profile_image}`
-              : data.profile_image
-          );
-        }
-        setImageUri(null);
-        setSelectedFile(null);
+        setPhoneNumber(data.phoneNumber || "");
+
         setCurrentPassword("");
         setNewPassword("");
         setConfirmPassword("");
@@ -175,11 +179,9 @@ export default function AdminProfile() {
     }
   };
 
-  const displayImage = imageUri ? imageUri : serverImage;
-
   return (
     <View style={styles.screen}>
-      {/* Header with Logo + Menu */}
+      {/* Header */}
       <View style={styles.header}>
         <Image
           source={require("../assets/images/Logo.jpg")}
@@ -221,15 +223,15 @@ export default function AdminProfile() {
         <Text style={styles.title}>My Profile</Text>
         {loading && <ActivityIndicator size="large" color="#c7da30" />}
 
+        {/* Profile Image */}
         <View style={styles.profileSection}>
-          <TouchableOpacity onPress={pickImage} style={styles.imageContainer}>
-            {displayImage ? (
-              <Image source={{ uri: displayImage }} style={styles.image} />
+          <View style={styles.imageContainer}>
+            {imageUri ? (
+              <Image source={{ uri: imageUri }} style={styles.image} />
             ) : (
               <Text style={styles.imagePlaceholder}>No Image</Text>
             )}
-          </TouchableOpacity>
-
+          </View>
           <View style={styles.profileRight}>
             <Text style={styles.updateText}>Update Profile Picture</Text>
             <TouchableOpacity style={styles.chooseBtn} onPress={pickImage}>
@@ -238,6 +240,7 @@ export default function AdminProfile() {
           </View>
         </View>
 
+        {/* Profile Fields */}
         <Text style={styles.label}>Full Name</Text>
         <TextInput style={styles.input} value={name} onChangeText={setName} />
 
@@ -245,12 +248,21 @@ export default function AdminProfile() {
         <TextInput
           style={styles.input}
           value={email}
-          onChangeText={setEmail}
+          onChangeText={handleEmailChange}
           keyboardType="email-address"
+          autoCapitalize="none"
         />
 
         <Text style={styles.label}>Username</Text>
         <TextInput style={styles.input} value={username} onChangeText={setUsername} />
+
+        <Text style={styles.label}>Phone Number</Text>
+        <TextInput
+          style={styles.input}
+          value={phoneNumber}
+          onChangeText={setPhoneNumber}
+          keyboardType="number-pad"
+        />
 
         <Text style={styles.updatePassword}>Update Password</Text>
 
@@ -287,7 +299,11 @@ export default function AdminProfile() {
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.saveBtn} onPress={handleSave}>
+        <TouchableOpacity
+          style={[styles.saveBtn, loading && { opacity: 0.6 }]}
+          onPress={handleSave}
+          disabled={loading}
+        >
           <Text style={styles.saveText}>Update</Text>
         </TouchableOpacity>
       </ScrollView>
@@ -295,12 +311,9 @@ export default function AdminProfile() {
   );
 }
 
+// Styles remain same as previous version
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: "#f9fafc",
-    paddingTop: Platform.OS === "ios" ? 80 : 60,
-  },
+  screen: { flex: 1, backgroundColor: "#f9fafc", paddingTop: Platform.OS === "ios" ? 80 : 60 },
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -336,10 +349,10 @@ const styles = StyleSheet.create({
   label: { fontSize: 14, fontWeight: "700", marginTop: 12, marginBottom: 4, color: "#333" },
   updatePassword: { fontWeight: "700", marginBottom: 10, marginTop: 10, textAlign: "center" },
   input: { borderWidth: 2, borderColor: "#c7da30", borderRadius: 8, padding: 12, fontSize: 14, backgroundColor: "#fff" },
-  saveBtn: { backgroundColor: "#c7da30", paddingVertical: 14,  alignSelf: "center", borderRadius: 30, marginTop: 10, alignItems: "center" , width:"50%"},
-  saveText: { color: "#464545ff", fontSize: 16},
-  imageContainer: { width: 120, height: 120, borderRadius: 60, backgroundColor: "#eee", justifyContent: "center", alignItems: "center", marginBottom: 20 },
-  image: { width: 120, height: 120, borderRadius: 60 },
+  saveBtn: { backgroundColor: "#c7da30", paddingVertical: 14, alignSelf: "center", borderRadius: 30, marginTop: 10, alignItems: "center", width: "50%" },
+  saveText: { color: "#464545ff", fontSize: 16 },
+  imageContainer: { width: 120, height: 120, borderRadius: 60, backgroundColor: "#eee", justifyContent: "center", alignItems: "center", marginBottom: 20, overflow: "hidden" },
+  image: { width: "100%", height: "100%", borderRadius: 60 },
   imagePlaceholder: { color: "#888" },
   profileSection: { flexDirection: "row", alignItems: "center", justifyContent: "center", marginBottom: 30, marginTop: 10 },
   profileRight: { marginLeft: 20, alignItems: "flex-start" },

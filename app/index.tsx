@@ -1,27 +1,22 @@
-import React, { useRef } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Image,
-  ScrollView,
-  Platform,
-} from "react-native";
+import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
-import ToggleMenu from "./toggle-menu";
+import React from "react";
+import {
+  Image,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 export default function Index() {
   const router = useRouter();
 
   return (
-    <View style={{ flex: 1 }}>
-      {/* Sticky Menu */}
-      <View style={styles.stickyMenu}>
-        <ToggleMenu />
-      </View>
+    <View style={{ flex: 1, backgroundColor: "#fff" }}>
 
       {/* Main Scrollable Content */}
       <ScrollView
@@ -37,12 +32,14 @@ export default function Index() {
           />
           <Text style={styles.heroTitle}>Report Abuse</Text>
           <Text style={styles.heroSubtitle}>Safely and Anonymously</Text>
+
           <Image
             source={require("../assets/images/schoolgirls.jpeg")}
             style={styles.heroImage}
-            resizeMode="contain"
+            resizeMode="cover"
           />
 
+          {/* Action Buttons */}
           <View style={styles.buttonsContainer}>
             <LinearGradient
               colors={["#c7da30", "#d7e47a"]}
@@ -50,7 +47,7 @@ export default function Index() {
             >
               <TouchableOpacity
                 style={styles.buttonContent}
-                activeOpacity={0.7}
+                activeOpacity={0.8}
                 onPress={() => router.push("/report-screen")}
               >
                 <FontAwesome5
@@ -62,19 +59,7 @@ export default function Index() {
               </TouchableOpacity>
             </LinearGradient>
 
-            <LinearGradient
-              colors={["#c7da30", "#d7e47a"]}
-              style={styles.gradientButton}
-            >
-              <TouchableOpacity
-                style={styles.buttonContent}
-                activeOpacity={0.7}
-                onPress={() => router.push("/admin-login")}
-              >
-                <FontAwesome5 name="user-shield" size={18} color="#545454" />
-                <Text style={styles.buttonText}>Administrator</Text>
-              </TouchableOpacity>
-            </LinearGradient>
+           
 
             <LinearGradient
               colors={["#c7da30", "#d7e47a"]}
@@ -82,7 +67,7 @@ export default function Index() {
             >
               <TouchableOpacity
                 style={styles.buttonContent}
-                activeOpacity={0.7}
+                activeOpacity={0.8}
                 onPress={() => router.push("/check-status")}
               >
                 <MaterialIcons
@@ -96,8 +81,7 @@ export default function Index() {
           </View>
         </View>
 
-        {/* Footer */}
-        <Text style={styles.footer}>© 2025 Safe Space. All rights reserved.</Text>
+        
       </ScrollView>
     </View>
   );
@@ -109,7 +93,7 @@ const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     backgroundColor: "#FFFFFF",
-    paddingBottom: 40,
+    paddingBottom: 60,
   },
   stickyMenu: {
     position: "absolute",
@@ -128,13 +112,9 @@ const styles = StyleSheet.create({
     width: 120,
     height: 120,
     marginBottom: 20,
-    shadowColor: "#000",
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 2 },
   },
   heroTitle: {
-    fontSize: 32,
+    fontSize: 34,
     fontWeight: "bold",
     color: "#c7da30",
     textAlign: "center",
@@ -146,13 +126,10 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   heroImage: {
-    width: 280,
-    height: 280,
+    width: "90%",
+    height: 250,
+    borderRadius: 10,
     marginBottom: 30,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 3 },
   },
   buttonsContainer: {
     width: "100%",
@@ -160,7 +137,7 @@ const styles = StyleSheet.create({
   },
   gradientButton: {
     width: "90%",
-    borderRadius: 25,
+    borderRadius: 30,
     marginVertical: 8,
     shadowColor: "#000",
     shadowOpacity: 0.1,
@@ -174,7 +151,7 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
   },
   buttonText: {
-    fontSize: 14,
+    fontSize: 15,
     color: "#545454",
     fontFamily:
       Platform.OS === "web"
@@ -182,10 +159,65 @@ const styles = StyleSheet.create({
         : "System",
     marginLeft: 10,
   },
-  footer: {
-    fontSize: 13,
-    color: "#777",
-    textAlign: "center",
+  aboutSection: {
+    flexDirection: "column",
+    alignItems: "center",
+    paddingHorizontal: 20,
     marginTop: 40,
+  },
+  aboutImage: {
+    width: "90%",
+    height: 200,
+    borderRadius: 10,
+    marginBottom: 20,
+  },
+  aboutTextContainer: {
+    alignItems: "center",
+  },
+  aboutTitle: {
+    fontSize: 24,
+    fontWeight: "900",
+    color: "#545454",
+    marginBottom: 10,
+    textAlign: "center",
+  },
+  aboutParagraph: {
+    fontSize: 16,
+    color: "#000",
+    textAlign: "center",
+    marginBottom: 20,
+    lineHeight: 22,
+  },
+  aboutSubtitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#545454",
+    textAlign: "center",
+    marginBottom: 10,
+  },
+  aboutList: {
+    fontSize: 15,
+    color: "#000",
+    textAlign: "center",
+    marginBottom: 40,
+  },
+  footer: {
+    backgroundColor: "#808080",
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 25,
+    paddingHorizontal: 15,
+  },
+  footerText: {
+    color: "#fff",
+    fontSize: 15,
+    textAlign: "center",
+    marginBottom: 5,
+  },
+  copyright: {
+    color: "#fff",
+    fontSize: 14,
+    textAlign: "center",
   },
 });

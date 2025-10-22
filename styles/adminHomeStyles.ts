@@ -1,4 +1,4 @@
-import { StyleSheet, Dimensions } from 'react-native';
+import { Dimensions, StyleSheet } from 'react-native';
 
 const { width } = Dimensions.get("window");
 
@@ -96,38 +96,42 @@ export const styles = StyleSheet.create({
 
 
   title: { fontSize: 24, marginVertical: 16, textAlign: 'center', fontWeight: 'bold' },
-  header: {
-    backgroundColor: "#c7da30",
-    paddingVertical: 10,
-    color: "#fff",
+  cardContainer: {
+    backgroundColor: '#f9f9f9',
+    borderWidth: 1,
+    borderColor: '#c7da30',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 12,
+    elevation: 3,
   },
-
-
-  row: {
-    flexDirection: "row",
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderColor: "#ccc",
-    backgroundColor: "#dadada",
+  
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
-  expandedRow: { backgroundColor: "#6c6c6c" },
-  cell: {
-    paddingHorizontal: 8,
-    justifyContent: "center",
-    color: "black",
+  
+  cardTitle: { fontSize: 16, fontWeight: 'bold', color: '#333', flex: 1 },
+  
+  cardEmail: { fontSize: 14, color: '#666', flex: 1 },
+  
+  cardDetails: {
+    marginTop: 10,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#c7da30',
   },
-  detailsBox: {
-    backgroundColor: "#f1fdf9",
-    padding: 10,
-    paddingHorizontal: 16,
-  },
-  detail: { fontSize: 14, marginVertical: 2, color: "#333" },
-
+ 
+  detail: { fontSize: 14, marginVertical: 2, color: '#333' },
   picker: {
+    width: '100%',
     height: 40,
-    width: "100%",
-    color: "#000",
+    color: '#000',
+    fontSize: 16, // makes text fully visible
   },
+  
+  
 
   viewButton: {
     backgroundColor: '#c7da30',
