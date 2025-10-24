@@ -1,9 +1,8 @@
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
-import DropDownPicker from 'react-native-dropdown-picker';
-import axios from 'axios';
-import * as ImagePicker from 'expo-image-picker';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import axios from "axios";
+import * as ImagePicker from "expo-image-picker";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect, useState } from "react";
 import {
   Alert,
   Animated,
@@ -17,10 +16,11 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View
-} from 'react-native';
+  View,
+} from "react-native";
+import DropDownPicker from "react-native-dropdown-picker";
 
-const { width } = Dimensions.get('window');
+const { width } = Dimensions.get("window");
 
 export default function CreateReportScreen() {
   const BACKEND_URL =
@@ -32,24 +32,27 @@ export default function CreateReportScreen() {
   const router = useRouter();
 
   const [subtypes, setSubtypes] = useState<any[]>([]);
-  const [selectedSubtype, setSelectedSubtype] = useState('');
+  const [selectedSubtype, setSelectedSubtype] = useState("");
   const [subtypeOpen, setSubtypeOpen] = useState(false);
   const [subtypeItems, setSubtypeItems] = useState<any[]>([]);
 
-  const [fullName, setFullName] = useState('');
-  const [description, setDescription] = useState('');
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
-  const [age, setAge] = useState('');
-  const [location, setLocation] = useState('');
-  const [grade, setGrade] = useState('');
+  const [fullName, setFullName] = useState("");
+  const [description, setDescription] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [age, setAge] = useState("");
+  const [location, setLocation] = useState("");
+  const [grade, setGrade] = useState("");
   const [gradeOpen, setGradeOpen] = useState(false);
   const [gradeItems, setGradeItems] = useState<any[]>([
-    { label: 'Creche', value: 'Creche' },
-    { label: 'Grade R', value: 'Grade R' },
-    ...Array.from({ length: 12 }, (_, i) => ({ label: `Grade ${i + 1}`, value: `Grade ${i + 1}` })),
+    { label: "Creche", value: "Creche" },
+    { label: "Grade R", value: "Grade R" },
+    ...Array.from({ length: 12 }, (_, i) => ({
+      label: `Grade ${i + 1}`,
+      value: `Grade ${i + 1}`,
+    })),
   ]);
-  const [school, setSchool] = useState('');
+  const [school, setSchool] = useState("");
   const [schoolSuggestions, setSchoolSuggestions] = useState<any[]>([]);
   const [image, setImage] = useState<any>(null);
   const [loading, setLoading] = useState(false);
@@ -57,26 +60,28 @@ export default function CreateReportScreen() {
   const [menuVisible, setMenuVisible] = useState(false);
   const slideAnim = useState(new Animated.Value(width))[0];
   const [successModalVisible, setSuccessModalVisible] = useState(false);
-  const [submittedCaseNumber, setSubmittedCaseNumber] = useState('');
+  const [submittedCaseNumber, setSubmittedCaseNumber] = useState("");
 
   // Fetch subtypes
   useEffect(() => {
     if (!abuseTypeId) return;
-    axios.get(`${BACKEND_URL}/reports/subtypes/${abuseTypeId}`)
-      .then(res => setSubtypes(res.data))
-      .catch(err => console.error('Error fetching subtypes:', err));
+    axios
+      .get(`${BACKEND_URL}/reports/subtypes/${abuseTypeId}`)
+      .then((res) => setSubtypes(res.data))
+      .catch((err) => console.error("Error fetching subtypes:", err));
   }, [abuseTypeId]);
 
   // Convert subtypes to dropdown items
   useEffect(() => {
-    setSubtypeItems(subtypes.map(s => ({ label: s.sub_type_name, value: String(s.id) })));
+    setSubtypeItems(
+      subtypes.map((s) => ({ label: s.sub_type_name, value: String(s.id) }))
+    );
   }, [subtypes]);
 
   useEffect(() => {
-    if (anonymous === 'yes') setIsAnonymous(true);
+    if (anonymous === "yes") setIsAnonymous(true);
     else setIsAnonymous(false);
   }, [anonymous]);
-
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -96,46 +101,48 @@ export default function CreateReportScreen() {
       const res = await axios.get(`${BACKEND_URL}/schools/search?q=${text}`);
       setSchoolSuggestions(res.data);
     } catch (err) {
-      console.error('Error fetching schools:', err);
+      console.error("Error fetching schools:", err);
     }
   };
 
   const handleSubmit = async () => {
-    const selectedSubtypeObj = subtypes.find(s => s.id === selectedSubtype);
-    const subtypeName = selectedSubtypeObj?.sub_type_name || '';
+    const selectedSubtypeObj = subtypes.find(
+      (s) => s.id === selectedSubtype
+    );
+    const subtypeName = selectedSubtypeObj?.sub_type_name || "";
 
     if (!selectedSubtype) {
-      Alert.alert('Error', 'Please select a subtype.');
+      Alert.alert("Error", "Please select a subtype.");
       return;
     }
     if (!email) {
-      Alert.alert('Error', 'Please enter your email.');
+      Alert.alert("Error", "Please enter your email.");
       return;
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      Alert.alert('Error', 'Please enter a valid email address.');
+      Alert.alert("Error", "Please enter a valid email address.");
       return;
     }
-    if (subtypeName === 'Other' && !description.trim()) {
-      Alert.alert('Error', 'Description is required when selecting "Other".');
+    if (subtypeName === "Other" && !description.trim()) {
+      Alert.alert("Error", 'Description is required when selecting "Other".');
       return;
     }
 
     setLoading(true);
     try {
       const formData = new FormData();
-      formData.append('abuse_type_id', abuseTypeId as string);
-      formData.append('subtype_id', selectedSubtype);
-      formData.append('description', description);
-      formData.append('reporter_email', email);
-      formData.append('phone_number', phone);
-      formData.append('full_name', fullName);
-      formData.append('age', age);
-      formData.append('location', location);
-      formData.append('school_name', school);
-      formData.append('status', 'Pending');
-      formData.append('is_anonymous', isAnonymous ? '1' : '0');
+      formData.append("abuse_type_id", abuseTypeId as string);
+      formData.append("subtype_id", selectedSubtype);
+      formData.append("description", description);
+      formData.append("reporter_email", email);
+      formData.append("phone_number", phone);
+      formData.append("full_name", fullName);
+      formData.append("age", age);
+      formData.append("location", location);
+      formData.append("school_name", school);
+      formData.append("status", "Pending");
+      formData.append("is_anonymous", isAnonymous ? "1" : "0");
 
       if (image) {
         try {
@@ -146,17 +153,17 @@ export default function CreateReportScreen() {
             reader.onloadend = () => resolve(reader.result);
             reader.readAsDataURL(blob);
           });
-          formData.append('image_base64', base64data as string);
-          formData.append('image_filename', `report-${Date.now()}.jpg`);
+          formData.append("image_base64", base64data as string);
+          formData.append("image_filename", `report-${Date.now()}.jpg`);
         } catch (base64Error) {
-          console.error('Error converting image to base64:', base64Error);
+          console.error("Error converting image to base64:", base64Error);
         }
       }
 
       const response = await fetch(`${BACKEND_URL}/reports`, {
-        method: 'POST',
+        method: "POST",
         body: formData,
-        headers: { 'Accept': 'application/json' },
+        headers: { Accept: "application/json" },
       });
 
       if (!response.ok) {
@@ -170,23 +177,24 @@ export default function CreateReportScreen() {
       setSuccessModalVisible(true);
 
       // Clear form
-      setSelectedSubtype('');
-      setDescription('');
-      setEmail('');
-      setPhone('');
-      setFullName('');
-      setAge('');
-      setLocation('');
-      setSchool('');
+      setSelectedSubtype("");
+      setDescription("");
+      setEmail("");
+      setPhone("");
+      setFullName("");
+      setAge("");
+      setLocation("");
+      setSchool("");
       setImage(null);
       setSchoolSuggestions([]);
     } catch (err: any) {
-      console.error('Submission error:', err);
-      Alert.alert('Error', 'Failed to create report.');
+      console.error("Submission error:", err);
+      Alert.alert("Error", "Failed to create report.");
     } finally {
       setLoading(false);
     }
   };
+
   const handleNavigate = (path: string) => {
     toggleMenu();
     setTimeout(() => {
@@ -212,11 +220,15 @@ export default function CreateReportScreen() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#fff' }}>
+    <View style={{ flex: 1, backgroundColor: "#fff" }}>
       {/* Top Bar */}
       <View style={styles.topBar}>
         <TouchableOpacity onPress={() => router.back()}>
-          <Image source={require('../assets/images/Logo.jpg')} style={styles.logo} resizeMode="contain" />
+          <Image
+            source={require("../assets/images/Logo.jpg")}
+            style={styles.logo}
+            resizeMode="contain"
+          />
         </TouchableOpacity>
         <TouchableOpacity onPress={toggleMenu}>
           <Ionicons name="menu" size={30} color="#c7da30" />
@@ -225,40 +237,60 @@ export default function CreateReportScreen() {
 
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.title}>REPORT CASE</Text>
-        {isAnonymous && <Text style={{ color: 'black', marginBottom: 10 }}>You are reporting anonymously</Text>}
+        {isAnonymous && (
+          <Text style={{ color: "black", marginBottom: 10 }}>
+            You are reporting anonymously
+          </Text>
+        )}
         <Text style={styles.abuseTypeText}>Abuse Type: {abuseTypeName}</Text>
 
         <View style={styles.formWrapper}>
-          {/* Subtype */}
-          <View style={styles.fullField}>
-            <Text style={styles.label}>Subtype</Text>
-            <DropDownPicker
-              open={subtypeOpen}
-              value={selectedSubtype}
-              items={subtypeItems}
-              setOpen={setSubtypeOpen}
-              setValue={setSelectedSubtype}
-              setItems={setSubtypeItems}
-              placeholder="Select Subtype"
-              style={styles.pickerWrapper}
-              dropDownContainerStyle={{ borderColor: '#c7da30' }}
-              zIndex={5000}
-            />
-          </View>
+          {/* Only show Subtype + Grade when school suggestions are closed */}
+          {schoolSuggestions.length === 0 && (
+            <>
+              {/* Subtype */}
+              <View style={styles.fullField}>
+                <Text style={styles.label}>Subtype</Text>
+                <DropDownPicker
+                  open={subtypeOpen}
+                  value={selectedSubtype}
+                  items={subtypeItems}
+                  setOpen={setSubtypeOpen}
+                  setValue={setSelectedSubtype}
+                  setItems={setSubtypeItems}
+                  placeholder="Select Subtype"
+                  style={styles.pickerWrapper}
+                  dropDownContainerStyle={{ borderColor: "#c7da30" }}
+                  zIndex={5000}
+                />
+              </View>
+            </>
+          )}
 
           {/* Age + School */}
           <View style={styles.row}>
             <View style={styles.field}>
               <Text style={styles.label}>Age</Text>
-              <TextInput style={styles.input} value={age} keyboardType="number-pad" onChangeText={(t) => setAge(t.replace(/[^0-9]/g, ''))} />
+              <TextInput
+                style={styles.input}
+                value={age}
+                keyboardType="number-pad"
+                onChangeText={(t) => setAge(t.replace(/[^0-9]/g, ""))}
+              />
             </View>
             <View style={styles.fieldLast}>
               <Text style={styles.label}>School Name</Text>
-              <TextInput style={styles.input} value={school} onChangeText={searchSchools} placeholder="start typing school name..." placeholderTextColor="#999" />
+              <TextInput
+                style={styles.input}
+                value={school}
+                onChangeText={searchSchools}
+                placeholder="start typing school name..."
+                placeholderTextColor="#999"
+              />
             </View>
           </View>
 
-          {/* School suggestions */}
+          {/* School suggestions overlay */}
           {schoolSuggestions.length > 0 && (
             <View style={styles.suggestionsOverlay}>
               <View style={styles.suggestionsContainer}>
@@ -267,14 +299,44 @@ export default function CreateReportScreen() {
                   data={schoolSuggestions}
                   keyExtractor={(item) => item.id.toString()}
                   renderItem={({ item }) => (
-                    <TouchableOpacity onPress={() => { setSchool(item.name); setSchoolSuggestions([]); }} style={styles.suggestionItem}>
+                    <TouchableOpacity
+                      onPress={() => {
+                        setSchool(item.name);
+                        setSchoolSuggestions([]);
+                      }}
+                      style={styles.suggestionItem}
+                    >
                       <Text style={styles.suggestionText}>{item.name}</Text>
                     </TouchableOpacity>
                   )}
                 />
-                <TouchableOpacity style={styles.closeSuggestionsButton} onPress={() => setSchoolSuggestions([])}>
+                <TouchableOpacity
+                  style={styles.closeSuggestionsButton}
+                  onPress={() => setSchoolSuggestions([])}
+                >
                   <Text style={styles.closeSuggestionsText}>Close</Text>
                 </TouchableOpacity>
+              </View>
+            </View>
+          )}
+
+          {/* Grade dropdown only visible when no suggestions */}
+          {schoolSuggestions.length === 0 && (
+            <View style={styles.row}>
+              <View style={styles.fieldLast}>
+                <Text style={styles.label}>Grade</Text>
+                <DropDownPicker
+                  open={gradeOpen}
+                  value={grade}
+                  items={gradeItems}
+                  setOpen={setGradeOpen}
+                  setValue={setGrade}
+                  setItems={setGradeItems}
+                  placeholder="Select Grade"
+                  style={styles.pickerWrapper}
+                  dropDownContainerStyle={{ borderColor: "#c7da30" }}
+                  zIndex={4000}
+                />
               </View>
             </View>
           )}
@@ -282,7 +344,11 @@ export default function CreateReportScreen() {
           {!isAnonymous && (
             <View style={styles.fullField}>
               <Text style={styles.label}>Full Name</Text>
-              <TextInput style={styles.input} value={fullName} onChangeText={setFullName} />
+              <TextInput
+                style={styles.input}
+                value={fullName}
+                onChangeText={setFullName}
+              />
             </View>
           )}
 
@@ -290,72 +356,78 @@ export default function CreateReportScreen() {
           <View style={styles.row}>
             <View style={styles.field}>
               <Text style={styles.label}>Email</Text>
-              <TextInput style={styles.input} value={email} onChangeText={setEmail} keyboardType="email-address" placeholder="e.g example@gmail.com" placeholderTextColor="#999" />
+              <TextInput
+                style={styles.input}
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+              />
             </View>
             <View style={styles.fieldLast}>
               <Text style={styles.label}>Phone Number</Text>
-              <TextInput style={styles.input} value={phone} onChangeText={(t) => setPhone(t.replace(/[^0-9]/g, ''))} keyboardType="number-pad" placeholder="e.g 0823456789" placeholderTextColor="#999" />
+              <TextInput
+                style={styles.input}
+                value={phone}
+                onChangeText={(t) => setPhone(t.replace(/[^0-9]/g, ""))}
+                keyboardType="number-pad"
+              />
             </View>
           </View>
 
-          {/* Address + Grade */}
-          <View style={styles.row}>
-            <View style={styles.field}>
-              <Text style={styles.label}>Address</Text>
-              <TextInput style={styles.input} value={location} onChangeText={setLocation} />
-            </View>
-            <View style={styles.fieldLast}>
-              <Text style={styles.label}>Grade</Text>
-              <DropDownPicker
-                open={gradeOpen}
-                value={grade}
-                items={gradeItems}
-                setOpen={setGradeOpen}
-                setValue={setGrade}
-                setItems={setGradeItems}
-                placeholder="Select Grade"
-                style={styles.pickerWrapper}
-                dropDownContainerStyle={{ borderColor: '#c7da30' }}
-                zIndex={4000}
-              />
-            </View>
+          {/* Address */}
+          <View style={styles.fullField}>
+            <Text style={styles.label}>Address</Text>
+            <TextInput
+              style={styles.input}
+              value={location}
+              onChangeText={setLocation}
+            />
           </View>
 
           {/* Description */}
           <View style={styles.fullField}>
             <Text style={styles.label}>
-              Description{' '}
-              {subtypes.find(s => String(s.id) === selectedSubtype)?.sub_type_name === 'Other' ? (
-                <Text style={{ color: 'red' }}>(Required)</Text>
+              Description{" "}
+              {subtypes.find((s) => String(s.id) === selectedSubtype)
+                ?.sub_type_name === "Other" ? (
+                <Text style={{ color: "red" }}>(Required)</Text>
               ) : (
-                <Text style={{ color: 'grey' }}>(Optional)</Text>
+                <Text style={{ color: "grey" }}>(Optional)</Text>
               )}
             </Text>
-            <TextInput style={[styles.input, styles.descriptionInput]} value={description} onChangeText={setDescription} multiline />
+            <TextInput
+              style={[styles.input, styles.descriptionInput]}
+              value={description}
+              onChangeText={setDescription}
+              multiline
+            />
           </View>
 
           {/* Attachments */}
           <View style={styles.fullField}>
             <Text style={styles.label}>Attachments (Optional)</Text>
 
-            {/* File picker row */}
             <View style={styles.filePickerWrapper}>
-              <TouchableOpacity style={styles.chooseFileButton} onPress={pickImage}>
+              <TouchableOpacity
+                style={styles.chooseFileButton}
+                onPress={pickImage}
+              >
                 <Text style={styles.chooseFileText}>Choose File</Text>
               </TouchableOpacity>
               <Text style={styles.fileNameText}>
-                {image ? image.uri.split('/').pop() : 'No file chosen'}
+                {image ? image.uri.split("/").pop() : "No file chosen"}
               </Text>
             </View>
 
-            {/* Image preview */}
-            {image && <Image source={{ uri: image.uri }} style={styles.imagePreview} />}
+            {image && (
+              <Image source={{ uri: image.uri }} style={styles.imagePreview} />
+            )}
           </View>
 
-
-
           <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-            <Text style={styles.submitText}>{loading ? 'Submitting...' : 'Submit'}</Text>
+            <Text style={styles.submitText}>
+              {loading ? "Submitting..." : "Submit"}
+            </Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -364,33 +436,52 @@ export default function CreateReportScreen() {
       <Modal visible={successModalVisible} transparent animationType="fade">
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
-            <Text style={styles.modalTitle}>Report Submitted Successfully</Text>
-            <MaterialIcons name="check-circle" size={60} color="#c7da30" style={{ marginBottom: 15 }} />
-            <Text style={styles.modalCase}>CASE NUMBER: {submittedCaseNumber}</Text>
-            <TouchableOpacity style={styles.modalButton} onPress={() => { setSuccessModalVisible(false); router.push('/'); }}>
+            <Text style={styles.modalTitle}>
+              Report Submitted Successfully
+            </Text>
+            <MaterialIcons
+              name="check-circle"
+              size={60}
+              color="#c7da30"
+              style={{ marginBottom: 15 }}
+            />
+            <Text style={styles.modalCase}>
+              CASE NUMBER: {submittedCaseNumber}
+            </Text>
+            <TouchableOpacity
+              style={styles.modalButton}
+              onPress={() => {
+                setSuccessModalVisible(false);
+                router.push("/");
+              }}
+            >
               <Text style={styles.modalButtonText}>OK</Text>
             </TouchableOpacity>
           </View>
         </View>
       </Modal>
 
-     {/* Overlay */}
-           {menuVisible && (
-             <TouchableOpacity style={styles.overlay} onPress={toggleMenu} />
-           )}
-     
-           {/* Slide-in Menu */}
-           <Animated.View
-             style={[styles.menu, { transform: [{ translateX: slideAnim }] }]}
-           >
-             <TouchableOpacity style={styles.menuItem} onPress={() => handleNavigate("/")}>
-               <Text style={styles.menuText}>Home</Text>
-             </TouchableOpacity>
-     
-             <TouchableOpacity style={styles.menuItem} onPress={() => handleNavigate("/abuse-types")}>
-               <Text style={styles.menuText}>Go Back</Text>
-             </TouchableOpacity>
-           </Animated.View>
+      {/* Overlay */}
+      {menuVisible && <TouchableOpacity style={styles.overlay} onPress={toggleMenu} />}
+
+      {/* Slide-in Menu */}
+      <Animated.View
+        style={[styles.menu, { transform: [{ translateX: slideAnim }] }]}
+      >
+        <TouchableOpacity
+          style={styles.menuItem}
+          onPress={() => handleNavigate("/")}
+        >
+          <Text style={styles.menuText}>Home</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.menuItem}
+          onPress={() => handleNavigate("/abuse-types")}
+        >
+          <Text style={styles.menuText}>Go Back</Text>
+        </TouchableOpacity>
+      </Animated.View>
     </View>
   );
 }
