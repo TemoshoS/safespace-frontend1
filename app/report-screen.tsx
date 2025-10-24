@@ -71,6 +71,7 @@ export default function ReportCaseScreen() {
       <View style={styles.centerContent}>
         <Text style={styles.questionText}>REPORT ANONYMOUSLY?</Text>
 
+<View style={styles.conditionBox}>
         <View style={styles.buttonRow}>
           <TouchableOpacity onPress={() => handleSelect("yes")}>
             <LinearGradient
@@ -95,7 +96,7 @@ export default function ReportCaseScreen() {
           </TouchableOpacity>
         </View>
       </View>
-
+     </View>
       {/* Slide-in menu from right */}
       {menuVisible && (
         <TouchableOpacity style={styles.overlay} onPress={toggleMenu} />
@@ -104,12 +105,7 @@ export default function ReportCaseScreen() {
         <TouchableOpacity style={styles.menuItem} onPress={() => navigate("/")}>
           <Text style={styles.menuText}>Home</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.menuItem} onPress={() => navigate("/about-us")}>
-          <Text style={styles.menuText}>About Us</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.menuItem} onPress={() => navigate("/contact-us")}>
-          <Text style={styles.menuText}>Contact Us</Text>
-        </TouchableOpacity>
+        
       </Animated.View>
     </View>
   );
@@ -136,6 +132,12 @@ const styles = StyleSheet.create({
     marginBottom: 40,
     textAlign: "center",
     color: "#000",
+  },
+  conditionBox: {
+    borderColor: '#c7da30',
+    borderWidth: 1,
+    padding: 20,
+    borderRadius: 10,
   },
   buttonRow: {
     flexDirection: "row",

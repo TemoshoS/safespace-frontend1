@@ -17,14 +17,28 @@ export default function DetailsScreen() {
     ? "http://localhost:3000"
     : "http://192.168.2.116:3000";
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'completed': return '#4CAF50';
-      case 'escalated': return '#FF9800';
-      case 'pending': return '#9E9E9E';
-      default: return '#000';
-    }
-  };
+const getStatusColor = (status: string) => {
+  const normalizedStatus = status.trim().toLowerCase();
+
+  switch (normalizedStatus) {
+    case 'pending':
+      return '#EF4444'; // red-500
+    case 'escalated':
+      return '#FACC15'; // yellow-500
+    case 'in-process':
+      return '#3B82F6'; // blue-500
+    case 'resolved':
+      return '#22C55E'; // green-500
+    case 'unresolved':
+      return '#FB923C'; // orange-500
+    case 'false-report':
+      return '#9CA3AF'; // gray-400
+    default:
+      return '#E5E7EB'; // gray-200
+  }
+};
+
+
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) {
@@ -111,14 +125,16 @@ export default function DetailsScreen() {
           </Text>
 
           {/* Case details */}
-          <Text style={styles.detail}>
-            <Text style={styles.detailLabel}>Abuse Type: </Text>
-            {String(searchResult.abuse_type_id || '')}
-          </Text>
-          <Text style={styles.detail}>
-            <Text style={styles.detailLabel}>Subtype: </Text>
-            {String(searchResult.subtype_id || '')}
-          </Text>
+        <Text style={styles.detail}>
+  <Text style={styles.detailLabel}>Abuse Type: </Text>
+  {searchResult.abuse_type || 'Unknown'}
+</Text>
+
+<Text style={styles.detail}>
+  <Text style={styles.detailLabel}>Subtype: </Text>
+  {searchResult.subtype || 'Unknown'}
+</Text>
+
           <Text style={styles.detail}>
             <Text style={styles.detailLabel}>Description: </Text>
             {String(searchResult.description || '')}
