@@ -19,6 +19,7 @@ import {
   View,
 } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
+import { Video } from "expo-av";
 
 const { width } = Dimensions.get("window");
 
@@ -55,6 +56,7 @@ export default function CreateReportScreen() {
   const [school, setSchool] = useState("");
   const [schoolSuggestions, setSchoolSuggestions] = useState<any[]>([]);
   const [image, setImage] = useState<any>(null);
+  const [attachment, setAttachment] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [isAnonymous, setIsAnonymous] = useState(true);
   const [menuVisible, setMenuVisible] = useState(false);
@@ -83,12 +85,17 @@ export default function CreateReportScreen() {
     else setIsAnonymous(false);
   }, [anonymous]);
 
-  const pickImage = async () => {
+  // 🟢 Allow both image & video
+  const pickMedia = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
       quality: 0.5,
     });
-    if (!result.canceled) setImage(result.assets[0]);
+
+    if (!result.canceled) {
+      const file = result.assets[0];
+      setAttachment(file);
+    }
   };
 
   const searchSchools = async (text: string) => {
@@ -141,24 +148,22 @@ export default function CreateReportScreen() {
       formData.append("age", age);
       formData.append("location", location);
       formData.append("school_name", school);
+      formData.append("grade", grade);
       formData.append("status", "Pending");
       formData.append("is_anonymous", isAnonymous ? "1" : "0");
 
-      if (image) {
-        try {
-          const response = await fetch(image.uri);
-          const blob = await response.blob();
-          const base64data = await new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result);
-            reader.readAsDataURL(blob);
-          });
-          formData.append("image_base64", base64data as string);
-          formData.append("image_filename", `report-${Date.now()}.jpg`);
-        } catch (base64Error) {
-          console.error("Error converting image to base64:", base64Error);
-        }
+      if (attachment) {
+        const uriParts = attachment.uri.split('/');
+        const fileName = uriParts[uriParts.length - 1];
+        const fileType = attachment.type.startsWith('video') ? 'video/mp4' : 'image/jpeg';
+
+        formData.append('file', {
+          uri: attachment.uri,
+          name: fileName,
+          type: fileType,
+        } as any);
       }
+
 
       const response = await fetch(`${BACKEND_URL}/reports`, {
         method: "POST",
@@ -185,7 +190,8 @@ export default function CreateReportScreen() {
       setAge("");
       setLocation("");
       setSchool("");
-      setImage(null);
+      setGrade("");
+      setAttachment(null);
       setSchoolSuggestions([]);
     } catch (err: any) {
       console.error("Submission error:", err);
@@ -403,24 +409,34 @@ export default function CreateReportScreen() {
             />
           </View>
 
-          {/* Attachments */}
+          {/* ATTACHMENT */}
           <View style={styles.fullField}>
-            <Text style={styles.label}>Attachments (Optional)</Text>
-
+            <Text style={styles.label}>Attachment (Optional)</Text>
             <View style={styles.filePickerWrapper}>
               <TouchableOpacity
                 style={styles.chooseFileButton}
-                onPress={pickImage}
+                onPress={pickMedia}
               >
                 <Text style={styles.chooseFileText}>Choose File</Text>
               </TouchableOpacity>
               <Text style={styles.fileNameText}>
-                {image ? image.uri.split("/").pop() : "No file chosen"}
+                {attachment ? attachment.uri.split("/").pop() : "No file chosen"}
               </Text>
             </View>
 
-            {image && (
-              <Image source={{ uri: image.uri }} style={styles.imagePreview} />
+            {attachment && attachment.type.startsWith("image") && (
+              <Image
+                source={{ uri: attachment.uri }}
+                style={styles.imagePreview}
+              />
+            )}
+            {attachment && attachment.type.startsWith("video") && (
+              <Video
+                source={{ uri: attachment.uri }}
+                style={styles.videoPreview}
+                useNativeControls
+                resizeMode={"contain" as any}
+              />
             )}
           </View>
 
@@ -526,7 +542,7 @@ const styles = StyleSheet.create({
     height: "100%",
     backgroundColor: "rgba(0,0,0,0.3)",
     zIndex: 5,
-  }, 
+  },
   menu: {
     position: "absolute",
     top: 0,
@@ -538,7 +554,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     zIndex: 10,
   },
-   menuItem: {
+  menuItem: {
     paddingVertical: 15,
     borderBottomWidth: 1,
     borderBottomColor: "#fff",
@@ -582,5 +598,6 @@ const styles = StyleSheet.create({
     borderColor: '#c7da30',
     marginTop: 5,
   },
+  videoPreview: { width: "100%", height: 180, borderRadius: 8, borderWidth: 2, borderColor: "#c7da30" },
 
 });
