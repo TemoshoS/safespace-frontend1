@@ -105,6 +105,12 @@ export default function ReportCaseScreen() {
         <TouchableOpacity style={styles.menuItem} onPress={() => navigate("/")}>
           <Text style={styles.menuText}>Home</Text>
         </TouchableOpacity>
+         <TouchableOpacity style={styles.menuItem} onPress={() => navigate("/contact-us")}>
+          <Text style={styles.menuText}>Contact Us</Text>
+        </TouchableOpacity>
+         <TouchableOpacity style={styles.menuItem} onPress={() => navigate("/about-us")}>
+          <Text style={styles.menuText}>About Us</Text>
+        </TouchableOpacity>
         
       </Animated.View>
     </View>

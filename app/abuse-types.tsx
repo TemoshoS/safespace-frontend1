@@ -130,8 +130,12 @@ export default function AbuseTypesScreen() {
           <Text style={styles.menuText}>Home</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.menuItem} onPress={() => handleNavigate("/report-screen")}>
-          <Text style={styles.menuText}>Go Back</Text>
+        <TouchableOpacity style={styles.menuItem} onPress={() => handleNavigate("/contact-us")}>
+          <Text style={styles.menuText}>Contact Us</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.menuItem} onPress={() => handleNavigate("/about-us")}>
+          <Text style={styles.menuText}>Contact Us</Text>
         </TouchableOpacity>
       </Animated.View>
     </View>

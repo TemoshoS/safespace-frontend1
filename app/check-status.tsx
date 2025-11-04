@@ -56,15 +56,17 @@ export default function DetailsScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Logo */}
-      <View style={styles.logoContainer}>
-        <Image
-          source={require('../assets/images/Logo.jpg')}
-          style={styles.logo}
-          resizeMode="contain"
-        />
+     {/* Top Bar */}
+      <View style={styles.topBar}>
+        <TouchableOpacity onPress={() => router.back()}>
+          <Image
+            source={require("../assets/images/Logo.jpg")}
+            style={styles.logo}
+            resizeMode="contain"
+          />
+        </TouchableOpacity>
+        
       </View>
-
       {/* Title */}
       <Text style={styles.title}>TRACK STATUS</Text>
 
@@ -208,6 +210,7 @@ export default function DetailsScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20, backgroundColor: '#fff' },
+  topBar: { flexDirection: 'row', width: '100%', maxWidth: 450, justifyContent: 'space-between', alignItems: 'center', marginTop: 40, marginBottom: 20, zIndex: 100, paddingHorizontal: 10 },
   logoContainer: { position: 'absolute', top: 50, left: 20, zIndex: 10 },
   logo: { width: 50, height: 50, borderRadius: 8 },
   title: { fontSize: 24, fontWeight: 'bold', marginBottom: 20, textAlign: 'center' },

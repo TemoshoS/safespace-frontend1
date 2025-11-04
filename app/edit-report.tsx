@@ -100,7 +100,6 @@ export default function EditReportScreen() {
       !report.description ||
       !report.reporter_email ||
       !report.phone_number ||
-      !report.full_name ||
       !report.age ||
       !report.location ||
       !report.school_name ||

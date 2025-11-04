@@ -497,6 +497,21 @@ export default function CreateReportScreen() {
         >
           <Text style={styles.menuText}>Go Back</Text>
         </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.menuItem}
+          onPress={() => handleNavigate("/contact-us")}
+        >
+          <Text style={styles.menuText}>Contact Us</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.menuItem}
+          onPress={() => handleNavigate("/about-us")}
+        >
+          <Text style={styles.menuText}>About Us</Text>
+        </TouchableOpacity>
+        
       </Animated.View>
     </View>
   );
