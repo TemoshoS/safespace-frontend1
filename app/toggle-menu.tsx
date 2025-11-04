@@ -18,9 +18,9 @@ export default function ToggleMenu({ onNavigate }: ToggleMenuProps) {
 
   const scaleAnims = useRef<{ [key: string]: Animated.Value }>({
     home: new Animated.Value(1),
-    about: new Animated.Value(1),
+    back: new Animated.Value(1),
     contact: new Animated.Value(1),
-    admin: new Animated.Value(1),
+    about: new Animated.Value(1),
   }).current;
 
   const toggleMenu = () => {
@@ -44,10 +44,18 @@ export default function ToggleMenu({ onNavigate }: ToggleMenuProps) {
     toggleMenu();
     setTimeout(() => {
       switch (section) {
-        case 'home': router.push('/'); break;
-        case 'about': router.push('/about-us'); break;
-        case 'contact': router.push('/contact-us'); break;
-        case 'admin': router.push('/admin-login'); break;
+        case 'home':
+          router.push('/');
+          break;
+        case 'back':
+          router.back();
+          break;
+        case 'contact':
+          router.push('/contact-us');
+          break;
+        case 'about':
+          router.push('/about-us');
+          break;
       }
       onNavigate?.(section);
     }, 250);
@@ -64,9 +72,9 @@ export default function ToggleMenu({ onNavigate }: ToggleMenuProps) {
 
   const menuItems = [
     { name: 'Home', section: 'home', icon: 'home' },
-    { name: 'About Us', section: 'about', icon: 'information-circle' },
+    { name: 'Back', section: 'back', icon: 'arrow-undo' },
     { name: 'Contact Us', section: 'contact', icon: 'call' },
-    { name: 'Admin Login', section: 'admin', icon: 'lock-closed' },
+    { name: 'About Us', section: 'about', icon: 'information-circle' },
   ];
 
   return (
@@ -161,7 +169,7 @@ const styles = StyleSheet.create({
   menuItem: {
     marginBottom: 12,
     borderRadius: 12,
-    alignSelf: 'stretch', // fill the 85% width
+    alignSelf: 'stretch',
   },
   menuItemGradient: {
     flexDirection: 'row',
@@ -169,7 +177,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 15,
     borderRadius: 12,
-    width: '85%', // all buttons take 85% of menu width
+    width: '85%',
   },
   menuItemActive: {
     borderWidth: 1,
