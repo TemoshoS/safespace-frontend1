@@ -100,7 +100,7 @@ export default function CreateReportScreen() {
 
   const searchSchools = async (text: string) => {
     setSchool(text);
-    if (text.length < 2) {
+    if (text.length < 1) {
       setSchoolSuggestions([]);
       return;
     }
@@ -113,93 +113,101 @@ export default function CreateReportScreen() {
   };
 
   const handleSubmit = async () => {
-    const selectedSubtypeObj = subtypes.find(
-      (s) => s.id === selectedSubtype
-    );
-    const subtypeName = selectedSubtypeObj?.sub_type_name || "";
+  const selectedSubtypeObj = subtypes.find(
+    (s) => String(s.id) === selectedSubtype
+  );
+  const subtypeName = selectedSubtypeObj?.sub_type_name || "";
 
-    if (!selectedSubtype) {
-      Alert.alert("Error", "Please select a subtype.");
-      return;
+  if (!selectedSubtype) {
+    Alert.alert("Error", "Please select a subtype.");
+    return;
+  }
+
+  if (!email) {
+    Alert.alert("Error", "Please enter your email.");
+    return;
+  }
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    Alert.alert("Error", "Please enter a valid email address.");
+    return;
+  }
+
+  // 🔹 Description validation
+  const descriptionRequired =
+    subtypes.find((s) => String(s.id) === selectedSubtype)
+      ?.sub_type_name === "Other"; // or any logic that decides required
+  if (descriptionRequired && !description.trim()) {
+    Alert.alert("Error", "Description is required for this report.");
+    return;
+  }
+
+  // ✅ Continue submission
+  setLoading(true);
+  try {
+    const formData = new FormData();
+    formData.append("abuse_type_id", abuseTypeId as string);
+    formData.append("subtype_id", selectedSubtype);
+    formData.append("description", description); // can be empty if optional
+    formData.append("reporter_email", email);
+    formData.append("phone_number", phone);
+    formData.append("full_name", fullName);
+    formData.append("age", age);
+    formData.append("location", location);
+    formData.append("school_name", school);
+    formData.append("grade", grade);
+    formData.append("status", "Awaiting-resolution");
+    formData.append("is_anonymous", isAnonymous ? "1" : "0");
+
+    if (attachment) {
+      const uriParts = attachment.uri.split('/');
+      const fileName = uriParts[uriParts.length - 1];
+      const fileType = attachment.type.startsWith('video') ? 'video/mp4' : 'image/jpeg';
+
+      formData.append('file', {
+        uri: attachment.uri,
+        name: fileName,
+        type: fileType,
+      } as any);
     }
-    if (!email) {
-      Alert.alert("Error", "Please enter your email.");
-      return;
-    }
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      Alert.alert("Error", "Please enter a valid email address.");
-      return;
-    }
-    if (subtypeName === "Other" && !description.trim()) {
-      Alert.alert("Error", 'Description is required when selecting "Other".');
-      return;
+
+    const response = await fetch(`${BACKEND_URL}/reports`, {
+      method: "POST",
+      body: formData,
+      headers: { Accept: "application/json" },
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Server error: ${response.status}`);
     }
 
-    setLoading(true);
-    try {
-      const formData = new FormData();
-      formData.append("abuse_type_id", abuseTypeId as string);
-      formData.append("subtype_id", selectedSubtype);
-      formData.append("description", description);
-      formData.append("reporter_email", email);
-      formData.append("phone_number", phone);
-      formData.append("full_name", fullName);
-      formData.append("age", age);
-      formData.append("location", location);
-      formData.append("school_name", school);
-      formData.append("grade", grade);
-      formData.append("status", "Pending");
-      formData.append("is_anonymous", isAnonymous ? "1" : "0");
+    const result = await response.json();
+    const caseNumber = result.case_number;
+    setSubmittedCaseNumber(caseNumber);
+    setSuccessModalVisible(true);
 
-      if (attachment) {
-        const uriParts = attachment.uri.split('/');
-        const fileName = uriParts[uriParts.length - 1];
-        const fileType = attachment.type.startsWith('video') ? 'video/mp4' : 'image/jpeg';
-
-        formData.append('file', {
-          uri: attachment.uri,
-          name: fileName,
-          type: fileType,
-        } as any);
-      }
+    // Clear form
+    setSelectedSubtype("");
+    setDescription("");
+    setEmail("");
+    setPhone("");
+    setFullName("");
+    setAge("");
+    setLocation("");
+    setSchool("");
+    setGrade("");
+    setAttachment(null);
+    setSchoolSuggestions([]);
+  } catch (err: any) {
+    console.error("Submission error:", err);
+    Alert.alert("Error", "Failed to create report.");
+  } finally {
+    setLoading(false);
+  }
+};
 
 
-      const response = await fetch(`${BACKEND_URL}/reports`, {
-        method: "POST",
-        body: formData,
-        headers: { Accept: "application/json" },
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Server error: ${response.status}`);
-      }
-
-      const result = await response.json();
-      const caseNumber = result.case_number;
-      setSubmittedCaseNumber(caseNumber);
-      setSuccessModalVisible(true);
-
-      // Clear form
-      setSelectedSubtype("");
-      setDescription("");
-      setEmail("");
-      setPhone("");
-      setFullName("");
-      setAge("");
-      setLocation("");
-      setSchool("");
-      setGrade("");
-      setAttachment(null);
-      setSchoolSuggestions([]);
-    } catch (err: any) {
-      console.error("Submission error:", err);
-      Alert.alert("Error", "Failed to create report.");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleNavigate = (path: string) => {
     toggleMenu();
@@ -241,7 +249,11 @@ export default function CreateReportScreen() {
         </TouchableOpacity>
       </View>
 
-      <ScrollView contentContainerStyle={styles.container}>
+     <ScrollView
+  contentContainerStyle={styles.container}
+  scrollEnabled={!subtypeOpen && !gradeOpen && schoolSuggestions.length === 0}
+>
+
         <Text style={styles.title}>REPORT CASE</Text>
         {isAnonymous && (
           <Text style={{ color: "black", marginBottom: 10 }}>

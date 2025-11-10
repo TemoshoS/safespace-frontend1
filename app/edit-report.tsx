@@ -4,6 +4,7 @@ import * as ImagePicker from "expo-image-picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   Animated,
   Dimensions,
@@ -162,14 +163,31 @@ export default function EditReportScreen() {
     setTimeout(() => router.push({ pathname: path as any }), 250);
   };
 
-  if (!report) return <Text style={{ padding: 20 }}>Loading report details...</Text>;
+if (!report)
+  return (
+    <View
+      style={{
+        flex: 1,                  
+        alignItems: "center",     
+        justifyContent: "center", 
+        backgroundColor: "#fff",  
+      }}
+    >
+      <ActivityIndicator size="large" color="#c7da30" />
+    </View>
+  );
+
 
   return (
     <View style={{ flex: 1, backgroundColor: "#fff" }}>
-      {/* Top Bar */}
+     // Top Bar & Menu updated for consistency
       <View style={styles.topBar}>
         <TouchableOpacity onPress={() => router.back()}>
-          <Image source={require("../assets/images/Logo.jpg")} style={styles.logo} resizeMode="contain" />
+          <Image
+            source={require("../assets/images/Logo.jpg")}
+            style={styles.logo}
+            resizeMode="contain"
+          />
         </TouchableOpacity>
         <TouchableOpacity onPress={toggleMenu}>
           <Ionicons name="menu" size={30} color="#c7da30" />
@@ -344,8 +362,20 @@ export default function EditReportScreen() {
         <TouchableOpacity style={styles.menuItem} onPress={() => handleNavigate("/")}>
           <Text style={styles.menuText}>Home</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.menuItem} onPress={() => handleNavigate("/check-status")}>
-          <Text style={styles.menuText}>Check Status</Text>
+        <TouchableOpacity
+          style={styles.menuItem}
+          onPress={() => router.back()}
+        >
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <Text style={styles.menuText}>Back</Text>
+              
+          </View>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.menuItem} onPress={() => handleNavigate("/contact-us")}>
+          <Text style={styles.menuText}>Contact Us</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.menuItem} onPress={() => handleNavigate("/about-us")}>
+          <Text style={styles.menuText}>About Us</Text>
         </TouchableOpacity>
       </Animated.View>
     </View>
@@ -353,8 +383,17 @@ export default function EditReportScreen() {
 }
 
 const styles = StyleSheet.create({
-  topBar: { width: "100%", flexDirection: "row", justifyContent: "space-between", paddingHorizontal: 20, paddingTop: 50, paddingBottom: 15, alignItems: "center", backgroundColor: "#fff" },
-  logo: { width: 100, height: 50 },
+  topBar: {
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 15,
+    paddingTop: Platform.OS === "ios" ? 50 : 30,
+    paddingBottom: 15,
+    backgroundColor: "#fff", // Same as DetailsScreen sidebar color
+  },
+  logo: { width: 100, height: 100 },
   container: { flexGrow: 1, alignItems: "center", backgroundColor: "#fff", paddingVertical: 20, paddingHorizontal: 20 },
   title: { fontSize: 26, fontWeight: "bold", marginBottom: 20, color: "black" },
   inputGroup: { width: "100%", marginBottom: 15 },
@@ -374,8 +413,26 @@ const styles = StyleSheet.create({
   modalCase: { fontSize: 15, color: "#555", marginBottom: 25, textAlign: "center" },
   modalButton: { backgroundColor: "#c7da30", paddingVertical: 12, paddingHorizontal: 35, borderRadius: 30 },
   modalButtonText: { color: "black", fontSize: 16 },
-  overlay: { position: "absolute", width: "100%", height: "100%", backgroundColor: "rgba(0,0,0,0.4)", top: 0, left: 0 },
-  menu: { position: "absolute", width: "70%", height: "100%", backgroundColor: "#c7da30", top: 0, right: 0, paddingTop: 80, paddingHorizontal: 20, zIndex: 9999 },
-  menuItem: { marginBottom: 25 },
+  overlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+    backgroundColor: "rgba(0,0,0,0.3)",
+    zIndex: 5,
+  },
+  menu: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    width: width * 0.7,
+    height: "100%",
+    backgroundColor: "#c7da30",
+    paddingTop: 100,
+    paddingHorizontal: 20,
+    zIndex: 10,
+  },
+  menuItem: { paddingVertical: 15, borderBottomWidth: 1, borderBottomColor: "#fff" },
   menuText: { fontSize: 18, color: "#333" },
 });
