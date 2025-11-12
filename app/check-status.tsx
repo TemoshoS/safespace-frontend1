@@ -17,14 +17,11 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Video } from "expo-av";
-
+import { BACKEND_URL } from "@/utils/config";
 const { width } = Dimensions.get("window");
 
 export default function DetailsScreen() {
-  const BACKEND_URL =
-    Platform.OS === "web"
-      ? "http://localhost:3000"
-      : "http://192.168.2.116:3000";
+ 
 
   const router = useRouter();
   const params = useLocalSearchParams();

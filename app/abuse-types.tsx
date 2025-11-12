@@ -14,11 +14,11 @@ import {
     ActivityIndicator
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-
+import { BACKEND_URL } from "@/utils/config";
 const { width } = Dimensions.get("window");
 
 export default function AbuseTypesScreen() {
-   const BACKEND_URL = "https://mobile.teketesafespace.co.za";
+   
 
 
     const [abuseTypes, setAbuseTypes] = useState<any[]>([]);
