@@ -1,26 +1,22 @@
+import { BACKEND_URL } from "@/utils/config";
+import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
+    ActivityIndicator,
+    Alert,
     Animated,
     Dimensions,
     Image,
-    Platform,
     StyleSheet,
     Text,
     TouchableOpacity,
-    View,
-    Alert,
-    ActivityIndicator
+    View
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { BACKEND_URL } from "@/utils/config";
 const { width } = Dimensions.get("window");
 
 export default function AbuseTypesScreen() {
-   
-
-
     const [abuseTypes, setAbuseTypes] = useState<any[]>([]);
     const [menuVisible, setMenuVisible] = useState(false);
     const slideAnim = useState(new Animated.Value(width))[0];
@@ -39,26 +35,6 @@ export default function AbuseTypesScreen() {
             });
     }, []);
 
-    const handleNavigate = (path: string) => {
-        toggleMenu();
-        setTimeout(() => {
-            router.push({ pathname: path as any });
-        }, 250);
-    };
-
-    const handleAbuseTypeSelect = (type: any) => {
-        router.push({
-            pathname: "/report-form",
-            params: {
-                abuseTypeId: type.id,
-                abuseTypeName: type.type_name,  // <— make sure this is from the object
-                anonymous,
-            },
-        });
-    };
-
-
-
     const toggleMenu = () => {
         if (menuVisible) {
             Animated.timing(slideAnim, {
@@ -74,6 +50,24 @@ export default function AbuseTypesScreen() {
                 useNativeDriver: true,
             }).start();
         }
+    };
+
+    const navigate = (path: string) => {
+        toggleMenu();
+        setTimeout(() => {
+            router.push({ pathname: path as any });
+        }, 250);
+    };
+
+    const handleAbuseTypeSelect = (type: any) => {
+        router.push({
+            pathname: "/report-form",
+            params: {
+                abuseTypeId: type.id,
+                abuseTypeName: type.type_name,  // <ó make sure this is from the object
+                anonymous,
+            },
+        });
     };
 
     return (
@@ -101,7 +95,11 @@ export default function AbuseTypesScreen() {
                 <View style={styles.centeredContent}>
                     <Text style={styles.title}>TYPES OF ABUSE</Text>
                     {anonymous === "yes" && (
-                        <Text style={styles.anonymousText}>You’re reporting anonymously</Text>
+                        <Text style={styles.anonymousText}>You're reporting anonymously</Text>
+                    )}
+                    {anonymous === "no" && (
+                        <Text style={styles.anonymousText}>You're reporting with details</Text>
+
                     )}
 
                     <View style={styles.abuseBox}>
@@ -120,27 +118,36 @@ export default function AbuseTypesScreen() {
                 </View>
             )}
 
-            {/* Overlay & Menu */}
-            {menuVisible && <TouchableOpacity style={styles.overlay} onPress={toggleMenu} />}
+            {/* Slide-in menu from right */}
+            {menuVisible && (
+                <TouchableOpacity style={styles.overlay} onPress={toggleMenu} />
+            )}
             <Animated.View style={[styles.menu, { transform: [{ translateX: slideAnim }] }]}>
-                <TouchableOpacity style={styles.menuItem} onPress={() => handleNavigate("/")}>
-                    <Text style={styles.menuText}>Home</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={styles.menuItem}
-                    onPress={() => router.back()}
-                >
+                {/* Close button centered at the top of the menu */}
+                <View style={styles.closeButtonContainer}>
+                    <TouchableOpacity onPress={toggleMenu} style={styles.closeButton}>
+                        <Ionicons name="close" size={50} color="#c7da30" />
+                    </TouchableOpacity>
+                </View>
 
-                    <Text style={styles.menuText}>Back</Text>
-
-
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.menuItem} onPress={() => handleNavigate("/contact-us")}>
-                    <Text style={styles.menuText}>Contact Us</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.menuItem} onPress={() => handleNavigate("/about-us")}>
-                    <Text style={styles.menuText}>About Us</Text>
-                </TouchableOpacity>
+                <View style={styles.menuContent}>
+                    {/* Home button with centered text */}
+                    <TouchableOpacity style={styles.menuItem} onPress={() => navigate("/")}>
+                        <Text style={[styles.menuText, styles.homeText]}>Home</Text>
+                    </TouchableOpacity>
+                    {/* Report button with shadow */}
+                    <TouchableOpacity style={[styles.menuItem, styles.reportItem]} onPress={() => navigate("/report-screen")}>
+                        <Text style={[styles.menuText, styles.reportText]}>Report</Text>
+                    </TouchableOpacity>
+                    {/* Check Status button with separate styling */}
+                    <TouchableOpacity style={[styles.menuItem, styles.checkStatusItem]} onPress={() => navigate("/check-status")}>
+                        <Text style={[styles.menuText, styles.checkStatusText]}>Check Status</Text>
+                    </TouchableOpacity>
+                    {/* Back button with separate styling */}
+                    <TouchableOpacity style={[styles.menuItem, styles.backItem]} onPress={() => navigate("/")}>
+                        <Text style={[styles.menuText, styles.backText]}>Back</Text>
+                    </TouchableOpacity>
+                </View>
             </Animated.View>
         </View>
     );
@@ -150,13 +157,14 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: "#fff",
-        paddingTop: 40,
         paddingHorizontal: 20,
     },
     topBar: {
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
+        marginTop: 40,
+        paddingHorizontal: 10,
     },
     logo: {
         width: 100,
@@ -196,16 +204,18 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
     },
     abuseButton: {
-        backgroundColor: "#c7da30",
+        backgroundColor: "#fff",
+        borderColor: "#c7da30",
         paddingVertical: 12,
         paddingHorizontal: 16,
         borderRadius: 25,
+        borderWidth: 3,
         marginBottom: 15,
         width: "48%",
         alignItems: "center",
     },
     abuseText: {
-        color: "#000",
+        color: "#91cae0ff",
         fontWeight: "500",
         fontSize: 14,
         textAlign: "center",
@@ -225,10 +235,24 @@ const styles = StyleSheet.create({
         right: 0,
         width: width * 0.7,
         height: "100%",
-        backgroundColor: "#c7da30",
-        paddingTop: 100,
-        paddingHorizontal: 20,
+        backgroundColor: "#FFFFFF",
         zIndex: 10,
+    },
+    // Close button container to center it
+    closeButtonContainer: {
+        position: "absolute",
+        top: 40,
+        left: 0,
+        right: 120,
+        alignItems: "center",
+        zIndex: 11,
+    },
+    closeButton: {
+        padding: 10,
+    },
+    menuContent: {
+        marginTop: 120,
+        paddingHorizontal: 20,
     },
     menuItem: {
         paddingVertical: 15,
@@ -236,7 +260,38 @@ const styles = StyleSheet.create({
         borderBottomColor: "#fff",
     },
     menuText: {
-        fontSize: 18,
-        color: "#333",
+        alignItems: "center",
+        fontSize: 20,
+        color: "#91cae0ff",
+    },
+    homeText: {
+        paddingLeft: 30,
+        fontSize: 20,
+    },
+    // Report item with shadow
+    reportItem: {
+        paddingLeft: 30,
+        borderRadius: 25,
+        width: '55%',
+        paddingVertical: 4, // This won't affect text alignment
+        justifyContent: 'center',
+        backgroundColor: "#87CEEB",  // Blue border color
+    },
+    reportText: {
+        color: "white",
+        fontSize: 20,
+    },
+    checkStatusItem: {
+        paddingLeft: 10, // Starts a bit later than the others
+    },
+    checkStatusText: {
+        fontSize: 20,
+    },
+    backItem: {
+        paddingLeft: 35, // Adjust this value as needed
+    },
+    backText: {
+        fontSize: 20,
+        // Add any other styles you want for Back text
     },
 });
