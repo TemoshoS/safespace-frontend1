@@ -17,6 +17,7 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  ActivityIndicator,
 } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
 import { Video } from "expo-av";
@@ -25,7 +26,6 @@ import { BACKEND_URL } from "@/utils/config";
 const { width } = Dimensions.get("window");
 
 export default function CreateReportScreen() {
-
 
   const { abuseTypeId, abuseTypeName, anonymous } = useLocalSearchParams();
   const router = useRouter();
@@ -83,7 +83,6 @@ export default function CreateReportScreen() {
     else setIsAnonymous(false);
   }, [anonymous]);
 
-  // 🟢 Allow both image & video
   const pickMedia = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
@@ -111,101 +110,97 @@ export default function CreateReportScreen() {
   };
 
   const handleSubmit = async () => {
-  const selectedSubtypeObj = subtypes.find(
-    (s) => String(s.id) === selectedSubtype
-  );
-  const subtypeName = selectedSubtypeObj?.sub_type_name || "";
+    const selectedSubtypeObj = subtypes.find(
+      (s) => String(s.id) === selectedSubtype
+    );
+    const subtypeName = selectedSubtypeObj?.sub_type_name || "";
 
-  if (!selectedSubtype) {
-    Alert.alert("Error", "Please select a subtype.");
-    return;
-  }
-
-  if (!email) {
-    Alert.alert("Error", "Please enter your email.");
-    return;
-  }
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
-    Alert.alert("Error", "Please enter a valid email address.");
-    return;
-  }
-
-  // 🔹 Description validation
-  const descriptionRequired =
-    subtypes.find((s) => String(s.id) === selectedSubtype)
-      ?.sub_type_name === "Other"; // or any logic that decides required
-  if (descriptionRequired && !description.trim()) {
-    Alert.alert("Error", "Description is required for this report.");
-    return;
-  }
-
-  // ✅ Continue submission
-  setLoading(true);
-  try {
-    const formData = new FormData();
-    formData.append("abuse_type_id", abuseTypeId as string);
-    formData.append("subtype_id", selectedSubtype);
-    formData.append("description", description); // can be empty if optional
-    formData.append("reporter_email", email);
-    formData.append("phone_number", phone);
-    formData.append("full_name", fullName);
-    formData.append("age", age);
-    formData.append("location", location);
-    formData.append("school_name", school);
-    formData.append("grade", grade);
-    formData.append("status", "Awaiting-resolution");
-    formData.append("is_anonymous", isAnonymous ? "1" : "0");
-
-    if (attachment) {
-      const uriParts = attachment.uri.split('/');
-      const fileName = uriParts[uriParts.length - 1];
-      const fileType = attachment.type.startsWith('video') ? 'video/mp4' : 'image/jpeg';
-
-      formData.append('file', {
-        uri: attachment.uri,
-        name: fileName,
-        type: fileType,
-      } as any);
+    if (!selectedSubtype) {
+      Alert.alert("Error", "Please select a subtype.");
+      return;
     }
 
-    const response = await fetch(`${BACKEND_URL}/reports`, {
-      method: "POST",
-      body: formData,
-      headers: { Accept: "application/json" },
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Server error: ${response.status}`);
+    if (!email) {
+      Alert.alert("Error", "Please enter your email.");
+      return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      Alert.alert("Error", "Please enter a valid email address.");
+      return;
     }
 
-    const result = await response.json();
-    const caseNumber = result.case_number;
-    setSubmittedCaseNumber(caseNumber);
-    setSuccessModalVisible(true);
+    const descriptionRequired =
+      subtypes.find((s) => String(s.id) === selectedSubtype)
+        ?.sub_type_name === "Other";
+    if (descriptionRequired && !description.trim()) {
+      Alert.alert("Error", "Description is required for this report.");
+      return;
+    }
 
-    // Clear form
-    setSelectedSubtype("");
-    setDescription("");
-    setEmail("");
-    setPhone("");
-    setFullName("");
-    setAge("");
-    setLocation("");
-    setSchool("");
-    setGrade("");
-    setAttachment(null);
-    setSchoolSuggestions([]);
-  } catch (err: any) {
-    console.error("Submission error:", err);
-    Alert.alert("Error", "Failed to create report.");
-  } finally {
-    setLoading(false);
-  }
-};
+    setLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append("abuse_type_id", abuseTypeId as string);
+      formData.append("subtype_id", selectedSubtype);
+      formData.append("description", description);
+      formData.append("reporter_email", email);
+      formData.append("phone_number", phone);
+      formData.append("full_name", fullName);
+      formData.append("age", age);
+      formData.append("location", location);
+      formData.append("school_name", school);
+      formData.append("grade", grade);
+      formData.append("status", "awaiting-resolution");
+      formData.append("is_anonymous", isAnonymous ? "1" : "0");
 
+      if (attachment) {
+        const uriParts = attachment.uri.split('/');
+        const fileName = uriParts[uriParts.length - 1];
+        const fileType = attachment.type.startsWith('video') ? 'video/mp4' : 'image/jpeg';
 
+        formData.append('file', {
+          uri: attachment.uri,
+          name: fileName,
+          type: fileType,
+        } as any);
+      }
+
+      const response = await fetch(`${BACKEND_URL}/reports`, {
+        method: "POST",
+        body: formData,
+        headers: { Accept: "application/json" },
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Server error: ${response.status}`);
+      }
+
+      const result = await response.json();
+      const caseNumber = result.case_number;
+      setSubmittedCaseNumber(caseNumber);
+      setSuccessModalVisible(true);
+
+      // Clear form
+      setSelectedSubtype("");
+      setDescription("");
+      setEmail("");
+      setPhone("");
+      setFullName("");
+      setAge("");
+      setLocation("");
+      setSchool("");
+      setGrade("");
+      setAttachment(null);
+      setSchoolSuggestions([]);
+    } catch (err: any) {
+      console.error("Submission error:", err);
+      Alert.alert("Error", "Failed to create report.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleNavigate = (path: string) => {
     toggleMenu();
@@ -247,11 +242,10 @@ export default function CreateReportScreen() {
         </TouchableOpacity>
       </View>
 
-     <ScrollView
-  contentContainerStyle={styles.container}
-  scrollEnabled={!subtypeOpen && !gradeOpen && schoolSuggestions.length === 0}
->
-
+      <ScrollView
+        contentContainerStyle={styles.container}
+        scrollEnabled={!subtypeOpen && !gradeOpen && schoolSuggestions.length === 0}
+      >
         <Text style={styles.title}>REPORT CASE</Text>
         {isAnonymous && (
           <Text style={{ color: "black", marginBottom: 10 }}>
@@ -261,10 +255,8 @@ export default function CreateReportScreen() {
         <Text style={styles.abuseTypeText}>Abuse Type: {abuseTypeName}</Text>
 
         <View style={styles.formWrapper}>
-          {/* Only show Subtype + Grade when school suggestions are closed */}
           {schoolSuggestions.length === 0 && (
             <>
-              {/* Subtype */}
               <View style={styles.fullField}>
                 <Text style={styles.label}>Subtype</Text>
                 <DropDownPicker
@@ -283,7 +275,6 @@ export default function CreateReportScreen() {
             </>
           )}
 
-          {/* Age + School */}
           <View style={styles.row}>
             <View style={styles.field}>
               <Text style={styles.label}>Age</Text>
@@ -306,7 +297,6 @@ export default function CreateReportScreen() {
             </View>
           </View>
 
-          {/* School suggestions overlay */}
           {schoolSuggestions.length > 0 && (
             <View style={styles.suggestionsOverlay}>
               <View style={styles.suggestionsContainer}>
@@ -336,7 +326,6 @@ export default function CreateReportScreen() {
             </View>
           )}
 
-          {/* Grade dropdown only visible when no suggestions */}
           {schoolSuggestions.length === 0 && (
             <View style={styles.row}>
               <View style={styles.fieldLast}>
@@ -368,7 +357,6 @@ export default function CreateReportScreen() {
             </View>
           )}
 
-          {/* Email + Phone */}
           <View style={styles.row}>
             <View style={styles.field}>
               <Text style={styles.label}>Email</Text>
@@ -390,7 +378,6 @@ export default function CreateReportScreen() {
             </View>
           </View>
 
-          {/* Address */}
           <View style={styles.fullField}>
             <Text style={styles.label}>Address</Text>
             <TextInput
@@ -400,7 +387,6 @@ export default function CreateReportScreen() {
             />
           </View>
 
-          {/* Description */}
           <View style={styles.fullField}>
             <Text style={styles.label}>
               Description{" "}
@@ -419,7 +405,6 @@ export default function CreateReportScreen() {
             />
           </View>
 
-          {/* ATTACHMENT */}
           <View style={styles.fullField}>
             <Text style={styles.label}>Attachment (Optional)</Text>
             <View style={styles.filePickerWrapper}>
@@ -458,6 +443,16 @@ export default function CreateReportScreen() {
         </View>
       </ScrollView>
 
+      {/* Loading Modal Overlay */}
+      <Modal visible={loading} transparent animationType="fade">
+        <View style={styles.loadingOverlay}>
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#c7da30" />
+            <Text style={styles.loadingText}>Submitting...</Text>
+          </View>
+        </View>
+      </Modal>
+
       {/* Success Modal */}
       <Modal visible={successModalVisible} transparent animationType="fade">
         <View style={styles.modalOverlay}>
@@ -490,7 +485,7 @@ export default function CreateReportScreen() {
       {/* Overlay */}
       {menuVisible && <TouchableOpacity style={styles.overlay} onPress={toggleMenu} />}
 
-      {/* Slide-in Menu */}
+      {/* Slide‑in Menu */}
       <Animated.View
         style={[styles.menu, { transform: [{ translateX: slideAnim }] }]}
       >
@@ -521,7 +516,6 @@ export default function CreateReportScreen() {
         >
           <Text style={styles.menuText}>About Us</Text>
         </TouchableOpacity>
-        
       </Animated.View>
     </View>
   );
@@ -625,4 +619,31 @@ const styles = StyleSheet.create({
   },
   videoPreview: { width: "100%", height: 180, borderRadius: 8, borderWidth: 2, borderColor: "#c7da30" },
 
+  /* --- Loading overlay styles --- */
+  loadingOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 10000,
+  },
+  loadingContainer: {
+    backgroundColor: '#fff',
+    padding: 30,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '70%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 10,
+  },
+  loadingText: {
+    marginTop: 15,
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: 'black',
+  },
 });

@@ -21,11 +21,10 @@ import {
 import DropDownPicker from "react-native-dropdown-picker";
 import { Video } from "expo-av";
 import { BACKEND_URL } from "@/utils/config";
+
 const { width } = Dimensions.get("window");
 
 export default function EditReportScreen() {
- 
-
   const { case_number } = useLocalSearchParams();
   const router = useRouter();
 
@@ -34,7 +33,7 @@ export default function EditReportScreen() {
   const [selectedSubtype, setSelectedSubtype] = useState("");
   const [subtypeItems, setSubtypeItems] = useState<any[]>([]);
   const [subtypeOpen, setSubtypeOpen] = useState(false);
-  const [media, setMedia] = useState<any>(null); // supports image/video
+  const [media, setMedia] = useState<any>(null);
 
   const [menuVisible, setMenuVisible] = useState(false);
   const slideAnim = useState(new Animated.Value(width))[0];
@@ -92,10 +91,8 @@ export default function EditReportScreen() {
   const handleUpdate = async () => {
     if (!report) return;
 
-    // Validate all required fields
     if (
       !selectedSubtype ||
-      !report.description ||
       !report.reporter_email ||
       !report.phone_number ||
       !report.age ||
@@ -114,13 +111,12 @@ export default function EditReportScreen() {
       formData.append("description", report.description);
       formData.append("phone_number", report.phone_number);
       formData.append("full_name", report.full_name);
-      formData.append("age", report.age); // ensure numeric
+      formData.append("age", report.age);
       formData.append("location", report.location);
       formData.append("school_name", report.school_name);
       formData.append("status", report.status);
       formData.append("subtype_id", selectedSubtype.toString());
       formData.append("grade", report.grade);
-
 
       if (media && media.uri && !media.uri.startsWith("http")) {
         formData.append("file", {
@@ -160,31 +156,19 @@ export default function EditReportScreen() {
     setTimeout(() => router.push({ pathname: path as any }), 250);
   };
 
-if (!report)
-  return (
-    <View
-      style={{
-        flex: 1,                  
-        alignItems: "center",     
-        justifyContent: "center", 
-        backgroundColor: "#fff",  
-      }}
-    >
-      <ActivityIndicator size="large" color="#c7da30" />
-    </View>
-  );
-
+  if (!report)
+    return (
+      <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: "#fff" }}>
+        <ActivityIndicator size="large" color="#c7da30" />
+      </View>
+    );
 
   return (
     <View style={{ flex: 1, backgroundColor: "#fff" }}>
-     // Top Bar & Menu updated for consistency
+      {/* Top Bar & Menu */}
       <View style={styles.topBar}>
         <TouchableOpacity onPress={() => router.back()}>
-          <Image
-            source={require("../assets/images/Logo.jpg")}
-            style={styles.logo}
-            resizeMode="contain"
-          />
+          <Image source={require("../assets/images/Logo.jpg")} style={styles.logo} resizeMode="contain" />
         </TouchableOpacity>
         <TouchableOpacity onPress={toggleMenu}>
           <Ionicons name="menu" size={30} color="#c7da30" />
@@ -213,8 +197,7 @@ if (!report)
           />
         </View>
 
-
-        {/* Full Name - hide completely if anonymous */}
+        {/* Full Name - hide if anonymous */}
         {report.is_anonymous == 0 && (
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Full Name</Text>
@@ -225,7 +208,6 @@ if (!report)
             />
           </View>
         )}
-
 
         {/* Email */}
         <View style={styles.inputGroup}>
@@ -279,7 +261,7 @@ if (!report)
           />
         </View>
 
-// -------------------- Grade Input --------------------
+        {/* Grade */}
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Grade</Text>
           <TextInput
@@ -342,11 +324,21 @@ if (!report)
               style={styles.modalButton}
               onPress={() => {
                 setSuccessModalVisible(false);
-                router.push("/check-status");
+                router.push("/");
               }}
             >
               <Text style={styles.modalButtonText}>OK</Text>
             </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Loading Modal */}
+      <Modal visible={loading} transparent animationType="fade">
+        <View style={styles.loadingOverlay}>
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#c7da30" />
+            <Text style={styles.loadingText}>Updating report...</Text>
           </View>
         </View>
       </Modal>
@@ -359,13 +351,9 @@ if (!report)
         <TouchableOpacity style={styles.menuItem} onPress={() => handleNavigate("/")}>
           <Text style={styles.menuText}>Home</Text>
         </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.menuItem}
-          onPress={() => router.back()}
-        >
+        <TouchableOpacity style={styles.menuItem} onPress={() => router.back()}>
           <View style={{ flexDirection: "row", alignItems: "center" }}>
             <Text style={styles.menuText}>Back</Text>
-              
           </View>
         </TouchableOpacity>
         <TouchableOpacity style={styles.menuItem} onPress={() => handleNavigate("/contact-us")}>
@@ -388,7 +376,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     paddingTop: Platform.OS === "ios" ? 50 : 30,
     paddingBottom: 15,
-    backgroundColor: "#fff", // Same as DetailsScreen sidebar color
+    backgroundColor: "#fff",
   },
   logo: { width: 100, height: 100 },
   container: { flexGrow: 1, alignItems: "center", backgroundColor: "#fff", paddingVertical: 20, paddingHorizontal: 20 },
@@ -410,26 +398,33 @@ const styles = StyleSheet.create({
   modalCase: { fontSize: 15, color: "#555", marginBottom: 25, textAlign: "center" },
   modalButton: { backgroundColor: "#c7da30", paddingVertical: 12, paddingHorizontal: 35, borderRadius: 30 },
   modalButtonText: { color: "black", fontSize: 16 },
-  overlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    width: "100%",
-    height: "100%",
-    backgroundColor: "rgba(0,0,0,0.3)",
-    zIndex: 5,
-  },
-  menu: {
-    position: "absolute",
-    top: 0,
-    right: 0,
-    width: width * 0.7,
-    height: "100%",
-    backgroundColor: "#c7da30",
-    paddingTop: 100,
-    paddingHorizontal: 20,
-    zIndex: 10,
-  },
+  overlay: { position: "absolute", top: 0, left: 0, width: "100%", height: "100%", backgroundColor: "rgba(0,0,0,0.3)", zIndex: 5 },
+  menu: { position: "absolute", top: 0, right: 0, width: width * 0.7, height: "100%", backgroundColor: "#c7da30", paddingTop: 100, paddingHorizontal: 20, zIndex: 10 },
   menuItem: { paddingVertical: 15, borderBottomWidth: 1, borderBottomColor: "#fff" },
   menuText: { fontSize: 18, color: "#333" },
+
+  // Loading Modal Styles
+  loadingOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    position: "absolute",
+    width: "100%",
+    height: "100%",
+    zIndex: 1000,
+  },
+  loadingContainer: {
+    width: 180,
+    padding: 20,
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: "#000",
+  },
 });
