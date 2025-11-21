@@ -22,16 +22,23 @@ export default function Index() {
         contentContainerStyle={[styles.container, { paddingTop: 70 }]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Hero Section */}
-        <View style={styles.heroSection}>
+        <View style={styles.logoWrapper}>
           <Image
             source={require("../assets/images/Logo.jpg")}
             style={styles.logo}
             resizeMode="contain"
           />
+        </View>
+        {/* Hero Section */}
+        <View style={styles.heroSection}>
 
-          <Text style={styles.heroTitle}>Report Abuse</Text>
-          <Text style={styles.heroSubtitle}>Safely and Anonymously</Text>
+
+
+          <Text style={styles.heroTitle}>
+            Report Abuse{"\n"}Safely and{"\n"}Anonymously
+          </Text>
+
+
 
           <Image
             source={require("../assets/images/schoolgirls.jpeg")}
@@ -87,16 +94,24 @@ const styles = StyleSheet.create({
   },
 
   logo: {
-    width: 120,
-    height: 120,
-    marginBottom: 20,
+    width: 180,
+    height: 180,
+   
   },
+  logoWrapper: {
+    width: "100%",
+    alignItems: "flex-start",
+    paddingLeft: 30,  
+      
+  },
+  
 
   heroTitle: {
-    fontSize: 34,
+    fontSize: 40,
     fontWeight: "bold",
     color: "#c7da30",
     textAlign: "center",
+    marginBottom: 10,
   },
 
   heroSubtitle: {
@@ -115,17 +130,19 @@ const styles = StyleSheet.create({
 
   buttonsContainer: {
     width: "100%",
-    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: 10,
+    
   },
-
   whiteButton: {
-    width: "90%",
+    flex: 1,
     borderRadius: 30,
     marginVertical: 8,
+    marginHorizontal: 5,
     backgroundColor: "#fff",
     borderWidth: 2,
     borderColor: "#c7da30",
-    
   },
 
   buttonContent: {
@@ -137,7 +154,7 @@ const styles = StyleSheet.create({
 
   buttonText: {
     fontSize: 16,
-    color: "#91cae0ff",
+    color: "#1aaed3ff",
     fontFamily:
       Platform.OS === "web"
         ? `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif`

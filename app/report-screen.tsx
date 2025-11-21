@@ -177,7 +177,7 @@ const styles = StyleSheet.create({
     borderColor: "#c7da30",
   },
   choiceText: {
-    color: "#91cae0ff",
+    color: "#1aaed3ff",
     fontSize: 18,
     fontWeight: "bold",
   },

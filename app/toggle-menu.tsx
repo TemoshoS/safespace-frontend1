@@ -1,8 +1,8 @@
-import React, { useRef, useState } from 'react';
-import { Text, TouchableOpacity, Animated, StyleSheet, Dimensions, TouchableWithoutFeedback } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
+import React, { useRef, useState } from 'react';
+import { Animated, Dimensions, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback } from 'react-native';
 
 const { width } = Dimensions.get('window');
 
