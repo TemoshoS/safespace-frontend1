@@ -1,23 +1,21 @@
+import { BACKEND_URL } from "@/utils/config";
+import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
+import { Video } from "expo-av";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
+  ActivityIndicator,
   Animated,
   Dimensions,
   Image,
-  Platform,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
-  Alert,
-  ActivityIndicator,
+  View
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { Video } from "expo-av";
-import { BACKEND_URL } from "@/utils/config";
 const { width } = Dimensions.get("window");
 
 export default function DetailsScreen() {
@@ -269,9 +267,9 @@ export default function DetailsScreen() {
         )}
       </View>
 
-      <TouchableOpacity style={styles.button} onPress={() => router.back()}>
+      {/* <TouchableOpacity style={styles.button} onPress={() => router.back()}>
         <Text style={styles.buttonText}>Go Back</Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
 
       {/* Overlay */}
       {menuVisible && <TouchableOpacity style={styles.overlay} onPress={toggleMenu} />}
@@ -281,12 +279,15 @@ export default function DetailsScreen() {
         <TouchableOpacity style={styles.menuItem} onPress={() => handleNavigate("/")}>
           <Text style={styles.menuText}>Home</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.menuItem} onPress={() => handleNavigate("/contact-us")}>
+         <TouchableOpacity style={styles.menuItem} onPress={() => router.back()}>
+        <Text style={styles.buttonText}>Go Back</Text>
+      </TouchableOpacity>
+        {/* <TouchableOpacity style={styles.menuItem} onPress={() => handleNavigate("/contact-us")}>
           <Text style={styles.menuText}>Contact Us</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.menuItem} onPress={() => handleNavigate("/about-us")}>
           <Text style={styles.menuText}>About Us</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </Animated.View>
     </View>
   );
@@ -296,8 +297,8 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fff", paddingHorizontal: 20, paddingTop: 40 },
   topBar: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   logo: { width: 100, height: 100 },
-  anonymousText: { textAlign: "center", color: "black", marginBottom: 10 },
-  title: { fontSize: 20, fontWeight: "bold", textAlign: "center", marginVertical: 10 },
+  anonymousText: { textAlign: "center", color: "black", marginBottom: 10, fontFamily: "Montserrat-Regular" },
+  title: { fontSize: 20, fontWeight: "bold", textAlign: "center", marginVertical: 10 , fontFamily: "Montserrat-Regular"},
   formContainer: {
     width: "100%",
     borderWidth: 2,
@@ -315,28 +316,31 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     fontSize: 16,
     marginBottom: 10,
+    fontFamily: "Montserrat-Regular",
   },
   statusButton: {
-    backgroundColor: "#c7da30",
+    backgroundColor: "#fff",
     width: "100%",
     padding: 10,
     borderRadius: 48,
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 10,
+     borderColor: "#c7da30",
+     borderWidth: 2,
   },
-  statusButtonText: { color: "#000", fontWeight: "500", fontSize: 14 },
-  caseStatusLabel: { fontSize: 16, fontWeight: "bold", marginVertical: 10, textAlign: "center" },
+  statusButtonText: { color: "#1aaed3ff", fontWeight: "500", fontSize: 15,fontFamily: "Montserrat-Regular" },
+  caseStatusLabel: { fontSize: 16, fontWeight: "bold", marginVertical: 10, textAlign: "center",fontFamily: "Montserrat-Regular", },
   statusContainer: { width: "100%", maxHeight: 300, marginTop: 10, flexGrow: 0 },
   caseItem: { backgroundColor: "#f9f9f9", padding: 15, borderRadius: 8, borderWidth: 1, borderColor: "#eee", marginBottom: 10 },
   caseHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 5 },
-  caseNumber: { fontSize: 16, fontWeight: "bold" },
-  statusBadge: { color: "white", paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12, fontSize: 12, fontWeight: "bold" },
-  caseDate: { fontSize: 14, color: "#666", marginBottom: 5 },
-  detail: { fontSize: 14, color: "#333", marginBottom: 3 },
-  detailLabel: { fontWeight: "bold" },
-  button: { backgroundColor: "#c7da30", padding: 15, borderRadius: 40, marginTop: 20, alignItems: "center" },
-  buttonText: { color: "black", fontSize: 16 },
+  caseNumber: { fontSize: 16, fontWeight: "bold" , fontFamily: "Montserrat-Regular"},
+  statusBadge: { color: "white", paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12, fontSize: 12, fontWeight: "bold",fontFamily: "Montserrat-Regular", },
+  caseDate: { fontSize: 14, color: "#666", marginBottom: 5,fontFamily: "Montserrat-Regular" },
+  detail: { fontSize: 14, color: "#333", marginBottom: 3,fontFamily: "Montserrat-Regular", },
+  detailLabel: { fontWeight: "bold",fontFamily: "Montserrat-Regular", },
+  button: { backgroundColor: "#fff",borderColor: "#c7da30", padding: 15, borderRadius: 40, marginTop: 20, alignItems: "center",borderWidth: 2, },
+  buttonText: {  color: "#333", fontSize: 15 ,fontFamily: "Montserrat-Regular",},
   editButton: { marginTop: 15, backgroundColor: "#c7da30", padding: 12, borderRadius: 8, alignItems: "center" },
   editButtonText: { borderRadius: 50, color: "black" },
   reporterImage: { width: 100, height: 100, borderRadius: 50, marginBottom: 10 },
@@ -356,7 +360,8 @@ const styles = StyleSheet.create({
     right: 0,
     width: width * 0.7,
     height: "100%",
-    backgroundColor: "#c7da30",
+    // backgroundColor: "#c7da30",
+    backgroundColor: "#fff",   // white
     paddingTop: 100,
     paddingHorizontal: 20,
     zIndex: 10,
