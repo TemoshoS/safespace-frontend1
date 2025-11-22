@@ -1,6 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
-import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
+import { Dimensions, Image, StyleSheet, TouchableOpacity, View } from "react-native";
+
+const { width, height } = Dimensions.get("window");
 
 interface TopBarProps {
   menuVisible: boolean;
@@ -22,7 +24,7 @@ export default function TopBar({ menuVisible, onBack, onToggleMenu }: TopBarProp
           </TouchableOpacity>
 
           <TouchableOpacity onPress={onToggleMenu}>
-            <Ionicons name="menu" size={30} color="#c7da30" />
+            <Ionicons name="menu" size={width * 0.08} color="#c7da30" />
           </TouchableOpacity>
         </>
       )}
@@ -33,14 +35,16 @@ export default function TopBar({ menuVisible, onBack, onToggleMenu }: TopBarProp
 const styles = StyleSheet.create({
   topBar: {
     flexDirection: "row",
+    width: "100%",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    backgroundColor: "#fff",
+    marginTop: height * 0.05,      
+    marginBottom: height * 0.025,  
+    paddingHorizontal: width * 0.04,
+    zIndex: 100,
   },
   logo: {
-    width: 120,
-    height: 40,
+    width: width * 0.25,  
+    height: height * 0.1, 
   },
 });

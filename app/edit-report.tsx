@@ -5,10 +5,10 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   Animated,
   Dimensions,
   Image,
+  KeyboardAvoidingView,
   Modal,
   Platform,
   ScrollView,
@@ -21,6 +21,8 @@ import {
 import DropDownPicker from "react-native-dropdown-picker";
 import { Video } from "expo-av";
 import { BACKEND_URL } from "@/utils/config";
+import TopBar from "@/components/toBar";
+import MenuToggle from "@/components/menuToggle";
 
 const { width } = Dimensions.get("window");
 
@@ -38,8 +40,13 @@ export default function EditReportScreen() {
   const [menuVisible, setMenuVisible] = useState(false);
   const slideAnim = useState(new Animated.Value(width))[0];
   const [successModalVisible, setSuccessModalVisible] = useState(false);
+  const [errors, setErrors] = useState<any>({});
 
-  // Fetch report
+  const updateReportField = (field: string, value: any) => {
+    setReport((prev: any) => ({ ...prev, [field]: value }));
+    setErrors((prev: any) => ({ ...prev, [field]: undefined })); // Clear field error on change
+  };
+
   useEffect(() => {
     if (!case_number) return;
     axios
@@ -48,7 +55,6 @@ export default function EditReportScreen() {
         setReport(res.data);
         setSelectedSubtype(String(res.data.subtype_id));
 
-        // Handle image/video
         if (res.data.image_path) {
           const path = `${BACKEND_URL}${res.data.image_path}`;
           const extension = path.split(".").pop()?.toLowerCase();
@@ -56,10 +62,9 @@ export default function EditReportScreen() {
           setMedia({ uri: path, type });
         }
       })
-      .catch(() => Alert.alert("Error", "Failed to fetch report."));
+      .catch(() => console.error("Failed to fetch report."));
   }, [case_number]);
 
-  // Fetch subtypes
   useEffect(() => {
     if (!report?.abuse_type_id) return;
     axios
@@ -72,38 +77,52 @@ export default function EditReportScreen() {
         setSubtypeItems(formatted);
         if (report.subtype_id) setSelectedSubtype(String(report.subtype_id));
       })
-      .catch(() => Alert.alert("Error", "Failed to load subtypes."));
+      .catch(() => console.error("Failed to load subtypes."));
   }, [report?.abuse_type_id]);
 
-  // Pick image or video
   const pickMedia = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
       quality: 0.5,
     });
-    if (!result.canceled) {
+    if (!result.canceled && result.assets.length > 0) {
       const asset = result.assets[0];
       setMedia({ uri: asset.uri, type: asset.type });
     }
   };
 
-  // Update report
   const handleUpdate = async () => {
     if (!report) return;
 
-    if (
-      !selectedSubtype ||
-      !report.reporter_email ||
-      !report.phone_number ||
-      !report.age ||
-      !report.location ||
-      !report.school_name ||
-      !report.status ||
-      !report.grade
-    ) {
-      Alert.alert("Error", "Please fill all required fields.");
-      return;
-    }
+    const newErrors: any = {};
+
+    // Required fields
+    if (!selectedSubtype) newErrors.subtype = "Subtype is required.";
+    if (!report.reporter_email) newErrors.reporter_email = "Email is required.";
+    if (!report.phone_number) newErrors.phone_number = "Phone number is required.";
+    if (!report.age) newErrors.age = "Age is required.";
+    if (!report.location) newErrors.location = "Address is required.";
+    if (!report.school_name) newErrors.school_name = "School name is required.";
+    if (!report.status) newErrors.status = "Status is required.";
+    if (!report.grade) newErrors.grade = "Grade is required.";
+    if (report.is_anonymous == 0 && !report.full_name)
+      newErrors.full_name = "Full name is required.";
+
+    // Validations
+    if (report.age && !/^\d+$/.test(report.age))
+      newErrors.age = "Age must contain numbers only.";
+
+    if (report.phone_number && !/^\d{7,15}$/.test(report.phone_number))
+      newErrors.phone_number = "Enter a valid phone number (7-15 digits).";
+
+    if (report.description && report.description.length > 500)
+      newErrors.description = "Description must be under 500 characters.";
+
+    if (report.location && /[^\w\s,.-]/.test(report.location))
+      newErrors.location = "Location cannot contain special characters.";
+
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) return;
 
     setLoading(true);
     try {
@@ -119,22 +138,23 @@ export default function EditReportScreen() {
       formData.append("grade", report.grade);
 
       if (media && media.uri && !media.uri.startsWith("http")) {
-        formData.append("file", {
-          uri: media.uri,
-          name: `report-${Date.now()}.${media.type === "image" ? "jpg" : "mp4"}`,
-          type: media.type === "image" ? "image/jpeg" : "video/mp4",
-        } as any);
+        formData.append(
+          "file",
+          {
+            uri: media.uri,
+            name: `report-${Date.now()}.${media.type === "image" ? "jpg" : "mp4"}`,
+            type: media.type === "image" ? "image/jpeg" : "video/mp4",
+          } as any
+        );
       }
 
-      const response = await axios.put(`${BACKEND_URL}/reports/${case_number}`, formData, {
+      await axios.put(`${BACKEND_URL}/reports/${case_number}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      console.log("Update response:", response.data);
       setSuccessModalVisible(true);
     } catch (err) {
       console.error("Update error:", err);
-      Alert.alert("Error", "Failed to update report.");
     } finally {
       setLoading(false);
     }
@@ -158,162 +178,169 @@ export default function EditReportScreen() {
 
   if (!report)
     return (
-      <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: "#fff" }}>
+      <View style={styles.loader}>
         <ActivityIndicator size="large" color="#c7da30" />
       </View>
     );
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#fff" }}>
-      {/* Top Bar & Menu */}
-      <View style={styles.topBar}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Image source={require("../assets/images/Logo.jpg")} style={styles.logo} resizeMode="contain" />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={toggleMenu}>
-          <Ionicons name="menu" size={30} color="#c7da30" />
-        </TouchableOpacity>
-      </View>
+    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+      <TopBar menuVisible={menuVisible} onBack={() => router.back()} onToggleMenu={toggleMenu} />
 
-      <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.title}>Edit Report</Text>
-        <Text style={{ marginBottom: 15 }}>Case Number: {case_number}</Text>
-
-        {/* Subtype */}
-        <View style={[styles.inputGroup, { zIndex: 9999 }]}>
-          <Text style={styles.label}>Subtype</Text>
-          <DropDownPicker
-            open={subtypeOpen}
-            value={selectedSubtype}
-            items={subtypeItems}
-            setOpen={setSubtypeOpen}
-            setValue={setSelectedSubtype}
-            setItems={setSubtypeItems}
-            placeholder="Select Subtype"
-            style={styles.pickerWrapper}
-            dropDownContainerStyle={styles.pickerDropdown}
-            placeholderStyle={{ color: "#555" }}
-            textStyle={{ fontSize: 15, color: "#000" }}
-          />
+      <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
+        <View style={{ alignItems: "center", marginBottom: 20 }}>
+          <Text style={styles.title}>Edit Report</Text>
+          <Text style={{ marginTop: 5, fontSize: 16, color: "#555" }}>Case Number: {case_number}</Text>
         </View>
 
-        {/* Full Name - hide if anonymous */}
-        {report.is_anonymous == 0 && (
+        <View style={styles.formWrapper}>
+          {/* Subtype */}
+          <View style={[styles.inputGroup, { zIndex: 5000 }]}>
+            <Text style={styles.label}>Subtype</Text>
+            <DropDownPicker
+              open={subtypeOpen}
+              value={selectedSubtype}
+              items={subtypeItems}
+              setOpen={setSubtypeOpen}
+              setValue={setSelectedSubtype}
+              setItems={setSubtypeItems}
+              placeholder="Select Subtype"
+              style={styles.pickerWrapper}
+              dropDownContainerStyle={styles.pickerDropdown}
+              placeholderStyle={{ color: "#555" }}
+              textStyle={{ fontSize: 15, color: "#000" }}
+            />
+            {errors.subtype && <Text style={styles.errorText}>{errors.subtype}</Text>}
+          </View>
+
+          {/* Full Name */}
+          {report.is_anonymous == 0 && (
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Full Name</Text>
+              <TextInput
+                style={styles.input}
+                value={report.full_name}
+                onChangeText={(text) => updateReportField("full_name", text)}
+              />
+              {errors.full_name && <Text style={styles.errorText}>{errors.full_name}</Text>}
+            </View>
+          )}
+
+          {/* Email */}
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Full Name</Text>
+            <Text style={styles.label}>Email</Text>
             <TextInput
               style={styles.input}
-              value={report.full_name}
-              onChangeText={(text) => setReport({ ...report, full_name: text })}
+              value={report.reporter_email}
+              onChangeText={(text) => updateReportField("reporter_email", text)}
             />
+            {errors.reporter_email && <Text style={styles.errorText}>{errors.reporter_email}</Text>}
           </View>
-        )}
 
-        {/* Email */}
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Email</Text>
-          <TextInput
-            style={styles.input}
-            value={report.reporter_email}
-            onChangeText={(text) => setReport({ ...report, reporter_email: text })}
-          />
-        </View>
+          {/* Phone & Age */}
+          <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 15 }}>
+            <View style={{ flex: 1, marginRight: 10 }}>
+              <Text style={styles.label}>Phone</Text>
+              <TextInput
+                style={styles.input}
+                value={report.phone_number}
+                onChangeText={(text) => updateReportField("phone_number", text)}
+                keyboardType="number-pad"
+              />
+              {errors.phone_number && <Text style={styles.errorText}>{errors.phone_number}</Text>}
+            </View>
 
-        {/* Phone */}
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Phone</Text>
-          <TextInput
-            style={styles.input}
-            value={report.phone_number}
-            onChangeText={(text) => setReport({ ...report, phone_number: text })}
-            keyboardType="number-pad"
-          />
-        </View>
+            <View style={{ flex: 1, marginLeft: 10 }}>
+              <Text style={styles.label}>Age</Text>
+              <TextInput
+                style={styles.input}
+                value={String(report.age || "")}
+                onChangeText={(text) => updateReportField("age", text)}
+                keyboardType="numeric"
+              />
+              {errors.age && <Text style={styles.errorText}>{errors.age}</Text>}
+            </View>
+          </View>
 
-        {/* Age */}
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Age</Text>
-          <TextInput
-            style={styles.input}
-            value={String(report.age || "")}
-            onChangeText={(text) => setReport({ ...report, age: text })}
-            keyboardType="numeric"
-          />
-        </View>
+          {/* Address */}
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Address</Text>
+            <TextInput
+              style={styles.input}
+              value={report.location}
+              onChangeText={(text) => updateReportField("location", text)}
+            />
+            {errors.location && <Text style={styles.errorText}>{errors.location}</Text>}
+          </View>
 
-        {/* Address */}
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Address</Text>
-          <TextInput
-            style={styles.input}
-            value={report.location}
-            onChangeText={(text) => setReport({ ...report, location: text })}
-          />
-        </View>
+          {/* School & Grade */}
+          <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 15 }}>
+            <View style={{ flex: 1, marginRight: 10 }}>
+              <Text style={styles.label}>School</Text>
+              <TextInput
+                style={styles.input}
+                value={report.school_name}
+                onChangeText={(text) => updateReportField("school_name", text)}
+              />
+              {errors.school_name && <Text style={styles.errorText}>{errors.school_name}</Text>}
+            </View>
 
-        {/* School */}
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>School</Text>
-          <TextInput
-            style={styles.input}
-            value={report.school_name}
-            onChangeText={(text) => setReport({ ...report, school_name: text })}
-          />
-        </View>
+            <View style={{ flex: 1, marginLeft: 10 }}>
+              <Text style={styles.label}>Grade</Text>
+              <TextInput
+                style={styles.input}
+                value={report.grade || ""}
+                onChangeText={(text) => updateReportField("grade", text)}
+              />
+              {errors.grade && <Text style={styles.errorText}>{errors.grade}</Text>}
+            </View>
+          </View>
 
-        {/* Grade */}
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Grade</Text>
-          <TextInput
-            style={styles.input}
-            value={report.grade || ""}
-            onChangeText={(text) => setReport({ ...report, grade: text })}
-          />
-        </View>
+          {/* Description */}
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Description</Text>
+            <TextInput
+              style={[styles.input, styles.descriptionInput]}
+              value={report.description}
+              onChangeText={(text) => updateReportField("description", text)}
+              multiline
+            />
+            {errors.description && <Text style={styles.errorText}>{errors.description}</Text>}
+          </View>
 
-        {/* Description */}
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Description</Text>
-          <TextInput
-            style={[styles.input, styles.descriptionInput]}
-            value={report.description}
-            onChangeText={(text) => setReport({ ...report, description: text })}
-            multiline
-          />
-        </View>
-
-        {/* Media */}
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Attachment</Text>
-          <TouchableOpacity style={styles.imageCard} onPress={pickMedia}>
-            {media ? (
-              media.type === "image" ? (
-                <Image source={{ uri: media.uri }} style={styles.imageInsideCard} />
+          {/* Media */}
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Attachment</Text>
+            <TouchableOpacity style={styles.imageCard} onPress={pickMedia}>
+              {media ? (
+                media.type === "image" ? (
+                  <Image source={{ uri: media.uri }} style={styles.imageInsideCard} />
+                ) : (
+                  <Video
+                    source={{ uri: media.uri }}
+                    style={styles.imageInsideCard}
+                    useNativeControls
+                    resizeMode={"contain" as any}
+                    shouldPlay={false}
+                  />
+                )
               ) : (
-                <Video
-                  source={{ uri: media.uri }}
-                  style={styles.imageInsideCard}
-                  useNativeControls
-                  resizeMode={"contain" as any}
-                  shouldPlay={false}
-                />
-              )
-            ) : (
-              <View style={styles.imagePlaceholder}>
-                <Text style={{ color: "#555", fontWeight: "500" }}>Choose Image/Video</Text>
-                <Ionicons name="camera" size={24} color="#555" style={{ marginLeft: 10 }} />
-              </View>
-            )}
-          </TouchableOpacity>
+                <View style={styles.imagePlaceholder}>
+                  <Text style={{ color: "#555", fontWeight: "500" }}>Choose Image/Video</Text>
+                  <Ionicons name="camera" size={24} color="#555" style={{ marginLeft: 10 }} />
+                </View>
+              )}
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Submit */}
-        <TouchableOpacity style={styles.submitButton} onPress={handleUpdate}>
+        <TouchableOpacity style={[styles.submitButton, { alignSelf: "center" }]} onPress={handleUpdate}>
           <Text style={styles.submitText}>{loading ? "Updating..." : "Update Report"}</Text>
         </TouchableOpacity>
       </ScrollView>
 
-      {/* Success Modal */}
+      {/* Modals */}
       <Modal visible={successModalVisible} transparent animationType="fade">
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
@@ -333,7 +360,6 @@ export default function EditReportScreen() {
         </View>
       </Modal>
 
-      {/* Loading Modal */}
       <Modal visible={loading} transparent animationType="fade">
         <View style={styles.loadingOverlay}>
           <View style={styles.loadingContainer}>
@@ -343,55 +369,78 @@ export default function EditReportScreen() {
         </View>
       </Modal>
 
-      {/* Overlay */}
       {menuVisible && <TouchableOpacity style={styles.overlay} onPress={toggleMenu} />}
 
-      {/* Slide-in Menu */}
-      <Animated.View style={[styles.menu, { transform: [{ translateX: slideAnim }] }]}>
-        <TouchableOpacity style={styles.menuItem} onPress={() => handleNavigate("/")}>
-          <Text style={styles.menuText}>Home</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.menuItem} onPress={() => router.back()}>
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <Text style={styles.menuText}>Back</Text>
-          </View>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.menuItem} onPress={() => handleNavigate("/contact-us")}>
-          <Text style={styles.menuText}>Contact Us</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.menuItem} onPress={() => handleNavigate("/about-us")}>
-          <Text style={styles.menuText}>About Us</Text>
-        </TouchableOpacity>
-      </Animated.View>
-    </View>
+      <MenuToggle
+        menuVisible={menuVisible}
+        slideAnim={slideAnim}
+        onNavigate={handleNavigate}
+        onBack={() => router.back()}
+        onClose={() => setMenuVisible(false)}
+      />
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  topBar: {
-    width: "100%",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 15,
-    paddingTop: Platform.OS === "ios" ? 50 : 30,
-    paddingBottom: 15,
-    backgroundColor: "#fff",
-  },
-  logo: { width: 100, height: 100 },
-  container: { flexGrow: 1, alignItems: "center", backgroundColor: "#fff", paddingVertical: 20, paddingHorizontal: 20 },
+  container: { flex: 1, backgroundColor: "#fff" },
+  scrollContainer: { flexGrow: 1, paddingVertical: 20, paddingHorizontal: 15 },
+  loader: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#fff" },
   title: { fontSize: 26, fontWeight: "bold", marginBottom: 20, color: "black" },
+  formWrapper: {
+    width: "100%",
+    maxWidth: 800,
+    borderWidth: 2,
+    borderColor: "#c7da30",
+    borderRadius: 6,
+    padding: 20,
+    backgroundColor: "#fff",
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 3 },
+    shadowRadius: 5,
+    elevation: 3,
+    alignSelf: "center",
+    marginBottom: 20,
+  },
   inputGroup: { width: "100%", marginBottom: 15 },
   label: { color: "black", marginBottom: 6 },
-  input: { borderWidth: 2, borderColor: "#c7da30", borderRadius: 8, padding: 10, fontSize: 15, backgroundColor: "#fff", width: "100%", height: 48 },
+  input: {
+    borderWidth: 2,
+    borderColor: "#c7da30",
+    borderRadius: 8,
+    padding: 10,
+    fontSize: 15,
+    backgroundColor: "#fff",
+    width: "100%",
+    height: 48,
+  },
   descriptionInput: { height: 100, textAlignVertical: "top" },
   pickerWrapper: { borderColor: "#c7da30", borderWidth: 2, borderRadius: 8, backgroundColor: "#fff", height: 48 },
   pickerDropdown: { borderColor: "#c7da30", borderWidth: 2, borderRadius: 8, backgroundColor: "#fff" },
-  imageCard: { borderWidth: 2, borderColor: "#c7da30", borderRadius: 8, backgroundColor: "#fff", width: "100%", height: 160, justifyContent: "center", alignItems: "center", overflow: "hidden" },
-  imageInsideCard: { width: "100%", height: "100%", borderRadius: 8 },
+  imageCard: {
+    borderWidth: 2,
+    borderColor: "#c7da30",
+    borderRadius: 8,
+    backgroundColor: "#fff",
+    width: "100%",
+    height: 160,
+    justifyContent: "center",
+    alignItems: "center",
+    overflow: "hidden",
+  },
+  imageInsideCard: { width: "100%", height: "100%", resizeMode: "cover", borderRadius: 8 },
   imagePlaceholder: { flexDirection: "row", alignItems: "center" },
-  submitButton: { backgroundColor: "#c7da30", paddingVertical: 14, borderRadius: 8, alignItems: "center", width: "100%", marginTop: 10 },
-  submitText: { color: "black", fontSize: 16 },
+  submitButton: {
+    borderWidth: 2,
+    borderColor: "#c7da30",
+    paddingVertical: 12,
+    borderRadius: 50,
+    alignItems: "center",
+    width: "70%",
+    marginTop: 10,
+  },
+  submitText: { color: "#1aaed3ff", fontWeight: "500", fontSize: 16 },
   modalOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", alignItems: "center" },
   modalContainer: { width: "85%", backgroundColor: "#fff", borderRadius: 12, padding: 25, alignItems: "center" },
   modalTitle: { fontSize: 16, fontWeight: "bold", color: "#000", textAlign: "center", marginBottom: 10 },
@@ -399,11 +448,6 @@ const styles = StyleSheet.create({
   modalButton: { backgroundColor: "#c7da30", paddingVertical: 12, paddingHorizontal: 35, borderRadius: 30 },
   modalButtonText: { color: "black", fontSize: 16 },
   overlay: { position: "absolute", top: 0, left: 0, width: "100%", height: "100%", backgroundColor: "rgba(0,0,0,0.3)", zIndex: 5 },
-  menu: { position: "absolute", top: 0, right: 0, width: width * 0.7, height: "100%", backgroundColor: "#c7da30", paddingTop: 100, paddingHorizontal: 20, zIndex: 10 },
-  menuItem: { paddingVertical: 15, borderBottomWidth: 1, borderBottomColor: "#fff" },
-  menuText: { fontSize: 18, color: "#333" },
-
-  // Loading Modal Styles
   loadingOverlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.5)",
@@ -414,17 +458,8 @@ const styles = StyleSheet.create({
     height: "100%",
     zIndex: 1000,
   },
-  loadingContainer: {
-    width: 180,
-    padding: 20,
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  loadingText: {
-    marginTop: 10,
-    fontSize: 16,
-    color: "#000",
-  },
+  loadingContainer: { width: 180, padding: 20, backgroundColor: "#fff", borderRadius: 12, justifyContent: "center", alignItems: "center" },
+  loadingText: { marginTop: 10, fontSize: 16, color: "#000" },
+  errorText: { color: "red", marginTop: 4, fontSize: 13 },
 });
+

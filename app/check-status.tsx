@@ -17,9 +17,11 @@ import {
   View
 } from "react-native";
 const { width } = Dimensions.get("window");
+import TopBar from "@/components/toBar";
+import MenuToggle from "@/components/menuToggle";
 
 export default function DetailsScreen() {
- 
+
 
   const router = useRouter();
   const params = useLocalSearchParams();
@@ -105,19 +107,11 @@ export default function DetailsScreen() {
   return (
     <View style={styles.container}>
       {/* Top bar: logo + menu */}
-      <View style={styles.topBar}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Image
-            source={require("../assets/images/Logo.jpg")}
-            style={styles.logo}
-            resizeMode="contain"
-          />
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={toggleMenu}>
-          <Ionicons name="menu" size={30} color="#c7da30" />
-        </TouchableOpacity>
-      </View>
+      <TopBar
+        menuVisible={menuVisible}
+        onBack={() => router.back()}
+        onToggleMenu={toggleMenu}
+      />
 
       {anonymous === "yes" && (
         <Text style={styles.anonymousText}>You’re reporting anonymously</Text>
@@ -267,38 +261,31 @@ export default function DetailsScreen() {
         )}
       </View>
 
-      {/* <TouchableOpacity style={styles.button} onPress={() => router.back()}>
-        <Text style={styles.buttonText}>Go Back</Text>
-      </TouchableOpacity> */}
+
 
       {/* Overlay */}
       {menuVisible && <TouchableOpacity style={styles.overlay} onPress={toggleMenu} />}
 
       {/* Slide-in Menu */}
-      <Animated.View style={[styles.menu, { transform: [{ translateX: slideAnim }] }]}>
-        <TouchableOpacity style={styles.menuItem} onPress={() => handleNavigate("/")}>
-          <Text style={styles.menuText}>Home</Text>
-        </TouchableOpacity>
-         <TouchableOpacity style={styles.menuItem} onPress={() => router.back()}>
-        <Text style={styles.buttonText}>Go Back</Text>
-      </TouchableOpacity>
-        {/* <TouchableOpacity style={styles.menuItem} onPress={() => handleNavigate("/contact-us")}>
-          <Text style={styles.menuText}>Contact Us</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.menuItem} onPress={() => handleNavigate("/about-us")}>
-          <Text style={styles.menuText}>About Us</Text>
-        </TouchableOpacity> */}
-      </Animated.View>
+      <MenuToggle
+        menuVisible={menuVisible}
+        slideAnim={slideAnim}
+        onNavigate={handleNavigate}
+        onBack={() => router.back()}
+        onClose={() => setMenuVisible(false)}
+      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff", paddingHorizontal: 20, paddingTop: 40 },
-  topBar: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
-  logo: { width: 100, height: 100 },
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+    paddingHorizontal: 20,
+  },
   anonymousText: { textAlign: "center", color: "black", marginBottom: 10, fontFamily: "Montserrat-Regular" },
-  title: { fontSize: 20, fontWeight: "bold", textAlign: "center", marginVertical: 10 , fontFamily: "Montserrat-Regular"},
+  title: { fontSize: 20, fontWeight: "bold", textAlign: "center", marginVertical: 10, fontFamily: "Montserrat-Regular" },
   formContainer: {
     width: "100%",
     borderWidth: 2,
@@ -326,25 +313,25 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 10,
-     borderColor: "#c7da30",
-     borderWidth: 2,
+    borderColor: "#c7da30",
+    borderWidth: 2,
   },
-  statusButtonText: { color: "#1aaed3ff", fontWeight: "500", fontSize: 15,fontFamily: "Montserrat-Regular" },
-  caseStatusLabel: { fontSize: 16, fontWeight: "bold", marginVertical: 10, textAlign: "center",fontFamily: "Montserrat-Regular", },
+  statusButtonText: { color: "#1aaed3ff", fontWeight: "500", fontSize: 16, fontFamily: "Montserrat-Regular" },
+  caseStatusLabel: { fontSize: 16, fontWeight: "bold", marginVertical: 10, textAlign: "center", fontFamily: "Montserrat-Regular", },
   statusContainer: { width: "100%", maxHeight: 300, marginTop: 10, flexGrow: 0 },
   caseItem: { backgroundColor: "#f9f9f9", padding: 15, borderRadius: 8, borderWidth: 1, borderColor: "#eee", marginBottom: 10 },
   caseHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 5 },
-  caseNumber: { fontSize: 16, fontWeight: "bold" , fontFamily: "Montserrat-Regular"},
-  statusBadge: { color: "white", paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12, fontSize: 12, fontWeight: "bold",fontFamily: "Montserrat-Regular", },
-  caseDate: { fontSize: 14, color: "#666", marginBottom: 5,fontFamily: "Montserrat-Regular" },
-  detail: { fontSize: 14, color: "#333", marginBottom: 3,fontFamily: "Montserrat-Regular", },
-  detailLabel: { fontWeight: "bold",fontFamily: "Montserrat-Regular", },
-  button: { backgroundColor: "#fff",borderColor: "#c7da30", padding: 15, borderRadius: 40, marginTop: 20, alignItems: "center",borderWidth: 2, },
-  buttonText: {  color: "#333", fontSize: 15 ,fontFamily: "Montserrat-Regular",},
-  editButton: { marginTop: 15, backgroundColor: "#c7da30", padding: 12, borderRadius: 8, alignItems: "center" },
-  editButtonText: { borderRadius: 50, color: "black" },
-  reporterImage: { width: 100, height: 100, borderRadius: 50, marginBottom: 10 },
-  reporterVideo: { width: 300, height: 200, borderRadius: 8, marginBottom: 10 },
+  caseNumber: { fontSize: 16, fontWeight: "bold", fontFamily: "Montserrat-Regular" },
+  statusBadge: { color: "white", paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12, fontSize: 12, fontWeight: "bold", fontFamily: "Montserrat-Regular", },
+  caseDate: { fontSize: 14, color: "#666", marginBottom: 5, fontFamily: "Montserrat-Regular" },
+  detail: { fontSize: 14, color: "#333", marginBottom: 3, fontFamily: "Montserrat-Regular", },
+  detailLabel: { fontWeight: "bold", fontFamily: "Montserrat-Regular", },
+  button: { backgroundColor: "#fff", borderColor: "#c7da30", padding: 15, borderRadius: 40, marginTop: 20, alignItems: "center", borderWidth: 2, },
+  buttonText: { color: "#333", fontSize: 15, fontFamily: "Montserrat-Regular", },
+  editButton: { marginTop: 15, borderWidth: 2, borderColor: "#c7da30", padding: 12, borderRadius: 50, alignItems: "center" },
+  editButtonText: { color: "#1aaed3ff", fontWeight: "500", fontSize: 16, fontFamily: "Montserrat-Regular" },
+  reporterImage: { width: 300, height: 200,  marginBottom: 10 },
+  reporterVideo: { width: 300, height: 200,  marginBottom: 10 },
   overlay: {
     position: "absolute",
     top: 0,
@@ -354,18 +341,5 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.3)",
     zIndex: 5,
   },
-  menu: {
-    position: "absolute",
-    top: 0,
-    right: 0,
-    width: width * 0.7,
-    height: "100%",
-    // backgroundColor: "#c7da30",
-    backgroundColor: "#fff",   // white
-    paddingTop: 100,
-    paddingHorizontal: 20,
-    zIndex: 10,
-  },
-  menuItem: { paddingVertical: 15, borderBottomWidth: 1, borderBottomColor: "#fff" },
-  menuText: { fontSize: 18, color: "#333" },
+
 });

@@ -1,61 +1,84 @@
+import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import {
-    Animated,
-    Dimensions,
-    StyleSheet,
-    Text,
-    TouchableOpacity
+  Animated,
+  Dimensions,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
-const { width } = Dimensions.get("window");
+const { width, height } = Dimensions.get("window");
 
 interface MenuToggleProps {
   menuVisible: boolean;
   slideAnim: Animated.Value;
   onNavigate: (path: string) => void;
+  onBack: () => void;
+  onClose: () => void;
 }
 
-export default function MenuToggle({ menuVisible, slideAnim, onNavigate }: MenuToggleProps) {
+export default function MenuToggle({ menuVisible, slideAnim, onNavigate, onBack, onClose }: MenuToggleProps) {
   if (!menuVisible) return null;
 
   return (
     <Animated.View
-      style={[styles.menuContainer, { transform: [{ translateX: slideAnim }] }]}
+      style={[styles.menu, { transform: [{ translateX: slideAnim }] }]}
     >
-      <TouchableOpacity onPress={() => onNavigate("/home")} style={styles.menuItem}>
-        <Text style={styles.menuText}>Home</Text>
-      </TouchableOpacity>
+      <SafeAreaView style={styles.menuContent}>
+        {/* Close button */}
+        <TouchableOpacity onPress={onClose} style={styles.menuItem}>
+          <Ionicons name="close" size={width * 0.12} color="#c7da30" />
+        </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => onNavigate("/reports")} style={styles.menuItem}>
-        <Text style={styles.menuText}>Reports</Text>
-      </TouchableOpacity>
+        <TouchableOpacity onPress={() => onNavigate("/")} style={styles.menuItem}>
+          <Text style={styles.menuText}>Home</Text>
+        </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => onNavigate("/profile")} style={styles.menuItem}>
-        <Text style={styles.menuText}>Profile</Text>
-      </TouchableOpacity>
+        <TouchableOpacity onPress={() => onNavigate("/report-screen")} style={styles.menuItem}>
+          <Text style={styles.menuText}>Reports</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => onNavigate("/check-status")} style={styles.menuItem}>
+          <Text style={styles.menuText}>Check status</Text>
+        </TouchableOpacity>
+
+        {/* Back button */}
+        <TouchableOpacity onPress={onBack} style={styles.menuItem}>
+          <Text style={styles.menuText}>Back</Text>
+        </TouchableOpacity>
+      </SafeAreaView>
     </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
-  menuContainer: {
+  menu: {
     position: "absolute",
-    right: 0,
     top: 0,
-    width: width * 0.7,
+    right: 0,
+    width: width * 0.7, 
     height: "100%",
-    backgroundColor: "#fff",
-    paddingTop: 60,
-    paddingHorizontal: 20,
-    elevation: 8,
+    backgroundColor: "#FFFFFF",
+    zIndex: 10,
+  },
+  menuContent: {
+    marginTop: height * 0.06, 
+    paddingHorizontal: width * 0.05, 
   },
   menuItem: {
-    paddingVertical: 15,
+    paddingVertical: height * 0.02, 
+    paddingHorizontal: width * 0.03, 
     borderBottomWidth: 1,
-    borderColor: "#eee",
+    borderBottomColor: "#fff",
+    borderRadius: 25,
+    marginBottom: height * 0.015,
   },
   menuText: {
-    fontSize: 18,
-    color: "#000",
+    textAlign: "left",
+    fontSize: width * 0.05, 
+    color: "#1aaed3ff",
   },
 });

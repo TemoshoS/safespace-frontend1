@@ -1,5 +1,7 @@
 import { useRouter } from "expo-router";
-import React, { useRef } from "react";
+import React, { useRef, useEffect, useState } from "react";
+import { Modal } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   Image,
   Platform,
@@ -8,11 +10,43 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Dimensions
 } from "react-native";
+
+const { width, height } = Dimensions.get("window");
 
 export default function Index() {
   const router = useRouter();
+  const [showCookie, setShowCookie] = useState(false);
   const scrollRef = useRef<ScrollView>(null);
+
+  useEffect(() => {
+  const checkConsent = async () => {
+    try {
+      const accepted = await AsyncStorage.getItem("cookieConsent");
+      if (!accepted) {
+        setShowCookie(true); 
+      }
+    } catch (error) {
+      console.error("Error reading cookie consent:", error);
+      setShowCookie(true); 
+    }
+  };
+
+  checkConsent();
+}, []);
+
+  const acceptCookies = async () => {
+    await AsyncStorage.setItem("cookieConsent", "all");
+    setShowCookie(false);
+  };
+
+ 
+  const rejectAll = async () => {
+    await AsyncStorage.setItem("cookieConsent", "rejected");
+    setShowCookie(false);
+  };
+
 
   return (
     <View style={{ flex: 1, backgroundColor: "#fff" }}>
@@ -72,6 +106,37 @@ export default function Index() {
           </View>
         </View>
       </ScrollView>
+      {/* ================= COOKIE MODAL ================= */}
+      <Modal visible={showCookie} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalBox}>
+            <Text style={styles.modalTitle}>Cookies Settings</Text>
+
+            <Text style={styles.modalText}>
+            We use essential cookies to keep Safe Space secure and working properly. This includes safety features like anonymous sessions, secure logins, and improving support services.By continuing, you accept these cookies.
+            </Text>
+
+            <View style={styles.modalButtons}>
+              {/* Accept All */}
+              <TouchableOpacity
+                style={[styles.modalButton, { backgroundColor: "#c7da30" }]}
+                onPress={acceptCookies}
+              >
+                <Text style={styles.modalButtonText}>Accept All</Text>
+              </TouchableOpacity>
+
+
+              {/* Reject All */}
+              <TouchableOpacity
+                style={[styles.modalButton, { backgroundColor: "red" }]}
+                onPress={rejectAll}
+              >
+                <Text style={styles.modalButtonText}>Reject All</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -89,25 +154,25 @@ const styles = StyleSheet.create({
   heroSection: {
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 40,
-    paddingHorizontal: 20,
+    paddingVertical: height * 0.05,
+    paddingHorizontal: width * 0.05,
   },
 
   logo: {
-    width: 180,
-    height: 180,
-   
+    width: width * 0.25,
+    height: width * 0.25,
+
   },
   logoWrapper: {
     width: "100%",
     alignItems: "flex-start",
-    paddingLeft: 30,  
-      
+    paddingLeft: width * 0.08,
+
   },
-  
+
 
   heroTitle: {
-    fontSize: 40,
+    fontSize: width * 0.1,
     fontWeight: "bold",
     color: "#c7da30",
     textAlign: "center",
@@ -123,7 +188,8 @@ const styles = StyleSheet.create({
 
   heroImage: {
     width: "90%",
-    height: 250,
+    height: height * 0.3,
+    aspectRatio: 16 / 9,
     borderRadius: 10,
     marginBottom: 30,
   },
@@ -133,7 +199,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     paddingHorizontal: 10,
-    
+
   },
   whiteButton: {
     flex: 1,
@@ -149,11 +215,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 15,
+    paddingVertical: height * 0.015
+    ,
   },
 
   buttonText: {
-    fontSize: 16,
+    fontSize: width * 0.04,
     color: "#1aaed3ff",
     fontFamily:
       Platform.OS === "web"
@@ -161,4 +228,50 @@ const styles = StyleSheet.create({
         : "System",
     marginLeft: 10,
   },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  modalBox: {
+    width: "85%",
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 20,
+  },
+
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 10,
+    textAlign: "center",
+    color: "#1aaed3ff",
+  },
+
+  modalText: {
+    fontSize: 14,
+    textAlign: "center",
+    marginBottom: 20,
+    color: "#444",
+  },
+
+  modalButtons: {
+    width: "100%",
+  },
+
+  modalButton: {
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginBottom: 10,
+  },
+
+  modalButtonText: {
+    color: "#fff",
+    textAlign: "center",
+    fontWeight: "bold",
+    fontSize: 15,
+  },
+
 });

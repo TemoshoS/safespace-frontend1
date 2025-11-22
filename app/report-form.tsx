@@ -18,22 +18,16 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-<<<<<<< HEAD
-  View,
-  ActivityIndicator,
-=======
   View
->>>>>>> b11731a5f1d94c321a2032700bf53ea34237107b
 } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
 
-const { width } = Dimensions.get("window");
+import TopBar from "@/components/toBar";
+import MenuToggle from "@/components/menuToggle";
+
+const { width, height } = Dimensions.get("window");
 
 export default function CreateReportScreen() {
-<<<<<<< HEAD
-
-=======
->>>>>>> b11731a5f1d94c321a2032700bf53ea34237107b
   const { abuseTypeId, abuseTypeName, anonymous } = useLocalSearchParams();
   const router = useRouter();
 
@@ -104,10 +98,7 @@ export default function CreateReportScreen() {
     else setIsAnonymous(false);
   }, [anonymous]);
 
-<<<<<<< HEAD
-=======
   // pick image or video
->>>>>>> b11731a5f1d94c321a2032700bf53ea34237107b
   const pickMedia = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
@@ -191,98 +182,6 @@ export default function CreateReportScreen() {
   };
 
   const handleSubmit = async () => {
-<<<<<<< HEAD
-    const selectedSubtypeObj = subtypes.find(
-      (s) => String(s.id) === selectedSubtype
-    );
-    const subtypeName = selectedSubtypeObj?.sub_type_name || "";
-
-    if (!selectedSubtype) {
-      Alert.alert("Error", "Please select a subtype.");
-      return;
-    }
-
-    if (!email) {
-      Alert.alert("Error", "Please enter your email.");
-      return;
-    }
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      Alert.alert("Error", "Please enter a valid email address.");
-      return;
-    }
-
-    const descriptionRequired =
-      subtypes.find((s) => String(s.id) === selectedSubtype)
-        ?.sub_type_name === "Other";
-    if (descriptionRequired && !description.trim()) {
-      Alert.alert("Error", "Description is required for this report.");
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const formData = new FormData();
-      formData.append("abuse_type_id", abuseTypeId as string);
-      formData.append("subtype_id", selectedSubtype);
-      formData.append("description", description);
-      formData.append("reporter_email", email);
-      formData.append("phone_number", phone);
-      formData.append("full_name", fullName);
-      formData.append("age", age);
-      formData.append("location", location);
-      formData.append("school_name", school);
-      formData.append("grade", grade);
-      formData.append("status", "awaiting-resolution");
-      formData.append("is_anonymous", isAnonymous ? "1" : "0");
-
-      if (attachment) {
-        const uriParts = attachment.uri.split('/');
-        const fileName = uriParts[uriParts.length - 1];
-        const fileType = attachment.type.startsWith('video') ? 'video/mp4' : 'image/jpeg';
-
-        formData.append('file', {
-          uri: attachment.uri,
-          name: fileName,
-          type: fileType,
-        } as any);
-      }
-
-      const response = await fetch(`${BACKEND_URL}/reports`, {
-        method: "POST",
-        body: formData,
-        headers: { Accept: "application/json" },
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Server error: ${response.status}`);
-      }
-
-      const result = await response.json();
-      const caseNumber = result.case_number;
-      setSubmittedCaseNumber(caseNumber);
-      setSuccessModalVisible(true);
-
-      // Clear form
-      setSelectedSubtype("");
-      setDescription("");
-      setEmail("");
-      setPhone("");
-      setFullName("");
-      setAge("");
-      setLocation("");
-      setSchool("");
-      setGrade("");
-      setAttachment(null);
-      setSchoolSuggestions([]);
-    } catch (err: any) {
-      console.error("Submission error:", err);
-      Alert.alert("Error", "Failed to create report.");
-    } finally {
-      setLoading(false);
-    }
-=======
     if (!validateForm()) {
       return;
     }
@@ -350,7 +249,6 @@ export default function CreateReportScreen() {
     } finally {
       setLoading(false);
     }
->>>>>>> b11731a5f1d94c321a2032700bf53ea34237107b
   };
 
   const handleNavigate = (path: string) => {
@@ -380,23 +278,12 @@ export default function CreateReportScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: "#fff" }}>
       {/* Top Bar */}
-      <View style={styles.topBar}>
-        {!menuVisible && (
-          <>
-            <TouchableOpacity onPress={() => router.back()}>
-              <Image
-                source={require("../assets/images/Logo.jpg")}
-                style={styles.logo}
-                resizeMode="contain"
-              />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={toggleMenu}>
-              <Ionicons name="menu" size={30} color="#c7da30" />
-            </TouchableOpacity>
-          </>
-        )}
-      </View>
 
+      <TopBar
+        menuVisible={menuVisible}
+        onBack={() => router.back()}
+        onToggleMenu={toggleMenu}
+      />
       <ScrollView
         contentContainerStyle={styles.container}
         scrollEnabled={!subtypeOpen && !gradeOpen && schoolSuggestions.length === 0}
@@ -410,26 +297,6 @@ export default function CreateReportScreen() {
         <Text style={styles.abuseTypeText}>Abuse Type: {abuseTypeName}</Text>
 
         <View style={styles.formWrapper}>
-<<<<<<< HEAD
-          {schoolSuggestions.length === 0 && (
-            <>
-              <View style={styles.fullField}>
-                <Text style={styles.label}>Subtype</Text>
-                <DropDownPicker
-                  open={subtypeOpen}
-                  value={selectedSubtype}
-                  items={subtypeItems}
-                  setOpen={setSubtypeOpen}
-                  setValue={setSelectedSubtype}
-                  setItems={setSubtypeItems}
-                  placeholder="Select Subtype"
-                  style={styles.pickerWrapper}
-                  dropDownContainerStyle={{ borderColor: "#c7da30" }}
-                  zIndex={5000}
-                />
-              </View>
-            </>
-=======
           {/* Subtype */}
           {schoolSuggestions.length === 0 && (
             <View style={styles.fullField}>
@@ -449,7 +316,6 @@ export default function CreateReportScreen() {
               />
               {errors.subtype ? <Text style={styles.errorText}>{errors.subtype}</Text> : null}
             </View>
->>>>>>> b11731a5f1d94c321a2032700bf53ea34237107b
           )}
 
           <View style={styles.row}>
@@ -517,10 +383,7 @@ export default function CreateReportScreen() {
             </View>
           )}
 
-<<<<<<< HEAD
-=======
           {/* Grade */}
->>>>>>> b11731a5f1d94c321a2032700bf53ea34237107b
           {schoolSuggestions.length === 0 && (
             <View style={styles.row}>
               <View style={styles.fieldLast}>
@@ -638,10 +501,7 @@ export default function CreateReportScreen() {
             {errors.description ? <Text style={styles.errorText}>{errors.description}</Text> : null}
           </View>
 
-<<<<<<< HEAD
-=======
           {/* Attachment */}
->>>>>>> b11731a5f1d94c321a2032700bf53ea34237107b
           <View style={styles.fullField}>
             <Text style={styles.label}>Attachment (Optional)</Text>
             <View style={styles.filePickerWrapper}>
@@ -680,20 +540,12 @@ export default function CreateReportScreen() {
         </View>
       </ScrollView>
 
-<<<<<<< HEAD
-      {/* Loading Modal Overlay */}
-=======
       {/* Big Loading Modal (keeps your design & logic) */}
->>>>>>> b11731a5f1d94c321a2032700bf53ea34237107b
       <Modal visible={loading} transparent animationType="fade">
         <View style={styles.loadingOverlay}>
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color="#c7da30" />
-<<<<<<< HEAD
-            <Text style={styles.loadingText}>Submitting...</Text>
-=======
             <Text style={styles.loadingText}>Submitting report…</Text>
->>>>>>> b11731a5f1d94c321a2032700bf53ea34237107b
           </View>
         </View>
       </Modal>
@@ -727,242 +579,127 @@ export default function CreateReportScreen() {
       {menuVisible && (
         <TouchableOpacity style={styles.overlay} onPress={toggleMenu} />
       )}
-      <Animated.View style={[styles.menu, { transform: [{ translateX: slideAnim }] }]}>
-        {/* Close button centered at the top of the menu */}
-        <View style={styles.closeButtonContainer}>
-          <TouchableOpacity onPress={toggleMenu} style={styles.closeButton}>
-            <Ionicons name="close" size={50} color="#c7da30" />
-          </TouchableOpacity>
-        </View>
+      <MenuToggle
+        menuVisible={menuVisible}
+        slideAnim={slideAnim}
+        onNavigate={handleNavigate}
+        onBack={() => router.back()}
+        onClose={() => setMenuVisible(false)}
+      />
 
-<<<<<<< HEAD
-      {/* Slide‑in Menu */}
-      <Animated.View
-        style={[styles.menu, { transform: [{ translateX: slideAnim }] }]}
-      >
-        <TouchableOpacity
-          style={styles.menuItem}
-          onPress={() => handleNavigate("/")}
-        >
-          <Text style={styles.menuText}>Home</Text>
-        </TouchableOpacity>
-=======
-        <View style={styles.menuContent}>
-          {/** Home */}
-          <Pressable
-            onPress={() => handleNavigate("/")}
-            onPressIn={() => setActiveMenuItem("home")}
-            onPressOut={() => setActiveMenuItem(null)}
-            style={[
-              styles.menuItem,
-              activeMenuItem === "home" ? styles.activeItem : null
-            ]}
-          >
-            <Text style={styles.menuText}>Home</Text>
-          </Pressable>
->>>>>>> b11731a5f1d94c321a2032700bf53ea34237107b
-
-          <Pressable
-            onPress={() => handleNavigate("/report-screen")}
-            onPressIn={() => setActiveMenuItem("report")}
-            onPressOut={() => setActiveMenuItem(null)}
-            style={[
-              styles.menuItem,
-              activeMenuItem === "report" ? styles.activeItem : null
-            ]}
-          >
-            <Text style={styles.menuText}>Report</Text>
-          </Pressable>
-
-          <Pressable
-            onPress={() => handleNavigate("/check-status")}
-            onPressIn={() => setActiveMenuItem("checkStatus")}
-            onPressOut={() => setActiveMenuItem(null)}
-            style={[
-              styles.menuItem,
-              activeMenuItem === "checkStatus" ? styles.activeItem : null
-            ]}
-          >
-            <Text style={styles.menuText}>Check Status</Text>
-          </Pressable>
-
-<<<<<<< HEAD
-        <TouchableOpacity
-          style={styles.menuItem}
-          onPress={() => handleNavigate("/about-us")}
-        >
-          <Text style={styles.menuText}>About Us</Text>
-        </TouchableOpacity>
-=======
-          <Pressable
-            onPress={() => handleNavigate("/abuse-types")}
-            onPressIn={() => setActiveMenuItem("back")}
-            onPressOut={() => setActiveMenuItem(null)}
-            style={[
-              styles.menuItem,
-              activeMenuItem === "back" ? styles.activeItem : null
-            ]}
-          >
-            <Text style={styles.menuText}>Back</Text>
-          </Pressable>
-
-        </View>
->>>>>>> b11731a5f1d94c321a2032700bf53ea34237107b
-      </Animated.View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { paddingBottom: 40, alignItems: "center", width: "100%", paddingHorizontal: 10 },
-  topBar: { flexDirection: "row", width: "100%", maxWidth: 450, justifyContent: "space-between", alignItems: "center", marginTop: 40, marginBottom: 20, zIndex: 100, paddingHorizontal: 10 },
-  logo: { width: 100, height: 80 },
-  title: { fontSize: 26, fontWeight: "bold", marginBottom: 20, color: "black" },
-  abuseTypeText: { fontSize: 16, fontWeight: "bold", marginBottom: 10 },
-  formWrapper: { width: "100%", maxWidth: 450, borderWidth: 2, borderColor: "#c7da30", borderRadius: 6, padding: 20, backgroundColor: "#fff", shadowColor: "#000", shadowOpacity: 0.1, shadowOffset: { width: 0, height: 3 }, shadowRadius: 5, elevation: 3 },
-  row: { flexDirection: "row", justifyContent: "space-between", marginBottom: 15 },
-  field: { flex: 1, marginRight: 10 },
-  fieldLast: { flex: 1, marginRight: 0 },
-  fullField: { width: "100%", marginBottom: 15 },
-  label: { color: "black", marginBottom: 6 },
-  input: { borderWidth: 2, borderColor: "#c7da30", borderRadius: 8, padding: 10, fontSize: 15, backgroundColor: "#fff" },
-  pickerWrapper: { borderWidth: 2, borderColor: "#c7da30", borderRadius: 8, overflow: "hidden" },
-  descriptionInput: { height: 100, textAlignVertical: "top" },
-  fileInput: { borderWidth: 2, borderColor: "#c7da30", borderRadius: 8, backgroundColor: "#fff", paddingVertical: 12, paddingHorizontal: 10, justifyContent: "center" },
-  fileInputText: { color: "#555", fontWeight: "500" },
-  submitButton: { backgroundColor: "#fff", paddingVertical: 14, borderRadius: 50, alignItems: "center", width: "100%", marginTop: 10, borderWidth: 2, borderColor: "#c7da30" },
-  submitText: { color: "#1aaed3ff", fontSize: 16 },
-  suggestionsOverlay: { position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0, 0, 0, 0.5)", zIndex: 1000, justifyContent: "center", alignItems: "center", padding: 20 },
-  suggestionsContainer: { backgroundColor: "#fff", borderRadius: 12, padding: 16, width: "90%", maxHeight: "50%", borderWidth: 2, borderColor: "#c7da30", shadowColor: "#000", shadowOpacity: 0.3, shadowOffset: { width: 0, height: 5 }, shadowRadius: 10, elevation: 10 },
-  suggestionsTitle: { fontSize: 18, fontWeight: "bold", marginBottom: 10 },
-  suggestionItem: { paddingVertical: 8 },
-  suggestionText: { fontSize: 16 },
-  closeSuggestionsButton: { marginTop: 10, alignSelf: "center" },
-  closeSuggestionsText: { color: "#c7da30", fontWeight: "bold" },
-  modalOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", alignItems: "center" },
-  modalContainer: { backgroundColor: "#fff", padding: 30, borderRadius: 12, alignItems: "center", width: "85%" },
-  modalTitle: { fontSize: 20, fontWeight: "bold", marginBottom: 10, textAlign: "center" },
-  modalCase: { fontSize: 18, marginBottom: 20, fontWeight: "bold", textAlign: "center" },
-  modalButton: { backgroundColor: "#c7da30", paddingVertical: 12, paddingHorizontal: 25, borderRadius: 8 },
-  modalButtonText: { color: "black", fontSize: 16 },
-  overlay: { position: "absolute", top: 0, left: 0, width: "100%", height: "100%", backgroundColor: "rgba(0,0,0,0.3)", zIndex: 5 },
-  menu: {
-    position: "absolute",
-    top: 0,
-    right: 0,
-    width: width * 0.7,
-    height: "100%",
-    backgroundColor: "#FFFFFF",
-    zIndex: 10,
-  }, 
-  closeButtonContainer: {
-    position: "absolute",
-    top: 40,
-    left: 0,
-    right: 120,
+  container: {
+    paddingBottom: height * 0.03,
     alignItems: "center",
-    zIndex: 11,
-  },
-  closeButton: {
-    padding: 10,
-  },
-  menuContent: {
-    marginTop: 120,
-    paddingHorizontal: 20,
-  },
-  menuItem: {
-    paddingVertical: 15,
-    paddingHorizontal: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: "#fff",
-    borderRadius: 25,
-    marginBottom: 10,
-  },
-  menuText: {
-    textAlign: "left",
-    fontSize: 20,
-    color: "#91cae0ff",
-  },
-  homeText: {
-    paddingLeft: 30,
-    fontSize: 20,
-  },
-  // Report item with shadow
-  reportItem: {
-    paddingLeft: 30,
-    borderRadius: 25,
-    width: '55%',
-    paddingVertical: 4, // This won't affect text alignment
-    justifyContent: 'center',
-    backgroundColor: "#87CEEB",  // Blue border color
-  },
-  reportText: {
-    color: "white",
-    fontSize: 20,
-  },
-  checkStatusItem: {
-    paddingLeft: 10, // Starts a bit later than the others
-  },
-  checkStatusText: {
-    fontSize: 20,
-  },
-  backItem: {
-    paddingLeft: 35, // Adjust this value as needed
-  },
-  backText: {
-    fontSize: 20,
-    // Add any other styles you want for Back text
+    width: "100%",
+    paddingHorizontal: width * 0.03
   },
 
-  filePickerWrapper: { flexDirection: "row", alignItems: "center", borderWidth: 2, borderColor: "#c7da30", borderRadius: 8, overflow: "hidden", backgroundColor: "#f0f0f0", height: 45, marginBottom: 10 },
-  chooseFileButton: { backgroundColor: "#d3d3d3", paddingHorizontal: 15, justifyContent: "center", alignItems: "center", height: "100%" },
+  title: {
+    fontSize: width * 0.07,
+    fontWeight: "bold",
+    marginBottom: height * 0.02,
+    color: "black"
+  },
+
+  abuseTypeText: {
+    fontSize: width * 0.045,
+    fontWeight: "bold",
+    marginBottom: height * 0.01
+  },
+
+  formWrapper: {
+    width: "100%",                 
+    maxWidth: width * 0.95,       
+    minWidth: 300,                 
+    borderWidth: 2,
+    borderColor: "#c7da30",
+    borderRadius: 6,
+    padding: width * 0.05,
+    backgroundColor: "#fff",
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 3 },
+    shadowRadius: 5,
+    elevation: 3,
+    alignSelf: "center",           // center on larger screens
+  },
+
+
+  row: { flexDirection: "row", justifyContent: "space-between", marginBottom: height * 0.02 },
+  field: { flex: 1, marginRight: width * 0.02 },
+  fieldLast: { flex: 1, marginRight: 0 },
+  fullField: { width: "100%", marginBottom: height * 0.02 },
+
+  label: { color: "black", marginBottom: height * 0.005 },
+  input: {
+    borderWidth: 2,
+    borderColor: "#c7da30",
+    borderRadius: 8,
+    padding: width * 0.02,
+    fontSize: width * 0.04,
+    backgroundColor: "#fff"
+  },
+  pickerWrapper: { borderWidth: 2, borderColor: "#c7da30", borderRadius: 8, overflow: "hidden" },
+  descriptionInput: { height: height * 0.12, textAlignVertical: "top" },
+
+  fileInput: { borderWidth: 2, borderColor: "#c7da30", borderRadius: 8, backgroundColor: "#fff", paddingVertical: height * 0.015, paddingHorizontal: width * 0.03, justifyContent: "center" },
+  fileInputText: { color: "#555", fontWeight: "500" },
+
+  submitButton: {
+    backgroundColor: "#fff",
+    paddingVertical: height * 0.018,
+    borderRadius: 50,
+    alignItems: "center",
+    width: "100%",
+    marginTop: height * 0.015,
+    borderWidth: 2,
+    borderColor: "#c7da30"
+  },
+  submitText: { color: "#1aaed3ff", fontSize: width * 0.045 },
+
+  suggestionsOverlay: {
+    position: "absolute", top: 0, left: 0, right: 0, bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    zIndex: 1000,
+    justifyContent: "center", alignItems: "center", padding: width * 0.05
+  },
+  suggestionsContainer: {
+    backgroundColor: "#fff", borderRadius: 12, padding: width * 0.04,
+    width: "90%", maxHeight: "50%", borderWidth: 2, borderColor: "#c7da30",
+    shadowColor: "#000", shadowOpacity: 0.3, shadowOffset: { width: 0, height: 5 }, shadowRadius: 10, elevation: 10
+  },
+  suggestionsTitle: { fontSize: width * 0.045, fontWeight: "bold", marginBottom: height * 0.01 },
+  suggestionItem: { paddingVertical: height * 0.008 },
+  suggestionText: { fontSize: width * 0.04 },
+  closeSuggestionsButton: { marginTop: height * 0.01, alignSelf: "center" },
+  closeSuggestionsText: { color: "#c7da30", fontWeight: "bold" },
+
+  modalOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", alignItems: "center" },
+  modalContainer: { backgroundColor: "#fff", padding: width * 0.08, borderRadius: 12, alignItems: "center", width: "85%" },
+  modalTitle: { fontSize: width * 0.05, fontWeight: "bold", marginBottom: height * 0.01, textAlign: "center" },
+  modalCase: { fontSize: width * 0.045, marginBottom: height * 0.02, fontWeight: "bold", textAlign: "center" },
+  modalButton: { backgroundColor: "#c7da30", paddingVertical: height * 0.015, paddingHorizontal: width * 0.06, borderRadius: 8 },
+  modalButtonText: { color: "black", fontSize: width * 0.045 },
+
+  overlay: { position: "absolute", top: 0, left: 0, width: "100%", height: "100%", backgroundColor: "rgba(0,0,0,0.3)", zIndex: 5 },
+
+  filePickerWrapper: { flexDirection: "row", alignItems: "center", borderWidth: 2, borderColor: "#c7da30", borderRadius: 8, overflow: "hidden", backgroundColor: "#f0f0f0", height: height * 0.06, marginBottom: height * 0.01 },
+  chooseFileButton: { backgroundColor: "#d3d3d3", paddingHorizontal: width * 0.04, justifyContent: "center", alignItems: "center", height: "100%" },
   chooseFileText: { color: "#000", fontWeight: "500" },
-  fileNameText: { flex: 1, paddingHorizontal: 10, color: "#555" },
-  imagePreview: { width: "100%", height: 120, borderRadius: 8, borderWidth: 2, borderColor: "#c7da30", marginTop: 5 },
-  videoPreview: { width: "100%", height: 180, borderRadius: 8, borderWidth: 2, borderColor: "#c7da30" },
+  fileNameText: { flex: 1, paddingHorizontal: width * 0.03, color: "#555" },
+  imagePreview: { width: "100%", height: height * 0.15, borderRadius: 8, borderWidth: 2, borderColor: "#c7da30", marginTop: height * 0.005 },
+  videoPreview: { width: "100%", height: height * 0.23, borderRadius: 8, borderWidth: 2, borderColor: "#c7da30" },
 
-  /* --- Loading overlay styles --- */
-<<<<<<< HEAD
-  loadingOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 10000,
-  },
-  loadingContainer: {
-    backgroundColor: '#fff',
-    padding: 30,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: '70%',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 5 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 10,
-  },
-  loadingText: {
-    marginTop: 15,
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: 'black',
-=======
   loadingOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", alignItems: "center", zIndex: 10000 },
-  loadingContainer: { backgroundColor: "#fff", padding: 30, borderRadius: 12, justifyContent: "center", alignItems: "center", width: "80%", shadowColor: "#000", shadowOffset: { width: 0, height: 5 }, shadowOpacity: 0.3, shadowRadius: 10, elevation: 10 },
-  loadingText: { marginTop: 15, fontSize: 16, fontWeight: "bold", color: "black" },
-  activeItem: {
-    backgroundColor: "#87CEEB",
-    borderRadius: 25,
-  },
+  loadingContainer: { backgroundColor: "#fff", padding: width * 0.08, borderRadius: 12, justifyContent: "center", alignItems: "center", width: "80%", shadowColor: "#000", shadowOffset: { width: 0, height: 5 }, shadowOpacity: 0.3, shadowRadius: 10, elevation: 10 },
+  loadingText: { marginTop: height * 0.015, fontSize: width * 0.045, fontWeight: "bold", color: "black" },
 
+  activeItem: { backgroundColor: "#87CEEB", borderRadius: 25 },
 
-  // inline error style
-  errorText: {
-    color: "red",
-    fontSize: 13,
-    marginTop: 4,
->>>>>>> b11731a5f1d94c321a2032700bf53ea34237107b
-  },
+  errorText: { color: "red", fontSize: width * 0.035, marginTop: height * 0.003 },
 });
