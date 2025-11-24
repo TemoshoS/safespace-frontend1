@@ -1,5 +1,5 @@
 import { BACKEND_URL } from "@/utils/config";
-import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { MaterialIcons } from "@expo/vector-icons";
 import axios from "axios";
 import { Video } from "expo-av";
 import * as ImagePicker from "expo-image-picker";
@@ -12,7 +12,6 @@ import {
   FlatList,
   Image,
   Modal,
-  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -22,8 +21,8 @@ import {
 } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
 
-import TopBar from "@/components/toBar";
 import MenuToggle from "@/components/menuToggle";
+import TopBar from "@/components/toBar";
 
 const { width, height } = Dimensions.get("window");
 
@@ -254,7 +253,7 @@ export default function CreateReportScreen() {
   const handleNavigate = (path: string) => {
     toggleMenu();
     setTimeout(() => {
-      router.push({ pathname: path as any });
+      router.replace({ pathname: path as any });
     }, 250);
   };
 
@@ -566,7 +565,7 @@ export default function CreateReportScreen() {
               style={styles.modalButton}
               onPress={() => {
                 setSuccessModalVisible(false);
-                router.push("/");
+                router.replace("/");
               }}
             >
               <Text style={styles.modalButtonText}>OK</Text>

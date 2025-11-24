@@ -1,16 +1,13 @@
-import { useRouter } from "expo-router";
-import React, { useRef, useEffect, useState } from "react";
-import { Modal } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRouter } from "expo-router";
+import React, { useEffect, useRef, useState } from "react";
 import {
-  Image,
-  Platform,
+  Dimensions, Image, Modal, Platform,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View,
-  Dimensions
+  View
 } from "react-native";
 
 const { width, height } = Dimensions.get("window");
@@ -21,27 +18,16 @@ export default function Index() {
   const scrollRef = useRef<ScrollView>(null);
 
   useEffect(() => {
-  const checkConsent = async () => {
-    try {
-      const accepted = await AsyncStorage.getItem("cookieConsent");
-      if (!accepted) {
-        setShowCookie(true); 
-      }
-    } catch (error) {
-      console.error("Error reading cookie consent:", error);
-      setShowCookie(true); 
-    }
-  };
-
-  checkConsent();
-}, []);
+    setShowCookie(true);
+  }, []);
+  
 
   const acceptCookies = async () => {
     await AsyncStorage.setItem("cookieConsent", "all");
     setShowCookie(false);
   };
 
- 
+
   const rejectAll = async () => {
     await AsyncStorage.setItem("cookieConsent", "rejected");
     setShowCookie(false);
@@ -87,7 +73,7 @@ export default function Index() {
               <TouchableOpacity
                 style={styles.buttonContent}
                 activeOpacity={0.8}
-                onPress={() => router.push("/report-screen")}
+                onPress={() => router.replace("/report-screen")}
               >
                 <Text style={styles.buttonText}>Report Now</Text>
               </TouchableOpacity>
@@ -98,7 +84,7 @@ export default function Index() {
               <TouchableOpacity
                 style={styles.buttonContent}
                 activeOpacity={0.8}
-                onPress={() => router.push("/check-status")}
+                onPress={() => router.replace("/check-status")}
               >
                 <Text style={styles.buttonText}>Check Status</Text>
               </TouchableOpacity>
@@ -110,28 +96,28 @@ export default function Index() {
       <Modal visible={showCookie} transparent animationType="fade">
         <View style={styles.modalOverlay}>
           <View style={styles.modalBox}>
-            <Text style={styles.modalTitle}>Cookies Settings</Text>
+            <Text style={styles.modalTitle}>Cookies Policy</Text>
 
             <Text style={styles.modalText}>
-            We use essential cookies to keep Safe Space secure and working properly. This includes safety features like anonymous sessions, secure logins, and improving support services.By continuing, you accept these cookies.
+              We use essential cookies to keep Safe Space secure and working properly. This includes safety features like anonymous sessions, secure logins, and improving support services.By continuing, you accept these cookies.
             </Text>
 
             <View style={styles.modalButtons}>
               {/* Accept All */}
               <TouchableOpacity
-                style={[styles.modalButton, { backgroundColor: "#c7da30" }]}
+                style={[styles.modalButton]}
                 onPress={acceptCookies}
               >
-                <Text style={styles.modalButtonText}>Accept All</Text>
+                <Text style={styles.modalButtonAccept}>Accept All</Text>
               </TouchableOpacity>
 
 
               {/* Reject All */}
               <TouchableOpacity
-                style={[styles.modalButton, { backgroundColor: "red" }]}
+                style={[styles.modalButton]}
                 onPress={rejectAll}
               >
-                <Text style={styles.modalButtonText}>Reject All</Text>
+                <Text style={styles.modalButtonReject}>Reject All</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -259,18 +245,34 @@ const styles = StyleSheet.create({
 
   modalButtons: {
     width: "100%",
+    
   },
 
   modalButton: {
     paddingVertical: 12,
-    borderRadius: 8,
+    borderRadius: 50,
     marginBottom: 10,
+    backgroundColor: "#fff",
+    borderColor: "#c7da30",
+    borderWidth: 2,
   },
 
-  modalButtonText: {
-    color: "#fff",
+  modalButtonAccept: {
+    color: "#1aaed3ff",
+    fontFamily:
+      Platform.OS === "web"
+        ? `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif`
+        : "System",
     textAlign: "center",
-    fontWeight: "bold",
+    fontSize: 15,
+  },
+  modalButtonReject: {
+    color: "red",
+    fontFamily:
+      Platform.OS === "web"
+        ? `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif`
+        : "System",
+    textAlign: "center",
     fontSize: 15,
   },
 

@@ -1,5 +1,9 @@
+import MenuToggle from "@/components/menuToggle";
+import TopBar from "@/components/toBar";
+import { BACKEND_URL } from "@/utils/config";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import axios from "axios";
+import { Video } from "expo-av";
 import * as ImagePicker from "expo-image-picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -19,10 +23,6 @@ import {
   View,
 } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
-import { Video } from "expo-av";
-import { BACKEND_URL } from "@/utils/config";
-import TopBar from "@/components/toBar";
-import MenuToggle from "@/components/menuToggle";
 
 const { width } = Dimensions.get("window");
 
@@ -173,7 +173,7 @@ export default function EditReportScreen() {
 
   const handleNavigate = (path: string) => {
     toggleMenu();
-    setTimeout(() => router.push({ pathname: path as any }), 250);
+    setTimeout(() => router.replace({ pathname: path as any }), 250);
   };
 
   if (!report)
@@ -351,7 +351,7 @@ export default function EditReportScreen() {
               style={styles.modalButton}
               onPress={() => {
                 setSuccessModalVisible(false);
-                router.push("/");
+                router.replace("/");
               }}
             >
               <Text style={styles.modalButtonText}>OK</Text>

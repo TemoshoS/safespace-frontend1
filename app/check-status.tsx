@@ -1,5 +1,6 @@
+import MenuToggle from "@/components/menuToggle";
+import TopBar from "@/components/toBar";
 import { BACKEND_URL } from "@/utils/config";
-import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
 import { Video } from "expo-av";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -17,8 +18,6 @@ import {
   View
 } from "react-native";
 const { width } = Dimensions.get("window");
-import TopBar from "@/components/toBar";
-import MenuToggle from "@/components/menuToggle";
 
 export default function DetailsScreen() {
 
@@ -55,7 +54,7 @@ export default function DetailsScreen() {
   const handleNavigate = (path: string) => {
     toggleMenu();
     setTimeout(() => {
-      router.push({ pathname: path as any });
+      router.replace({ pathname: path as any });
     }, 250);
   };
 
@@ -248,7 +247,7 @@ export default function DetailsScreen() {
               <TouchableOpacity
                 style={styles.editButton}
                 onPress={() =>
-                  router.push({
+                  router.replace({
                     pathname: "/edit-report",
                     params: { case_number: searchResult.case_number },
                   })

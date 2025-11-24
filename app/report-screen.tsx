@@ -1,18 +1,16 @@
-import { Ionicons } from "@expo/vector-icons";
+import MenuToggle from "@/components/menuToggle";
+import TopBar from "@/components/toBar";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
   Animated,
   Dimensions,
-  Image,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
-import TopBar from "@/components/toBar";
-import MenuToggle from "@/components/menuToggle";
 
 const { width, height } = Dimensions.get("window");
 
@@ -22,7 +20,7 @@ export default function ReportCaseScreen() {
   const slideAnim = useState(new Animated.Value(width))[0];
 
   const handleSelect = (choice: string) => {
-    router.push({
+    router.replace({
       pathname: "/abuse-types",
       params: { anonymous: choice },
     });
@@ -48,7 +46,7 @@ export default function ReportCaseScreen() {
   const handleNavigate = (path: string) => {
     toggleMenu();
     setTimeout(() => {
-      router.push({ pathname: path as any });
+      router.replace({ pathname: path as any });
     }, 250);
   };
 

@@ -1,5 +1,6 @@
+import MenuToggle from "@/components/menuToggle";
+import TopBar from "@/components/toBar";
 import { BACKEND_URL } from "@/utils/config";
-import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -15,8 +16,6 @@ import {
 } from "react-native";
 
 const { width, height } = Dimensions.get("window");
-import TopBar from "@/components/toBar";
-import MenuToggle from "@/components/menuToggle";
 
 export default function AbuseTypesScreen() {
     const [abuseTypes, setAbuseTypes] = useState<any[]>([]);
@@ -57,12 +56,12 @@ export default function AbuseTypesScreen() {
     const handleNavigate = (path: string) => {
         toggleMenu();
         setTimeout(() => {
-            router.push({ pathname: path as any });
+            router.replace({ pathname: path as any });
         }, 250);
     };
 
     const handleAbuseTypeSelect = (type: any) => {
-        router.push({
+        router.replace({
             pathname: "/report-form",
             params: {
                 abuseTypeId: type.id,
@@ -174,7 +173,7 @@ const styles = StyleSheet.create({
         borderWidth: 2,
         borderRadius: width * 0.06,
         width: "48%",
-        height: height * 0.08, // FIXED HEIGHT (equal boxes)
+        height: height * 0.05, // FIXED HEIGHT (equal boxes)
         justifyContent: "center",
         alignItems: "center",
         marginBottom: height * 0.02,
