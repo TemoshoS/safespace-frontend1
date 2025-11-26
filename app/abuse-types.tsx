@@ -92,10 +92,10 @@ export default function AbuseTypesScreen() {
                     <Text style={styles.title}>TYPES OF ABUSE</Text>
 
                     {anonymous === "yes" && (
-                        <Text style={styles.anonymousText}>You're reporting anonymously</Text>
+                        <Text style={styles.anonymousText}>You are reporting anonymously</Text>
                     )}
                     {anonymous === "no" && (
-                        <Text style={styles.anonymousText}>You're reporting with details</Text>
+                        <Text style={styles.anonymousText}>You are reporting with details</Text>
                     )}
 
                     <View style={styles.abuseBox}>
@@ -120,7 +120,6 @@ export default function AbuseTypesScreen() {
                 menuVisible={menuVisible}
                 slideAnim={slideAnim}
                 onNavigate={handleNavigate}
-                onBack={() => router.back()}
                 onClose={() => setMenuVisible(false)}
             />
         </View>

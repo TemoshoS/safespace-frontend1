@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import React from "react";
 import {
   Animated,
@@ -6,8 +7,7 @@ import {
   SafeAreaView,
   StyleSheet,
   Text,
-  TouchableOpacity,
-  View,
+  TouchableOpacity
 } from "react-native";
 
 const { width, height } = Dimensions.get("window");
@@ -16,12 +16,22 @@ interface MenuToggleProps {
   menuVisible: boolean;
   slideAnim: Animated.Value;
   onNavigate: (path: string) => void;
-  onBack: () => void;
   onClose: () => void;
 }
 
-export default function MenuToggle({ menuVisible, slideAnim, onNavigate, onBack, onClose }: MenuToggleProps) {
+export default function MenuToggle({ menuVisible, slideAnim, onNavigate, onClose }: MenuToggleProps) {
+  const router = useRouter();
+
   if (!menuVisible) return null;
+
+  // Safe Back function
+  const handleBack = () => {
+    if (router.canGoBack?.()) {
+      router.back(); // go back if possible
+    } else {
+      router.push("/"); // fallback to Home
+    }
+  };
 
   return (
     <Animated.View
@@ -46,7 +56,7 @@ export default function MenuToggle({ menuVisible, slideAnim, onNavigate, onBack,
         </TouchableOpacity>
 
         {/* Back button */}
-        <TouchableOpacity onPress={onBack} style={styles.menuItem}>
+        <TouchableOpacity onPress={handleBack} style={styles.menuItem}>
           <Text style={styles.menuText}>Back</Text>
         </TouchableOpacity>
       </SafeAreaView>
@@ -59,18 +69,18 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 0,
     right: 0,
-    width: width * 0.7, 
+    width: width * 0.7,
     height: "100%",
     backgroundColor: "#FFFFFF",
     zIndex: 10,
   },
   menuContent: {
-    marginTop: height * 0.06, 
-    paddingHorizontal: width * 0.05, 
+    marginTop: height * 0.06,
+    paddingHorizontal: width * 0.05,
   },
   menuItem: {
-    paddingVertical: height * 0.02, 
-    paddingHorizontal: width * 0.03, 
+    paddingVertical: height * 0.02,
+    paddingHorizontal: width * 0.03,
     borderBottomWidth: 1,
     borderBottomColor: "#fff",
     borderRadius: 25,
@@ -78,7 +88,7 @@ const styles = StyleSheet.create({
   },
   menuText: {
     textAlign: "left",
-    fontSize: width * 0.05, 
+    fontSize: width * 0.05,
     color: "#1aaed3ff",
   },
 });

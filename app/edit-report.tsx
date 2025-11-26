@@ -148,12 +148,22 @@ export default function EditReportScreen() {
         );
       }
 
-      await axios.put(`${BACKEND_URL}/reports/${case_number}`, formData, {
+     const response =  await axios.put(`${BACKEND_URL}/reports/${case_number}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
+      // If malicious, backend returns 403
+      if (response.status === 403) {
+        router.replace("/access-denied"); 
+        return;
+      }
+
       setSuccessModalVisible(true);
-    } catch (err) {
+    } catch (err: any) {
+      if (err.response?.status === 403) {
+        router.replace("/access-denied");
+        return;
+      }
       console.error("Update error:", err);
     } finally {
       setLoading(false);
@@ -190,11 +200,15 @@ export default function EditReportScreen() {
       <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
         <View style={{ alignItems: "center", marginBottom: 20 }}>
           <Text style={styles.title}>Edit Report</Text>
-          <Text style={{ marginTop: 5, fontSize: 16, color: "#555" }}>Case Number: {case_number}</Text>
+          
         </View>
 
         <View style={styles.formWrapper}>
           {/* Subtype */}
+          <View style={{ alignItems: "center", marginBottom: 20 }}>
+         
+          <Text style={{ marginTop: 5, fontSize: 16, color: "#555" }}>Case Number: {case_number}</Text>
+        </View>
           <View style={[styles.inputGroup, { zIndex: 5000 }]}>
             <Text style={styles.label}>Subtype</Text>
             <DropDownPicker
@@ -375,7 +389,6 @@ export default function EditReportScreen() {
         menuVisible={menuVisible}
         slideAnim={slideAnim}
         onNavigate={handleNavigate}
-        onBack={() => router.back()}
         onClose={() => setMenuVisible(false)}
       />
     </KeyboardAvoidingView>

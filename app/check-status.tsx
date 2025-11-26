@@ -83,18 +83,31 @@ export default function DetailsScreen() {
       setError("Please enter a case number");
       return;
     }
-
+  
     setLoading(true);
     setError("");
     setSearchResult(null);
-
+  
     try {
       const res = await axios.get(`${BACKEND_URL}/reports/case/${searchQuery}`);
+  
+      // Extra safety: backend might return a 200 but a malicious message
+      if (res.data?.message?.toLowerCase().includes("malicious")) {
+        router.replace("/access-denied");
+        return;
+      }
+  
       setSearchResult(res.data);
     } catch (err: any) {
-      console.error(err);
-      if (err.response?.status === 404) {
+      console.error("Search error:", err);
+  
+      const status = err.response?.status;
+      const message = err.response?.data?.message?.toLowerCase() || "";
+  
+      if (status === 404 || message.includes("not found")) {
         setError("Case not found");
+      } else if (status === 403 || message.includes("malicious") || message.includes("forbidden")) {
+        router.replace("/access-denied");
       } else {
         setError("Failed to fetch case. Check backend/network.");
       }
@@ -102,6 +115,7 @@ export default function DetailsScreen() {
       setLoading(false);
     }
   };
+  
 
   return (
     <View style={styles.container}>
@@ -270,7 +284,7 @@ export default function DetailsScreen() {
         menuVisible={menuVisible}
         slideAnim={slideAnim}
         onNavigate={handleNavigate}
-        onBack={() => router.back()}
+       
         onClose={() => setMenuVisible(false)}
       />
     </View>

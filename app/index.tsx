@@ -1,47 +1,30 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef } from "react";
 import {
-  Dimensions, Image, Modal, Platform,
+  Dimensions,
+  Image,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 
 const { width, height } = Dimensions.get("window");
 
 export default function Index() {
   const router = useRouter();
-  const [showCookie, setShowCookie] = useState(false);
   const scrollRef = useRef<ScrollView>(null);
-
-  useEffect(() => {
-    setShowCookie(true);
-  }, []);
-  
-
-  const acceptCookies = async () => {
-    await AsyncStorage.setItem("cookieConsent", "all");
-    setShowCookie(false);
-  };
-
-
-  const rejectAll = async () => {
-    await AsyncStorage.setItem("cookieConsent", "rejected");
-    setShowCookie(false);
-  };
-
 
   return (
     <View style={{ flex: 1, backgroundColor: "#fff" }}>
-      {/* Main Scrollable Content */}
       <ScrollView
         ref={scrollRef}
         contentContainerStyle={[styles.container, { paddingTop: 70 }]}
         showsVerticalScrollIndicator={false}
       >
+        {/* Logo */}
         <View style={styles.logoWrapper}>
           <Image
             source={require("../assets/images/Logo.jpg")}
@@ -49,16 +32,12 @@ export default function Index() {
             resizeMode="contain"
           />
         </View>
+
         {/* Hero Section */}
         <View style={styles.heroSection}>
-
-
-
           <Text style={styles.heroTitle}>
             Report Abuse{"\n"}Safely and{"\n"}Anonymously
           </Text>
-
-
 
           <Image
             source={require("../assets/images/schoolgirls.jpeg")}
@@ -68,7 +47,6 @@ export default function Index() {
 
           {/* Action Buttons */}
           <View style={styles.buttonsContainer}>
-            {/* Report Button */}
             <View style={styles.whiteButton}>
               <TouchableOpacity
                 style={styles.buttonContent}
@@ -79,7 +57,6 @@ export default function Index() {
               </TouchableOpacity>
             </View>
 
-            {/* Check Status Button */}
             <View style={styles.whiteButton}>
               <TouchableOpacity
                 style={styles.buttonContent}
@@ -92,37 +69,6 @@ export default function Index() {
           </View>
         </View>
       </ScrollView>
-      {/* ================= COOKIE MODAL ================= */}
-      <Modal visible={showCookie} transparent animationType="fade">
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalBox}>
-            <Text style={styles.modalTitle}>Cookies Policy</Text>
-
-            <Text style={styles.modalText}>
-              We use essential cookies to keep Safe Space secure and working properly. This includes safety features like anonymous sessions, secure logins, and improving support services.By continuing, you accept these cookies.
-            </Text>
-
-            <View style={styles.modalButtons}>
-              {/* Accept All */}
-              <TouchableOpacity
-                style={[styles.modalButton]}
-                onPress={acceptCookies}
-              >
-                <Text style={styles.modalButtonAccept}>Accept All</Text>
-              </TouchableOpacity>
-
-
-              {/* Reject All */}
-              <TouchableOpacity
-                style={[styles.modalButton]}
-                onPress={rejectAll}
-              >
-                <Text style={styles.modalButtonReject}>Reject All</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
     </View>
   );
 }
@@ -131,149 +77,14 @@ export const options = { headerShown: false };
 
 // Styles
 const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    backgroundColor: "#FFFFFF",
-    paddingBottom: 60,
-  },
-
-  heroSection: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: height * 0.05,
-    paddingHorizontal: width * 0.05,
-  },
-
-  logo: {
-    width: width * 0.25,
-    height: width * 0.25,
-
-  },
-  logoWrapper: {
-    width: "100%",
-    alignItems: "flex-start",
-    paddingLeft: width * 0.08,
-
-  },
-
-
-  heroTitle: {
-    fontSize: width * 0.1,
-    fontWeight: "bold",
-    color: "#c7da30",
-    textAlign: "center",
-    marginBottom: 10,
-  },
-
-  heroSubtitle: {
-    fontSize: 18,
-    color: "#545454",
-    marginBottom: 30,
-    textAlign: "center",
-  },
-
-  heroImage: {
-    width: "90%",
-    height: height * 0.3,
-    aspectRatio: 16 / 9,
-    borderRadius: 10,
-    marginBottom: 30,
-  },
-
-  buttonsContainer: {
-    width: "100%",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingHorizontal: 10,
-
-  },
-  whiteButton: {
-    flex: 1,
-    borderRadius: 30,
-    marginVertical: 8,
-    marginHorizontal: 5,
-    backgroundColor: "#fff",
-    borderWidth: 2,
-    borderColor: "#c7da30",
-  },
-
-  buttonContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: height * 0.015
-    ,
-  },
-
-  buttonText: {
-    fontSize: width * 0.04,
-    color: "#1aaed3ff",
-    fontFamily:
-      Platform.OS === "web"
-        ? `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif`
-        : "System",
-    marginLeft: 10,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-
-  modalBox: {
-    width: "85%",
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 20,
-  },
-
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 10,
-    textAlign: "center",
-    color: "#1aaed3ff",
-  },
-
-  modalText: {
-    fontSize: 14,
-    textAlign: "center",
-    marginBottom: 20,
-    color: "#444",
-  },
-
-  modalButtons: {
-    width: "100%",
-    
-  },
-
-  modalButton: {
-    paddingVertical: 12,
-    borderRadius: 50,
-    marginBottom: 10,
-    backgroundColor: "#fff",
-    borderColor: "#c7da30",
-    borderWidth: 2,
-  },
-
-  modalButtonAccept: {
-    color: "#1aaed3ff",
-    fontFamily:
-      Platform.OS === "web"
-        ? `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif`
-        : "System",
-    textAlign: "center",
-    fontSize: 15,
-  },
-  modalButtonReject: {
-    color: "red",
-    fontFamily:
-      Platform.OS === "web"
-        ? `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif`
-        : "System",
-    textAlign: "center",
-    fontSize: 15,
-  },
-
+  container: { flexGrow: 1, backgroundColor: "#FFFFFF" },
+  heroSection: { alignItems: "center", justifyContent: "center", paddingVertical: height * 0.05, paddingHorizontal: width * 0.05 },
+  logo: { width: width * 0.25, height: width * 0.25 },
+  logoWrapper: { width: "100%", alignItems: "flex-start", paddingLeft: width * 0.08 },
+  heroTitle: { fontSize: width * 0.1, fontWeight: "bold", color: "#c7da30", textAlign: "center", marginBottom: 10 },
+  heroImage: { width: "100%", height: height * 0.35, borderRadius: 10, marginBottom: 30 },
+  buttonsContainer: { width: "100%", flexDirection: "row", justifyContent: "space-between", paddingHorizontal: 10 },
+  whiteButton: { flex: 1, borderRadius: 30, marginVertical: 8, marginHorizontal: 5, backgroundColor: "#fff", borderWidth: 2, borderColor: "#c7da30" },
+  buttonContent: { flexDirection: "row", alignItems: "center", justifyContent: "center", paddingVertical: height * 0.015 },
+  buttonText: { fontSize: width * 0.04, color: "#1aaed3ff", marginLeft: 10, fontFamily: Platform.OS === "web" ? `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif` : "System" },
 });

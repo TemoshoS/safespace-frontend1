@@ -181,9 +181,7 @@ export default function CreateReportScreen() {
   };
 
   const handleSubmit = async () => {
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
     setLoading(true);
     try {
@@ -193,7 +191,6 @@ export default function CreateReportScreen() {
       formData.append("description", description);
       formData.append("reporter_email", email);
       formData.append("phone_number", phone);
-      formData.append("full_name", fullName);
       formData.append("age", age);
       formData.append("location", location);
       formData.append("school_name", school);
@@ -201,10 +198,18 @@ export default function CreateReportScreen() {
       formData.append("status", "awaiting-resolution");
       formData.append("is_anonymous", isAnonymous ? "1" : "0");
 
+      // Append full_name only if the user is NOT anonymous
+      if (!isAnonymous && fullName.trim()) {
+        formData.append("full_name", fullName);
+      }
+
+      // Attach file if selected
       if (attachment) {
         const uriParts = attachment.uri.split("/");
         const fileName = uriParts[uriParts.length - 1];
-        const fileType = (attachment.type && attachment.type.startsWith && attachment.type.startsWith("video")) ? "video/mp4" : "image/jpeg";
+        const fileType = (attachment.type && attachment.type.startsWith && attachment.type.startsWith("video"))
+          ? "video/mp4"
+          : "image/jpeg";
 
         formData.append("file", {
           uri: attachment.uri,
@@ -219,14 +224,20 @@ export default function CreateReportScreen() {
         headers: { Accept: "application/json" },
       });
 
+
+      // If malicious, backend returns 403
+      if (response.status === 403) {
+        router.replace("/access-denied"); 
+        return;
+      }
+      
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(`Server error: ${response.status} ${errorText}`);
       }
 
       const result = await response.json();
-      const caseNumber = result.case_number;
-      setSubmittedCaseNumber(caseNumber);
+      setSubmittedCaseNumber(result.case_number);
       setSuccessModalVisible(true);
 
       // Clear form
@@ -249,6 +260,7 @@ export default function CreateReportScreen() {
       setLoading(false);
     }
   };
+
 
   const handleNavigate = (path: string) => {
     toggleMenu();
@@ -582,7 +594,6 @@ export default function CreateReportScreen() {
         menuVisible={menuVisible}
         slideAnim={slideAnim}
         onNavigate={handleNavigate}
-        onBack={() => router.back()}
         onClose={() => setMenuVisible(false)}
       />
 
@@ -612,9 +623,9 @@ const styles = StyleSheet.create({
   },
 
   formWrapper: {
-    width: "100%",                 
-    maxWidth: width * 0.95,       
-    minWidth: 300,                 
+    width: "100%",
+    maxWidth: width * 0.95,
+    minWidth: 300,
     borderWidth: 2,
     borderColor: "#c7da30",
     borderRadius: 6,
