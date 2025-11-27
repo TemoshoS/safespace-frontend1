@@ -1,5 +1,4 @@
 import { BACKEND_URL } from "@/utils/config";
-import { MaterialIcons } from "@expo/vector-icons";
 import axios from "axios";
 import { Video } from "expo-av";
 import * as ImagePicker from "expo-image-picker";
@@ -11,7 +10,9 @@ import {
   Dimensions,
   FlatList,
   Image,
+  KeyboardAvoidingView,
   Modal,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -19,6 +20,7 @@ import {
   TouchableOpacity,
   View
 } from "react-native";
+
 import DropDownPicker from "react-native-dropdown-picker";
 
 import MenuToggle from "@/components/menuToggle";
@@ -227,10 +229,10 @@ export default function CreateReportScreen() {
 
       // If malicious, backend returns 403
       if (response.status === 403) {
-        router.replace("/access-denied"); 
+        router.replace("/access-denied");
         return;
       }
-      
+
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(`Server error: ${response.status} ${errorText}`);
@@ -287,8 +289,11 @@ export default function CreateReportScreen() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#fff" }}>
-      {/* Top Bar */}
+    <KeyboardAvoidingView
+      style={{ flex: 1 ,backgroundColor: "#fff"}}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0}
+    >
 
       <TopBar
         menuVisible={menuVisible}
@@ -298,6 +303,7 @@ export default function CreateReportScreen() {
       <ScrollView
         contentContainerStyle={styles.container}
         scrollEnabled={!subtypeOpen && !gradeOpen && schoolSuggestions.length === 0}
+        keyboardShouldPersistTaps="handled"
       >
         <Text style={styles.title}>REPORT CASE</Text>
         {isAnonymous && (
@@ -566,11 +572,10 @@ export default function CreateReportScreen() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
             <Text style={styles.modalTitle}>Report Submitted Successfully</Text>
-            <MaterialIcons
-              name="check-circle"
-              size={60}
-              color="#c7da30"
-              style={{ marginBottom: 15 }}
+            <Image
+              source={require("../assets/images/right.jpeg")}
+              style={{ width: 60, height: 60, marginBottom: 15 }}
+              resizeMode="contain"
             />
             <Text style={styles.modalCase}>CASE NUMBER: {submittedCaseNumber}</Text>
             <TouchableOpacity
@@ -597,7 +602,7 @@ export default function CreateReportScreen() {
         onClose={() => setMenuVisible(false)}
       />
 
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -691,10 +696,20 @@ const styles = StyleSheet.create({
 
   modalOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", alignItems: "center" },
   modalContainer: { backgroundColor: "#fff", padding: width * 0.08, borderRadius: 12, alignItems: "center", width: "85%" },
-  modalTitle: { fontSize: width * 0.05, fontWeight: "bold", marginBottom: height * 0.01, textAlign: "center" },
-  modalCase: { fontSize: width * 0.045, marginBottom: height * 0.02, fontWeight: "bold", textAlign: "center" },
-  modalButton: { backgroundColor: "#c7da30", paddingVertical: height * 0.015, paddingHorizontal: width * 0.06, borderRadius: 8 },
-  modalButtonText: { color: "black", fontSize: width * 0.045 },
+  modalTitle: { fontSize: 16, fontWeight: "bold", color: "#000", textAlign: "center", marginBottom: 10, fontFamily: "Montserrat-Regular" },
+  modalCase: { fontSize: 16, fontWeight: "bold", color: "#000", marginBottom: 25, textAlign: "center", fontFamily: "Montserrat-Regular" },
+  modalButton: {
+    backgroundColor: "#fff",
+    width: "100%",
+    padding: 10,
+    borderRadius: 48,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 10,
+    borderColor: "#c7da30",
+    borderWidth: 2,
+  },
+  modalButtonText: { color: "#1aaed3ff", fontWeight: "500", fontSize: 16, fontFamily: "Montserrat-Regular" },
 
   overlay: { position: "absolute", top: 0, left: 0, width: "100%", height: "100%", backgroundColor: "rgba(0,0,0,0.3)", zIndex: 5 },
 

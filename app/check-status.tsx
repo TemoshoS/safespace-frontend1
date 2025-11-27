@@ -61,20 +61,20 @@ export default function DetailsScreen() {
   const getStatusColor = (status: string) => {
     const normalizedStatus = status.trim().toLowerCase();
     switch (normalizedStatus) {
-      case "pending":
-        return "#EF4444";
-      case "escalated":
-        return "#FACC15";
-      case "in-process":
-        return "#3B82F6";
-      case "resolved":
-        return "#22C55E";
+      case "awaiting-resolution":
+        return "#EF4444"; 
+      case "forwarded":
+        return "#FACC15"; 
+      case "under-review":
+        return "#3B82F6"; 
+      case "closed":
+        return "#22C55E"; 
       case "unresolved":
-        return "#FB923C";
+        return "#FB923C"; 
       case "false-report":
-        return "#9CA3AF";
+        return "#9CA3AF"; 
       default:
-        return "#E5E7EB";
+        return "#E5E7EB"; 
     }
   };
 

@@ -1,7 +1,7 @@
 import MenuToggle from "@/components/menuToggle";
 import TopBar from "@/components/toBar";
 import { BACKEND_URL } from "@/utils/config";
-import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
 import { Video } from "expo-av";
 import * as ImagePicker from "expo-image-picker";
@@ -148,13 +148,13 @@ export default function EditReportScreen() {
         );
       }
 
-     const response =  await axios.put(`${BACKEND_URL}/reports/${case_number}`, formData, {
+      const response = await axios.put(`${BACKEND_URL}/reports/${case_number}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
       // If malicious, backend returns 403
       if (response.status === 403) {
-        router.replace("/access-denied"); 
+        router.replace("/access-denied");
         return;
       }
 
@@ -200,15 +200,11 @@ export default function EditReportScreen() {
       <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
         <View style={{ alignItems: "center", marginBottom: 20 }}>
           <Text style={styles.title}>Edit Report</Text>
-          
+          <Text style={{ marginTop: 5, fontSize: 16, color: "#555" }}>Case Number: {case_number}</Text>
         </View>
 
         <View style={styles.formWrapper}>
           {/* Subtype */}
-          <View style={{ alignItems: "center", marginBottom: 20 }}>
-         
-          <Text style={{ marginTop: 5, fontSize: 16, color: "#555" }}>Case Number: {case_number}</Text>
-        </View>
           <View style={[styles.inputGroup, { zIndex: 5000 }]}>
             <Text style={styles.label}>Subtype</Text>
             <DropDownPicker
@@ -359,7 +355,11 @@ export default function EditReportScreen() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
             <Text style={styles.modalTitle}>Report Updated Successfully</Text>
-            <MaterialIcons name="check-circle" size={60} color="#c7da30" style={{ marginBottom: 15 }} />
+            <Image
+              source={require("../assets/images/right.jpeg")}
+              style={{ width: 60, height: 60, marginBottom: 15 }}
+              resizeMode="contain"
+            />
             <Text style={styles.modalCase}>CASE NUMBER: {case_number}</Text>
             <TouchableOpacity
               style={styles.modalButton}
@@ -368,7 +368,7 @@ export default function EditReportScreen() {
                 router.replace("/");
               }}
             >
-              <Text style={styles.modalButtonText}>OK</Text>
+              <Text style={styles.modalButtonText}>Close</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -389,17 +389,36 @@ export default function EditReportScreen() {
         menuVisible={menuVisible}
         slideAnim={slideAnim}
         onNavigate={handleNavigate}
+
         onClose={() => setMenuVisible(false)}
       />
     </KeyboardAvoidingView>
   );
 }
 
+
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fff" },
   scrollContainer: { flexGrow: 1, paddingVertical: 20, paddingHorizontal: 15 },
   loader: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#fff" },
-  title: { fontSize: 26, fontWeight: "bold", marginBottom: 20, color: "black" },
+
+  // Text Styles
+  title: { fontSize: 26, fontWeight: "bold", marginBottom: 20, color: "black", fontFamily: "Montserrat-Regular" },
+  label: { color: "black", marginBottom: 6, fontFamily: "Montserrat-Regular" },
+  input: {
+    borderWidth: 2,
+    borderColor: "#c7da30",
+    borderRadius: 8,
+    padding: 10,
+    fontSize: 15,
+    backgroundColor: "#fff",
+    width: "100%",
+    height: 48,
+    fontFamily: "Montserrat-Regular",
+  },
+  descriptionInput: { height: 100, textAlignVertical: "top", fontFamily: "Montserrat-Regular" },
+  submitText: { color: "#1aaed3ff", fontWeight: "500", fontSize: 16, fontFamily: "Montserrat-Regular" },
+
   formWrapper: {
     width: "100%",
     maxWidth: 800,
@@ -417,20 +436,10 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   inputGroup: { width: "100%", marginBottom: 15 },
-  label: { color: "black", marginBottom: 6 },
-  input: {
-    borderWidth: 2,
-    borderColor: "#c7da30",
-    borderRadius: 8,
-    padding: 10,
-    fontSize: 15,
-    backgroundColor: "#fff",
-    width: "100%",
-    height: 48,
-  },
-  descriptionInput: { height: 100, textAlignVertical: "top" },
+
   pickerWrapper: { borderColor: "#c7da30", borderWidth: 2, borderRadius: 8, backgroundColor: "#fff", height: 48 },
   pickerDropdown: { borderColor: "#c7da30", borderWidth: 2, borderRadius: 8, backgroundColor: "#fff" },
+
   imageCard: {
     borderWidth: 2,
     borderColor: "#c7da30",
@@ -444,23 +453,26 @@ const styles = StyleSheet.create({
   },
   imageInsideCard: { width: "100%", height: "100%", resizeMode: "cover", borderRadius: 8 },
   imagePlaceholder: { flexDirection: "row", alignItems: "center" },
-  submitButton: {
-    borderWidth: 2,
-    borderColor: "#c7da30",
-    paddingVertical: 12,
-    borderRadius: 50,
-    alignItems: "center",
-    width: "70%",
-    marginTop: 10,
-  },
-  submitText: { color: "#1aaed3ff", fontWeight: "500", fontSize: 16 },
+
   modalOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", alignItems: "center" },
   modalContainer: { width: "85%", backgroundColor: "#fff", borderRadius: 12, padding: 25, alignItems: "center" },
-  modalTitle: { fontSize: 16, fontWeight: "bold", color: "#000", textAlign: "center", marginBottom: 10 },
-  modalCase: { fontSize: 15, color: "#555", marginBottom: 25, textAlign: "center" },
-  modalButton: { backgroundColor: "#c7da30", paddingVertical: 12, paddingHorizontal: 35, borderRadius: 30 },
-  modalButtonText: { color: "black", fontSize: 16 },
+  modalTitle: { fontSize: 16, fontWeight: "bold", color: "#000", textAlign: "center", marginBottom: 10, fontFamily: "Montserrat-Regular" },
+  modalCase: { fontSize: 16, fontWeight: "bold", color: "#000", marginBottom: 25, textAlign: "center", fontFamily: "Montserrat-Regular" },
+  modalButton: {
+    backgroundColor: "#fff",
+    width: "100%",
+    padding: 10,
+    borderRadius: 48,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 10,
+    borderColor: "#c7da30",
+    borderWidth: 2,
+  },
+  modalButtonText: { color: "#1aaed3ff", fontWeight: "500", fontSize: 16, fontFamily: "Montserrat-Regular" },
+
   overlay: { position: "absolute", top: 0, left: 0, width: "100%", height: "100%", backgroundColor: "rgba(0,0,0,0.3)", zIndex: 5 },
+
   loadingOverlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.5)",
@@ -472,7 +484,18 @@ const styles = StyleSheet.create({
     zIndex: 1000,
   },
   loadingContainer: { width: 180, padding: 20, backgroundColor: "#fff", borderRadius: 12, justifyContent: "center", alignItems: "center" },
-  loadingText: { marginTop: 10, fontSize: 16, color: "#000" },
-  errorText: { color: "red", marginTop: 4, fontSize: 13 },
+  loadingText: { marginTop: 10, fontSize: 16, color: "#000", fontFamily: "Montserrat-Regular" },
+
+  errorText: { color: "red", marginTop: 4, fontSize: 13, fontFamily: "Montserrat-Regular" },
+
+  submitButton: {
+    borderWidth: 2,
+    borderColor: "#c7da30",
+    paddingVertical: 12,
+    borderRadius: 50,
+    alignItems: "center",
+    width: "70%",
+    marginTop: 10,
+  },
 });
 

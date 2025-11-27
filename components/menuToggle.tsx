@@ -24,14 +24,6 @@ export default function MenuToggle({ menuVisible, slideAnim, onNavigate, onClose
 
   if (!menuVisible) return null;
 
-  // Safe Back function
-  const handleBack = () => {
-    if (router.canGoBack?.()) {
-      router.back(); // go back if possible
-    } else {
-      router.push("/"); // fallback to Home
-    }
-  };
 
   return (
     <Animated.View
@@ -56,7 +48,7 @@ export default function MenuToggle({ menuVisible, slideAnim, onNavigate, onClose
         </TouchableOpacity>
 
         {/* Back button */}
-        <TouchableOpacity onPress={handleBack} style={styles.menuItem}>
+        <TouchableOpacity style={styles.menuItem}>
           <Text style={styles.menuText}>Back</Text>
         </TouchableOpacity>
       </SafeAreaView>

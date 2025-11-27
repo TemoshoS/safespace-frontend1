@@ -99,7 +99,7 @@ export default function ReportCaseScreen() {
               menuVisible={menuVisible}
               slideAnim={slideAnim}
               onNavigate={handleNavigate}
-              onBack={() => router.back()}
+              
               onClose={() => setMenuVisible(false)}
             />
     </View>

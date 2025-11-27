@@ -15,13 +15,13 @@ export default function TopBar({ menuVisible, onBack, onToggleMenu }: TopBarProp
     <View style={styles.topBar}>
       {!menuVisible && (
         <>
-          <TouchableOpacity onPress={onBack}>
-            <Image
-              source={require("../assets/images/Logo.jpg")}
-              style={styles.logo}
-              resizeMode="contain"
-            />
-          </TouchableOpacity>
+
+          <Image
+            source={require("../assets/images/Logo.jpg")}
+            style={styles.logo}
+            resizeMode="contain"
+          />
+
 
           <TouchableOpacity onPress={onToggleMenu}>
             <Ionicons name="menu" size={width * 0.08} color="#c7da30" />
@@ -38,13 +38,13 @@ const styles = StyleSheet.create({
     width: "100%",
     justifyContent: "space-between",
     alignItems: "center",
-    marginTop: height * 0.05,      
-    marginBottom: height * 0.025,  
+    marginTop: height * 0.05,
+    marginBottom: height * 0.025,
     paddingHorizontal: width * 0.04,
     zIndex: 100,
   },
   logo: {
-    width: width * 0.25,  
-    height: height * 0.1, 
+    width: width * 0.25,
+    height: height * 0.1,
   },
 });
