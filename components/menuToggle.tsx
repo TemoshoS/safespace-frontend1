@@ -8,9 +8,9 @@ import {
   Text,
   TouchableOpacity
 } from "react-native";
- 
+
 const { width, height } = Dimensions.get("window");
- 
+
 interface MenuToggleProps {
   menuVisible: boolean;
   slideAnim: Animated.Value;
@@ -18,10 +18,10 @@ interface MenuToggleProps {
   onBack: () => void;
   onClose: () => void;
 }
- 
+
 export default function MenuToggle({ menuVisible, slideAnim, onNavigate, onBack, onClose }: MenuToggleProps) {
   if (!menuVisible) return null;
- 
+
   return (
     <Animated.View
       style={[styles.menu, { transform: [{ translateX: slideAnim }] }]}
@@ -31,38 +31,35 @@ export default function MenuToggle({ menuVisible, slideAnim, onNavigate, onBack,
         <TouchableOpacity onPress={onClose} style={styles.menuItem}>
           <Ionicons name="close" size={width * 0.12} color="#c7da30" />
         </TouchableOpacity>
- 
+
         <TouchableOpacity onPress={() => onNavigate("/")} style={styles.menuItem}>
           <Text style={styles.menuText}>Home</Text>
         </TouchableOpacity>
- 
+
         <TouchableOpacity onPress={() => onNavigate("/report-screen")} style={styles.menuItem}>
           <Text style={styles.menuText}>Reports</Text>
         </TouchableOpacity>
- 
+
         <TouchableOpacity onPress={() => onNavigate("/check-status")} style={styles.menuItem}>
           <Text style={styles.menuText}>Check status</Text>
         </TouchableOpacity>
- 
+
         {/* Back button */}
-        {/* <TouchableOpacity onPress={onBack} style={styles.menuItem}>
+
+        <TouchableOpacity
+          onPress={() => {
+            onClose(); // Close menu first
+            setTimeout(() => onBack(), 250); // Then go back after menu animation
+          }}
+          style={styles.menuItem}
+        >
           <Text style={styles.menuText}>Back</Text>
-        </TouchableOpacity> */}
-        {/* Back button - FIXED */}
-<TouchableOpacity
-  onPress={() => {
-    onClose(); // Close menu first
-    setTimeout(() => onBack(), 250); // Then go back after menu animation
-  }}
-  style={styles.menuItem}
->
-  <Text style={styles.menuText}>Back</Text>
-</TouchableOpacity>
+        </TouchableOpacity>
       </SafeAreaView>
     </Animated.View>
   );
 }
- 
+
 const styles = StyleSheet.create({
   menu: {
     position: "absolute",
@@ -87,10 +84,9 @@ const styles = StyleSheet.create({
   },
   menuText: {
     textAlign: "left",
-    fontSize: width * 0.05,
+    fontSize: width * 0.04,
     color: "#1aaed3ff",
     fontFamily: 'Montserrat'
   },
 });
- 
- 
+
