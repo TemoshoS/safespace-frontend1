@@ -1,3 +1,4 @@
+import { Montserrat_400Regular, Montserrat_700Bold, useFonts } from '@expo-google-fonts/montserrat';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Stack } from 'expo-router';
 import React, { useEffect, useState } from 'react';

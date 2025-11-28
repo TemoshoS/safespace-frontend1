@@ -54,27 +54,29 @@ export default function DetailsScreen() {
   const handleNavigate = (path: string) => {
     toggleMenu();
     setTimeout(() => {
-      router.replace({ pathname: path as any });
+      router.push({ pathname: path as any });
     }, 250);
   };
 
+
   const getStatusColor = (status: string) => {
     const normalizedStatus = status.trim().toLowerCase();
+
     switch (normalizedStatus) {
       case "awaiting-resolution":
-        return "#EF4444"; 
+        return "#EF4444";
       case "forwarded":
-        return "#FACC15"; 
+        return "#FACC15";
       case "under-review":
-        return "#3B82F6"; 
+        return "#3B82F6";
       case "closed":
-        return "#22C55E"; 
+        return "#22C55E";
       case "unresolved":
-        return "#FB923C"; 
+        return "#FB923C";
       case "false-report":
-        return "#9CA3AF"; 
+        return "#9CA3AF";
       default:
-        return "#E5E7EB"; 
+        return "#E5E7EB";
     }
   };
 
@@ -83,27 +85,27 @@ export default function DetailsScreen() {
       setError("Please enter a case number");
       return;
     }
-  
+
     setLoading(true);
     setError("");
     setSearchResult(null);
-  
+
     try {
       const res = await axios.get(`${BACKEND_URL}/reports/case/${searchQuery}`);
-  
+
       // Extra safety: backend might return a 200 but a malicious message
       if (res.data?.message?.toLowerCase().includes("malicious")) {
         router.replace("/access-denied");
         return;
       }
-  
+
       setSearchResult(res.data);
     } catch (err: any) {
       console.error("Search error:", err);
-  
+
       const status = err.response?.status;
       const message = err.response?.data?.message?.toLowerCase() || "";
-  
+
       if (status === 404 || message.includes("not found")) {
         setError("Case not found");
       } else if (status === 403 || message.includes("malicious") || message.includes("forbidden")) {
@@ -115,7 +117,6 @@ export default function DetailsScreen() {
       setLoading(false);
     }
   };
-  
 
   return (
     <View style={styles.container}>
@@ -164,23 +165,43 @@ export default function DetailsScreen() {
         {searchResult && (
           <ScrollView style={styles.statusContainer}>
             <View style={styles.caseItem}>
-              <View style={styles.caseHeader}>
-                <Text style={styles.caseNumber}>
-                  {String(searchResult.case_number || "")}
-                </Text>
+              <Text style={styles.caseNumber}>
+                {String(searchResult.case_number || "")}
+              </Text>
+              <Text style={styles.detail}>
+                <Text style={styles.detailLabel}>Status: </Text>
                 <Text
-                  style={[
-                    styles.statusBadge,
-                    { backgroundColor: getStatusColor(String(searchResult.status || "")) },
-                  ]}
+                  style={{
+                    backgroundColor: getStatusColor(String(searchResult.status || "")),
+                    color: "black",
+                    paddingHorizontal: 8,
+                    paddingVertical: 2,
+                    borderRadius: 8,
+                    fontSize: 14,
+                    fontFamily: "Montserrat-Regular",
+                  }}
                 >
                   {String(searchResult.status || "")}
                 </Text>
-              </View>
-
-              <Text style={styles.caseDate}>
-                Submitted: {new Date(searchResult.created_at || "").toLocaleDateString()}
               </Text>
+
+              <Text style={styles.detail}>
+                <Text style={styles.detailLabel}>Age: </Text>
+                {String(searchResult.age || "")}
+              </Text>
+
+              <Text style={styles.detail}>
+                <Text style={styles.detailLabel}>Email: </Text>
+                {String(searchResult.reporter_email || "")}
+              </Text>
+
+
+
+              <Text style={styles.detail}>
+                <Text style={styles.detailLabel}>Submitted: </Text>
+                {new Date(searchResult.created_at || "").toLocaleDateString()}
+              </Text>
+
 
               <Text style={styles.detail}>
                 <Text style={styles.detailLabel}>Abuse Type: </Text>
@@ -198,7 +219,7 @@ export default function DetailsScreen() {
               </Text>
 
               <Text style={styles.detail}>
-                <Text style={styles.detailLabel}>Reporter Email: </Text>
+                <Text style={styles.detailLabel}>Email: </Text>
                 {String(searchResult.reporter_email || "")}
               </Text>
 
@@ -234,10 +255,14 @@ export default function DetailsScreen() {
                 {String(searchResult.school_name || "")}
               </Text>
 
-              <Text style={styles.detail}>
-                <Text style={styles.detailLabel}>Reason: </Text>
-                {String(searchResult.latest_status_reason || "")}
-              </Text>
+
+              {searchResult.latest_status_reason ? (
+                <Text style={styles.detail}>
+                  <Text style={styles.detailLabel}>Reason: </Text>
+                  {searchResult.latest_status_reason}
+                </Text>
+              ) : null}
+
 
               {searchResult.image_path && (
                 searchResult.image_path.endsWith(".mp4") ||
@@ -280,16 +305,24 @@ export default function DetailsScreen() {
       {menuVisible && <TouchableOpacity style={styles.overlay} onPress={toggleMenu} />}
 
       {/* Slide-in Menu */}
+  
       <MenuToggle
         menuVisible={menuVisible}
         slideAnim={slideAnim}
         onNavigate={handleNavigate}
-       
+        onBack={() => {
+          if (router.canGoBack()) {
+            router.back();
+          } else {
+            router.replace("/"); // Go home if no back screen
+          }
+        }}
         onClose={() => setMenuVisible(false)}
       />
     </View>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {
@@ -297,8 +330,19 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     paddingHorizontal: 20,
   },
-  anonymousText: { textAlign: "center", color: "black", marginBottom: 10, fontFamily: "Montserrat-Regular" },
-  title: { fontSize: 20, fontWeight: "bold", textAlign: "center", marginVertical: 10, fontFamily: "Montserrat-Regular" },
+  anonymousText: {
+    textAlign: "center",
+    color: "black",
+    marginBottom: 10,
+    fontFamily: "Montserrat"
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginVertical: 10,
+    fontFamily: "Montserrat"
+  },
   formContainer: {
     width: "100%",
     borderWidth: 2,
@@ -316,7 +360,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     fontSize: 16,
     marginBottom: 10,
-    fontFamily: "Montserrat-Regular",
+    fontFamily: "Montserrat",
   },
   statusButton: {
     backgroundColor: "#fff",
@@ -329,22 +373,109 @@ const styles = StyleSheet.create({
     borderColor: "#c7da30",
     borderWidth: 2,
   },
-  statusButtonText: { color: "#1aaed3ff", fontWeight: "500", fontSize: 16, fontFamily: "Montserrat-Regular" },
-  caseStatusLabel: { fontSize: 16, fontWeight: "bold", marginVertical: 10, textAlign: "center", fontFamily: "Montserrat-Regular", },
-  statusContainer: { width: "100%", maxHeight: 300, marginTop: 10, flexGrow: 0 },
-  caseItem: { backgroundColor: "#f9f9f9", padding: 15, borderRadius: 8, borderWidth: 1, borderColor: "#eee", marginBottom: 10 },
-  caseHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 5 },
-  caseNumber: { fontSize: 16, fontWeight: "bold", fontFamily: "Montserrat-Regular" },
-  statusBadge: { color: "white", paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12, fontSize: 12, fontWeight: "bold", fontFamily: "Montserrat-Regular", },
-  caseDate: { fontSize: 14, color: "#666", marginBottom: 5, fontFamily: "Montserrat-Regular" },
-  detail: { fontSize: 14, color: "#333", marginBottom: 3, fontFamily: "Montserrat-Regular", },
-  detailLabel: { fontWeight: "bold", fontFamily: "Montserrat-Regular", },
-  button: { backgroundColor: "#fff", borderColor: "#c7da30", padding: 15, borderRadius: 40, marginTop: 20, alignItems: "center", borderWidth: 2, },
-  buttonText: { color: "#333", fontSize: 15, fontFamily: "Montserrat-Regular", },
-  editButton: { marginTop: 15, borderWidth: 2, borderColor: "#c7da30", padding: 12, borderRadius: 50, alignItems: "center" },
-  editButtonText: { color: "#1aaed3ff", fontWeight: "500", fontSize: 16, fontFamily: "Montserrat-Regular" },
-  reporterImage: { width: 300, height: 200,  marginBottom: 10 },
-  reporterVideo: { width: 300, height: 200,  marginBottom: 10 },
+  statusButtonText: {
+    color: "#1aaed3ff",
+    fontWeight: "500",
+    fontSize: 16,
+    fontFamily: "Montserrat"
+  },
+  caseStatusLabel: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginVertical: 10,
+    textAlign: "center",
+    fontFamily: "Montserrat"
+  },
+  statusContainer: {
+    width: "100%",
+    maxHeight: 300,
+    marginTop: 10,
+    flexGrow: 0
+  },
+  caseItem: {
+    backgroundColor: "#f9f9f9",
+    padding: 15,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#eee",
+    marginBottom: 10
+  },
+  caseHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 5
+  },
+  caseNumber: {
+    fontSize: 16,
+    fontWeight: "bold",
+    fontFamily: "Montserrat"
+  },
+  statusBadge: {
+    color: "black",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    fontSize: 12,
+    fontWeight: "bold",
+    overflow: "hidden",
+    fontFamily: "Montserrat",
+  },
+  caseDate: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: "#333",
+    marginBottom: 3,
+    fontFamily: "Montserrat"
+  },
+  detail: {
+    fontSize: 14,
+    color: "#333",
+    marginBottom: 3,
+    fontFamily: "Montserrat"
+  },
+  detailLabel: {
+    fontWeight: "bold",
+    fontFamily: "Montserrat"
+  },
+  button: {
+    backgroundColor: "#fff",
+    borderColor: "#c7da30",
+    padding: 15,
+    borderRadius: 40,
+    marginTop: 20,
+    alignItems: "center",
+    borderWidth: 2
+  },
+  buttonText: {
+    color: "#333",
+    fontSize: 15,
+    fontFamily: "Montserrat"
+  },
+  editButton: {
+    marginTop: 15,
+    borderWidth: 2,
+    borderColor: "#c7da30",
+    padding: 12,
+    borderRadius: 50,
+    alignItems: "center"
+  },
+  editButtonText: {
+    color: "#1aaed3ff",
+    fontWeight: "500",
+    fontSize: 16,
+    fontFamily: "Montserrat"
+  },
+  reporterImage: {
+    width: 300,
+    height: 200,
+    marginBottom: 10
+  },
+  reporterVideo: {
+    width: 300,
+    height: 200,
+    marginBottom: 10
+  },
   overlay: {
     position: "absolute",
     top: 0,
@@ -354,5 +485,4 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.3)",
     zIndex: 5,
   },
-
 });

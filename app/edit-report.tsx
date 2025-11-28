@@ -354,7 +354,7 @@ export default function EditReportScreen() {
       <Modal visible={successModalVisible} transparent animationType="fade">
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
-            <Text style={styles.modalTitle}>Report Updated Successfully</Text>
+            <Text style={styles.modalTitle}>REPORT SUBMITTED SUCCESSFULLY</Text>
             <Image
               source={require("../assets/images/right.jpeg")}
               style={{ width: 60, height: 60, marginBottom: 15 }}
@@ -386,12 +386,18 @@ export default function EditReportScreen() {
       {menuVisible && <TouchableOpacity style={styles.overlay} onPress={toggleMenu} />}
 
       <MenuToggle
-        menuVisible={menuVisible}
-        slideAnim={slideAnim}
-        onNavigate={handleNavigate}
-
-        onClose={() => setMenuVisible(false)}
-      />
+              menuVisible={menuVisible}
+              slideAnim={slideAnim}
+              onNavigate={handleNavigate}
+              onBack={() => {
+                if (router.canGoBack()) {
+                  router.back();
+                } else {
+                  router.replace("/check-status"); // Go home if no back screen
+                }
+              }}
+              onClose={() => setMenuVisible(false)}
+            />
     </KeyboardAvoidingView>
   );
 }
@@ -403,8 +409,8 @@ const styles = StyleSheet.create({
   loader: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#fff" },
 
   // Text Styles
-  title: { fontSize: 26, fontWeight: "bold", marginBottom: 20, color: "black", fontFamily: "Montserrat-Regular" },
-  label: { color: "black", marginBottom: 6, fontFamily: "Montserrat-Regular" },
+  title: { fontSize: 26, fontWeight: "bold", marginBottom: 20, color: "black", fontFamily: "Montserrat" },
+  label: { color: "black", marginBottom: 6, fontFamily: "Montserrat" },
   input: {
     borderWidth: 2,
     borderColor: "#c7da30",
@@ -414,10 +420,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     width: "100%",
     height: 48,
-    fontFamily: "Montserrat-Regular",
+    fontFamily: "Montserrat",
   },
-  descriptionInput: { height: 100, textAlignVertical: "top", fontFamily: "Montserrat-Regular" },
-  submitText: { color: "#1aaed3ff", fontWeight: "500", fontSize: 16, fontFamily: "Montserrat-Regular" },
+  descriptionInput: { height: 100, textAlignVertical: "top", fontFamily: "Montserrat" },
+  submitText: { color: "#1aaed3ff", fontWeight: "500", fontSize: 16, fontFamily: "Montserrat" },
 
   formWrapper: {
     width: "100%",
@@ -456,8 +462,8 @@ const styles = StyleSheet.create({
 
   modalOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", alignItems: "center" },
   modalContainer: { width: "85%", backgroundColor: "#fff", borderRadius: 12, padding: 25, alignItems: "center" },
-  modalTitle: { fontSize: 16, fontWeight: "bold", color: "#000", textAlign: "center", marginBottom: 10, fontFamily: "Montserrat-Regular" },
-  modalCase: { fontSize: 16, fontWeight: "bold", color: "#000", marginBottom: 25, textAlign: "center", fontFamily: "Montserrat-Regular" },
+  modalTitle: { fontSize: 16, color: "#000", textAlign: "center", marginBottom: 10, fontFamily: "Montserrat" },
+  modalCase: { fontSize: 16, color: "#000", marginBottom: 25, textAlign: "center", fontFamily: "Montserrat" },
   modalButton: {
     backgroundColor: "#fff",
     width: "100%",
@@ -469,7 +475,7 @@ const styles = StyleSheet.create({
     borderColor: "#c7da30",
     borderWidth: 2,
   },
-  modalButtonText: { color: "#1aaed3ff", fontWeight: "500", fontSize: 16, fontFamily: "Montserrat-Regular" },
+  modalButtonText: { color: "#1aaed3ff", fontWeight: "500", fontSize: 16, fontFamily: "Montserrat" },
 
   overlay: { position: "absolute", top: 0, left: 0, width: "100%", height: "100%", backgroundColor: "rgba(0,0,0,0.3)", zIndex: 5 },
 
@@ -484,9 +490,9 @@ const styles = StyleSheet.create({
     zIndex: 1000,
   },
   loadingContainer: { width: 180, padding: 20, backgroundColor: "#fff", borderRadius: 12, justifyContent: "center", alignItems: "center" },
-  loadingText: { marginTop: 10, fontSize: 16, color: "#000", fontFamily: "Montserrat-Regular" },
+  loadingText: { marginTop: 10, fontSize: 16, color: "#000", fontFamily: "Montserrat" },
 
-  errorText: { color: "red", marginTop: 4, fontSize: 13, fontFamily: "Montserrat-Regular" },
+  errorText: { color: "red", marginTop: 4, fontSize: 13, fontFamily: "Montserrat" },
 
   submitButton: {
     borderWidth: 2,

@@ -571,7 +571,7 @@ export default function CreateReportScreen() {
       <Modal visible={successModalVisible} transparent animationType="fade">
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
-            <Text style={styles.modalTitle}>Report Submitted Successfully</Text>
+            <Text style={styles.modalTitle}>REPORT SUBMITTED SUCCESSFULLY</Text>
             <Image
               source={require("../assets/images/right.jpeg")}
               style={{ width: 60, height: 60, marginBottom: 15 }}
@@ -595,12 +595,19 @@ export default function CreateReportScreen() {
       {menuVisible && (
         <TouchableOpacity style={styles.overlay} onPress={toggleMenu} />
       )}
-      <MenuToggle
-        menuVisible={menuVisible}
-        slideAnim={slideAnim}
-        onNavigate={handleNavigate}
-        onClose={() => setMenuVisible(false)}
-      />
+     <MenuToggle
+              menuVisible={menuVisible}
+              slideAnim={slideAnim}
+              onNavigate={handleNavigate}
+              onBack={() => {
+                if (router.canGoBack()) {
+                  router.back();
+                } else {
+                  router.replace("/abuse-types"); // Go home if no back screen
+                }
+              }}
+              onClose={() => setMenuVisible(false)}
+            />
 
     </KeyboardAvoidingView>
   );
@@ -688,16 +695,16 @@ const styles = StyleSheet.create({
     width: "90%", maxHeight: "50%", borderWidth: 2, borderColor: "#c7da30",
     shadowColor: "#000", shadowOpacity: 0.3, shadowOffset: { width: 0, height: 5 }, shadowRadius: 10, elevation: 10
   },
-  suggestionsTitle: { fontSize: width * 0.045, fontWeight: "bold", marginBottom: height * 0.01 },
+  suggestionsTitle: { fontSize: width * 0.045, fontWeight: "bold", marginBottom: height * 0.01,fontFamily: 'Montserrat'  },
   suggestionItem: { paddingVertical: height * 0.008 },
-  suggestionText: { fontSize: width * 0.04 },
+  suggestionText: { fontSize: width * 0.04 ,fontFamily: 'Montserrat' },
   closeSuggestionsButton: { marginTop: height * 0.01, alignSelf: "center" },
-  closeSuggestionsText: { color: "#c7da30", fontWeight: "bold" },
+  closeSuggestionsText: { color: "#c7da30", fontWeight: "bold", fontFamily: 'Montserrat'  },
 
   modalOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", alignItems: "center" },
   modalContainer: { backgroundColor: "#fff", padding: width * 0.08, borderRadius: 12, alignItems: "center", width: "85%" },
-  modalTitle: { fontSize: 16, fontWeight: "bold", color: "#000", textAlign: "center", marginBottom: 10, fontFamily: "Montserrat-Regular" },
-  modalCase: { fontSize: 16, fontWeight: "bold", color: "#000", marginBottom: 25, textAlign: "center", fontFamily: "Montserrat-Regular" },
+  modalTitle: { fontSize: 16,  color: "#000", textAlign: "center", marginBottom: 10, fontFamily: "Montserrat" },
+  modalCase: { fontSize: 16,  color: "#000", marginBottom: 25, textAlign: "center", fontFamily: "Montserrat" },
   modalButton: {
     backgroundColor: "#fff",
     width: "100%",
@@ -709,22 +716,22 @@ const styles = StyleSheet.create({
     borderColor: "#c7da30",
     borderWidth: 2,
   },
-  modalButtonText: { color: "#1aaed3ff", fontWeight: "500", fontSize: 16, fontFamily: "Montserrat-Regular" },
+  modalButtonText: { color: "#1aaed3ff", fontWeight: "500", fontSize: 16, fontFamily: 'Montserrat'  },
 
   overlay: { position: "absolute", top: 0, left: 0, width: "100%", height: "100%", backgroundColor: "rgba(0,0,0,0.3)", zIndex: 5 },
 
   filePickerWrapper: { flexDirection: "row", alignItems: "center", borderWidth: 2, borderColor: "#c7da30", borderRadius: 8, overflow: "hidden", backgroundColor: "#f0f0f0", height: height * 0.06, marginBottom: height * 0.01 },
   chooseFileButton: { backgroundColor: "#d3d3d3", paddingHorizontal: width * 0.04, justifyContent: "center", alignItems: "center", height: "100%" },
-  chooseFileText: { color: "#000", fontWeight: "500" },
-  fileNameText: { flex: 1, paddingHorizontal: width * 0.03, color: "#555" },
+  chooseFileText: { color: "#000", fontWeight: "500" ,fontFamily: 'Montserrat' },
+  fileNameText: { flex: 1, paddingHorizontal: width * 0.03, color: "#555",fontFamily: 'Montserrat'  },
   imagePreview: { width: "100%", height: height * 0.15, borderRadius: 8, borderWidth: 2, borderColor: "#c7da30", marginTop: height * 0.005 },
   videoPreview: { width: "100%", height: height * 0.23, borderRadius: 8, borderWidth: 2, borderColor: "#c7da30" },
 
   loadingOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", alignItems: "center", zIndex: 10000 },
   loadingContainer: { backgroundColor: "#fff", padding: width * 0.08, borderRadius: 12, justifyContent: "center", alignItems: "center", width: "80%", shadowColor: "#000", shadowOffset: { width: 0, height: 5 }, shadowOpacity: 0.3, shadowRadius: 10, elevation: 10 },
-  loadingText: { marginTop: height * 0.015, fontSize: width * 0.045, fontWeight: "bold", color: "black" },
+  loadingText: { marginTop: height * 0.015, fontSize: width * 0.045, fontWeight: "bold", color: "black",fontFamily: 'Montserrat'  },
 
   activeItem: { backgroundColor: "#87CEEB", borderRadius: 25 },
 
-  errorText: { color: "red", fontSize: width * 0.035, marginTop: height * 0.003 },
+  errorText: { color: "red", fontSize: width * 0.035, marginTop: height * 0.003,fontFamily: 'Montserrat'  },
 });

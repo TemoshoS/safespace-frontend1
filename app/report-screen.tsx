@@ -95,11 +95,17 @@ export default function ReportCaseScreen() {
       {menuVisible && (
         <TouchableOpacity style={styles.overlay} onPress={toggleMenu} />
       )}
-       <MenuToggle
+        <MenuToggle
               menuVisible={menuVisible}
               slideAnim={slideAnim}
               onNavigate={handleNavigate}
-              
+              onBack={() => {
+                if (router.canGoBack()) {
+                  router.back();
+                } else {
+                  router.replace("/"); 
+                }
+              }}
               onClose={() => setMenuVisible(false)}
             />
     </View>
@@ -122,6 +128,7 @@ const styles = StyleSheet.create({
     marginBottom: height * 0.05,
     textAlign: "center",
     color: "#000",
+    fontFamily: 'Montserrat'
   },
   conditionBox: {
     borderColor: '#c7da30',
@@ -148,6 +155,7 @@ const styles = StyleSheet.create({
     color: "#1aaed3ff",
     fontSize: width * 0.040, 
     fontWeight: "bold",
+    fontFamily: 'Montserrat'
   },
   overlay: {
     position: "absolute",

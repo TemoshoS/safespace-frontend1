@@ -117,11 +117,19 @@ export default function AbuseTypesScreen() {
             {menuVisible && <TouchableOpacity style={styles.overlay} onPress={toggleMenu} />}
 
             <MenuToggle
-                menuVisible={menuVisible}
-                slideAnim={slideAnim}
-                onNavigate={handleNavigate}
-                onClose={() => setMenuVisible(false)}
+              menuVisible={menuVisible}
+              slideAnim={slideAnim}
+              onNavigate={handleNavigate}
+              onBack={() => {
+                if (router.canGoBack()) {
+                  router.back();
+                } else {
+                  router.replace("/report-screen"); // Go home if no back screen
+                }
+              }}
+              onClose={() => setMenuVisible(false)}
             />
+ 
         </View>
     );
 }
@@ -147,6 +155,7 @@ const styles = StyleSheet.create({
         textAlign: "center",
         marginBottom: height * 0.015,
         color: "#000",
+        fontFamily: 'Montserrat'
     },
     anonymousText: {
         textAlign: "center",
@@ -154,6 +163,7 @@ const styles = StyleSheet.create({
         marginBottom: height * 0.02,
         fontWeight: "500",
         fontSize: width * 0.04,
+        fontFamily: 'Montserrat'
     },
     abuseBox: {
         borderColor: "#c7da30",
@@ -184,6 +194,7 @@ const styles = StyleSheet.create({
         fontSize: width * 0.035,
         textAlign: "center",
         flexShrink: 1,
+        fontFamily: 'Montserrat'
 
     },
     overlay: {
