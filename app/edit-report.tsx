@@ -194,6 +194,7 @@ export default function EditReportScreen() {
     );
 
   return (
+    <>
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : undefined}>
       <TopBar menuVisible={menuVisible} onBack={() => router.back()} onToggleMenu={toggleMenu} />
 
@@ -351,37 +352,41 @@ export default function EditReportScreen() {
       </ScrollView>
 
       {/* Modals */}
-      <Modal visible={successModalVisible} transparent animationType="fade">
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
-            <Text style={styles.modalTitle}>REPORT SUBMITTED SUCCESSFULLY</Text>
-            <Image
-              source={require("../assets/images/right.jpeg")}
-              style={{ width: 60, height: 60, marginBottom: 15 }}
-              resizeMode="contain"
-            />
-            <Text style={styles.modalCase}>CASE NUMBER: {case_number}</Text>
-            <TouchableOpacity
-              style={styles.modalButton}
-              onPress={() => {
-                setSuccessModalVisible(false);
-                router.replace("/");
-              }}
-            >
-              <Text style={styles.modalButtonText}>Close</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+     
+      {/* Loading and Success Modal */}
+      <Modal visible={loading || successModalVisible} transparent animationType="fade">
+          {loading && (
+            <View style={styles.loadingOverlay}>
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color="#c7da30" />
+                <Text style={styles.loadingText}>Submitting report…</Text>
+              </View>
+            </View>
+          )}
 
-      <Modal visible={loading} transparent animationType="fade">
-        <View style={styles.loadingOverlay}>
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#c7da30" />
-            <Text style={styles.loadingText}>Updating report...</Text>
-          </View>
-        </View>
-      </Modal>
+          {successModalVisible && !loading && (
+            <View style={styles.modalOverlay}>
+              <View style={styles.modalContainer}>
+                <Text style={styles.modalTitle}>REPORT UPDATED SUCCESSFULLY</Text>
+                <Image
+                  source={require("../assets/images/right.jpeg")}
+                  style={{ width: 60, height: 60, marginBottom: 15 }}
+                  resizeMode="contain"
+                />
+                <Text style={styles.modalCase}>CASE NUMBER: {case_number}</Text>
+                <TouchableOpacity
+                  style={styles.modalButton}
+                  onPress={() => {
+                    setSuccessModalVisible(false);
+                    router.replace("/");
+                  }}
+                >
+                  <Text style={styles.modalButtonText}>OK</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
+        </Modal>
 
       {menuVisible && <TouchableOpacity style={styles.overlay} onPress={toggleMenu} />}
 
@@ -399,6 +404,9 @@ export default function EditReportScreen() {
               onClose={() => setMenuVisible(false)}
             />
     </KeyboardAvoidingView>
+
+
+    </>
   );
 }
 

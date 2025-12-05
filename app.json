@@ -4,24 +4,25 @@
     "slug": "safespace",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/Logo.png",
+    "icon": "./assets/images/icon1.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.safespace",
+      "buildNumber": "2",
+      "bundleIdentifier": "com.moepipublishing.safespace",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.jpg",
-        "backgroundColor": "#ffffff"
+        "foregroundImage": "./assets/images/icon1.png",
+        "backgroundColor": "#fff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.temosho.myapp"
+      "package": "com.moepipublishing.safespace"
     },
     "web": {
       "bundler": "metro",
@@ -39,7 +40,8 @@
           "backgroundColor": "#ffffff"
         }
       ],
-      "expo-font"
+      "expo-font",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true
