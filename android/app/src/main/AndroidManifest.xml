@@ -28,6 +28,7 @@
         <category android:name="android.intent.category.BROWSABLE"/>
         <data android:scheme="myapp"/>
         <data android:scheme="exp+safespace"/>
+        <data android:scheme="exp+safespace"/>
       </intent-filter>
     </activity>
   </application>

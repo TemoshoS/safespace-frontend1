@@ -69,6 +69,11 @@ const styles = StyleSheet.create({
     height: "100%",
     backgroundColor: "#FFFFFF",
     zIndex: 10,
+    shadowColor: "black",
+  shadowOffset: { width: -5, height: 0 }, // negative X = shadow on the left
+  shadowOpacity: 0.25,
+  shadowRadius: 8,
+  elevation: 50,
   },
   menuContent: {
     marginTop: height * 0.06,

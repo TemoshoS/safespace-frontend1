@@ -30,6 +30,7 @@
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		F11748412D0307B40044C1D9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = safespace/AppDelegate.swift; sourceTree = "<group>"; };
 		F11748442D0722820044C1D9 /* safespace-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "safespace-Bridging-Header.h"; path = "safespace/safespace-Bridging-Header.h"; sourceTree = "<group>"; };
+		1A74AFB1D3304DB4BAB0323B /* SplashScreen.storyboard */ = {isa = PBXFileReference; name = "SplashScreen.storyboard"; path = "safespace/SplashScreen.storyboard"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -99,6 +100,7 @@
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
 				98CCB371138658FE41E579E1 /* Pods */,
 				0609C8C38EEEE33645EF924F /* ExpoModulesProviders */,
+				1A74AFB1D3304DB4BAB0323B /* SplashScreen.storyboard */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -197,6 +199,7 @@
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */,
 				4121326FFE9B9AAC4A03ED9B /* PrivacyInfo.xcprivacy in Resources */,
+				31C12A0A59F64456A69F0DC8 /* SplashScreen.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -370,7 +373,7 @@
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
 				PRODUCT_BUNDLE_IDENTIFIER = com.moepipublishing.safespace;
-				PRODUCT_NAME = safespace;
+				PRODUCT_NAME = "safespace";
 				SWIFT_OBJC_BRIDGING_HEADER = "safespace/safespace-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -401,7 +404,7 @@
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
 				PRODUCT_BUNDLE_IDENTIFIER = com.moepipublishing.safespace;
-				PRODUCT_NAME = safespace;
+				PRODUCT_NAME = "safespace";
 				SWIFT_OBJC_BRIDGING_HEADER = "safespace/safespace-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";

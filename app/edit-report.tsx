@@ -367,13 +367,13 @@ export default function EditReportScreen() {
           {successModalVisible && !loading && (
             <View style={styles.modalOverlay}>
               <View style={styles.modalContainer}>
-                <Text style={styles.modalTitle}>REPORT UPDATED SUCCESSFULLY</Text>
+                <Text style={styles.modalTitle}>DETAILS UPDATED SUCCESSFULLY</Text>
                 <Image
                   source={require("../assets/images/right.jpeg")}
                   style={{ width: 60, height: 60, marginBottom: 15 }}
                   resizeMode="contain"
                 />
-                <Text style={styles.modalCase}>CASE NUMBER: {case_number}</Text>
+                <Text style={styles.modalCase}>REFERENCE NUMBER: {case_number}</Text>
                 <TouchableOpacity
                   style={styles.modalButton}
                   onPress={() => {
@@ -470,8 +470,8 @@ const styles = StyleSheet.create({
 
   modalOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", alignItems: "center" },
   modalContainer: { width: "85%", backgroundColor: "#fff", borderRadius: 12, padding: 25, alignItems: "center" },
-  modalTitle: { fontSize: 16, color: "#000", textAlign: "center", marginBottom: 10, fontFamily: "Montserrat" },
-  modalCase: { fontSize: 16, color: "#000", marginBottom: 25, textAlign: "center", fontFamily: "Montserrat" },
+  modalTitle: { fontSize: 15, color: "#000", textAlign: "center", marginBottom: 10, fontFamily: "Montserrat" },
+  modalCase: { fontSize: 14, color: "#000", marginBottom: 25, textAlign: "center", fontFamily: "Montserrat" },
   modalButton: {
     backgroundColor: "#fff",
     width: "100%",

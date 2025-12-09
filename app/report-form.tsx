@@ -306,13 +306,13 @@ export default function CreateReportScreen() {
           scrollEnabled={!subtypeOpen && !gradeOpen && schoolSuggestions.length === 0}
           keyboardShouldPersistTaps="handled"
         >
-          <Text style={styles.title}>REPORT CASE</Text>
+          <Text style={styles.title}>DETAILS</Text>
           {isAnonymous && (
             <Text style={{ color: "black", marginBottom: 10 }}>
-              You are reporting anonymously
+              Your details are not required
             </Text>
           )}
-          <Text style={styles.abuseTypeText}>Abuse Type: {abuseTypeName}</Text>
+         
 
           <View style={styles.formWrapper}>
             {/* Subtype */}
@@ -336,8 +336,42 @@ export default function CreateReportScreen() {
               </View>
             )}
 
+            {/* Full name when not anonymous */}
+            {!isAnonymous && (
+              <View style={styles.fullField}>
+                <Text style={styles.label}>Full Name</Text>
+                <TextInput
+                  style={styles.input}
+                  value={fullName}
+                  onChangeText={(t) => {
+                    setFullName(t);
+                    if (t.trim().length >= 1 && t.trim().length <= 50) {
+                      setErrors((prev) => ({ ...prev, fullName: "" }));
+                    }
+                  }}
+                />
+                {errors.fullName ? <Text style={styles.errorText}>{errors.fullName}</Text> : null}
+              </View>
+            )}
+
             <View style={styles.row}>
+              
               <View style={styles.field}>
+                <Text style={styles.label}>Name of School</Text>
+                <TextInput
+                  style={styles.input}
+                  value={school}
+                  onChangeText={(text) => {
+                    searchSchools(text);
+                    if (text.trim().length >= 1) {
+                      setErrors((prev) => ({ ...prev, school: "" }));
+                    }
+                  }}
+                
+                />
+                {errors.school ? <Text style={styles.errorText}>{errors.school}</Text> : null}
+              </View>
+              <View style={styles.fieldLast}>
                 <Text style={styles.label}>Age</Text>
                 <TextInput
                   style={styles.input}
@@ -352,22 +386,6 @@ export default function CreateReportScreen() {
                   }}
                 />
                 {errors.age ? <Text style={styles.errorText}>{errors.age}</Text> : null}
-              </View>
-              <View style={styles.fieldLast}>
-                <Text style={styles.label}>School Name</Text>
-                <TextInput
-                  style={styles.input}
-                  value={school}
-                  onChangeText={(text) => {
-                    searchSchools(text);
-                    if (text.trim().length >= 1) {
-                      setErrors((prev) => ({ ...prev, school: "" }));
-                    }
-                  }}
-                  placeholder="start typing school name..."
-                  placeholderTextColor="#999"
-                />
-                {errors.school ? <Text style={styles.errorText}>{errors.school}</Text> : null}
               </View>
             </View>
 
@@ -401,8 +419,46 @@ export default function CreateReportScreen() {
               </View>
             )}
 
-            {/* Grade */}
-            {schoolSuggestions.length === 0 && (
+          
+
+            <View style={styles.row}>
+             
+              <View style={styles.field}>
+                <Text style={styles.label}>Phone Number</Text>
+                <TextInput
+                  style={styles.input}
+                  value={phone}
+                  onChangeText={(t) => {
+                    const cleaned = t.replace(/[^0-9]/g, "");
+                    setPhone(cleaned);
+                    if (cleaned.length >= 10 && cleaned.length <= 15) {
+                      setErrors((prev) => ({ ...prev, phone: "" }));
+                    }
+                  }}
+                  keyboardType="number-pad"
+                />
+                {errors.phone ? <Text style={styles.errorText}>{errors.phone}</Text> : null}
+              </View>
+              <View style={styles.fieldLast}>
+                <Text style={styles.label}>Email</Text>
+                <TextInput
+                  style={styles.input}
+                  value={email}
+                  onChangeText={(t) => {
+                    setEmail(t);
+                    if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(t.trim())) {
+                      setErrors((prev) => ({ ...prev, email: "" }));
+                    }
+                  }}
+                  keyboardType="email-address"
+                />
+                {errors.email ? <Text style={styles.errorText}>{errors.email}</Text> : null}
+              </View>
+            </View>
+
+              {/* Grade */}
+            
+              {schoolSuggestions.length === 0 && (
               <View style={styles.row}>
                 <View style={styles.fieldLast}>
                   <Text style={styles.label}>Grade</Text>
@@ -424,57 +480,7 @@ export default function CreateReportScreen() {
               </View>
             )}
 
-            {/* Full name when not anonymous */}
-            {!isAnonymous && (
-              <View style={styles.fullField}>
-                <Text style={styles.label}>Full Name</Text>
-                <TextInput
-                  style={styles.input}
-                  value={fullName}
-                  onChangeText={(t) => {
-                    setFullName(t);
-                    if (t.trim().length >= 1 && t.trim().length <= 50) {
-                      setErrors((prev) => ({ ...prev, fullName: "" }));
-                    }
-                  }}
-                />
-                {errors.fullName ? <Text style={styles.errorText}>{errors.fullName}</Text> : null}
-              </View>
-            )}
-
-            <View style={styles.row}>
-              <View style={styles.field}>
-                <Text style={styles.label}>Email</Text>
-                <TextInput
-                  style={styles.input}
-                  value={email}
-                  onChangeText={(t) => {
-                    setEmail(t);
-                    if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(t.trim())) {
-                      setErrors((prev) => ({ ...prev, email: "" }));
-                    }
-                  }}
-                  keyboardType="email-address"
-                />
-                {errors.email ? <Text style={styles.errorText}>{errors.email}</Text> : null}
-              </View>
-              <View style={styles.fieldLast}>
-                <Text style={styles.label}>Phone Number</Text>
-                <TextInput
-                  style={styles.input}
-                  value={phone}
-                  onChangeText={(t) => {
-                    const cleaned = t.replace(/[^0-9]/g, "");
-                    setPhone(cleaned);
-                    if (cleaned.length >= 10 && cleaned.length <= 15) {
-                      setErrors((prev) => ({ ...prev, phone: "" }));
-                    }
-                  }}
-                  keyboardType="number-pad"
-                />
-                {errors.phone ? <Text style={styles.errorText}>{errors.phone}</Text> : null}
-              </View>
-            </View>
+            
 
             <View style={styles.fullField}>
               <Text style={styles.label}>Address</Text>
@@ -572,13 +578,13 @@ export default function CreateReportScreen() {
           {successModalVisible && !loading && (
             <View style={styles.modalOverlay}>
               <View style={styles.modalContainer}>
-                <Text style={styles.modalTitle}>REPORT SUBMITTED SUCCESSFULLY</Text>
+                <Text style={styles.modalTitle}>DETAILS SUBMITTED SUCCESSFULLY</Text>
                 <Image
                   source={require("../assets/images/right.jpeg")}
                   style={{ width: 60, height: 60, marginBottom: 15 }}
                   resizeMode="contain"
                 />
-                <Text style={styles.modalCase}>CASE NUMBER: {submittedCaseNumber}</Text>
+                <Text style={styles.modalCase}>REFERENCE NUMBER: {submittedCaseNumber}</Text>
                 <TouchableOpacity
                   style={styles.modalButton}
                   onPress={() => {
@@ -710,8 +716,8 @@ const styles = StyleSheet.create({
 
   modalOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", alignItems: "center", zIndex: 9999, elevation: 10, },
   modalContainer: { backgroundColor: "#fff", padding: width * 0.08, borderRadius: 12, alignItems: "center", width: "85%" },
-  modalTitle: { fontSize: 16, color: "#000", textAlign: "center", marginBottom: 10, fontFamily: "Montserrat" },
-  modalCase: { fontSize: 16, color: "#000", marginBottom: 25, textAlign: "center", fontFamily: "Montserrat" },
+  modalTitle: { fontSize: 15, color: "#000", textAlign: "center", marginBottom: 10, fontFamily: "Montserrat" },
+  modalCase: { fontSize: 14, color: "#000", marginBottom: 25, textAlign: "center", fontFamily: "Montserrat" },
   modalButton: {
     backgroundColor: "#fff",
     width: "100%",

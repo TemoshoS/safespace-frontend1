@@ -89,10 +89,10 @@ export default function AbuseTypesScreen() {
                 </View>
             ) : (
                 <View style={styles.centeredContent}>
-                    <Text style={styles.title}>TYPES OF ABUSE</Text>
+                    <Text style={styles.title}>REPORT TYPE</Text>
 
                     {anonymous === "yes" && (
-                        <Text style={styles.anonymousText}>You are reporting anonymously</Text>
+                        <Text style={styles.anonymousText}>Your details are not required</Text>
                     )}
                     {anonymous === "no" && (
                         <Text style={styles.anonymousText}>You are reporting with details</Text>

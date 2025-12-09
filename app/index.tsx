@@ -39,6 +39,7 @@ export default function Index() {
         </View>
 
         {/* Hero Section */}
+        
         <View style={styles.heroSection}>
           <Image
             source={require("../assets/images/schoolgirls.jpeg")}
@@ -79,7 +80,7 @@ export default function Index() {
                 <Text style={styles.choiceText}>Check Status</Text>
               </LinearGradient>
             </TouchableOpacity>
-          </View>
+            </View>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -121,14 +122,13 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 10,
   },
-
   heroImage: {
     width: "100%",
-    height: height * 0.35,
-    borderRadius: 10,
-    marginTop: height * 0.03,
-    marginBottom: 30,
+    height: height * 0.45,
+    alignSelf: "center",     
+    marginBottom: 50,
   },
+  
 
   /* Equal buttons row */
   buttonsContainer: {

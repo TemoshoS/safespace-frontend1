@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   questionText: {
-    fontSize: width * 0.06, // scales with screen width
+    fontSize: width * 0.05, // scales with screen width
     fontWeight: "bold",
     marginBottom: height * 0.05,
     textAlign: "center",
