@@ -138,7 +138,7 @@ export default function DetailsScreen() {
       <View style={styles.formContainer}>
         <TextInput
           style={styles.input}
-          placeholder="CASE NUMBER"
+          placeholder="Reference Number"
           placeholderTextColor="#999"
           value={searchQuery}
           onChangeText={setSearchQuery}
@@ -150,7 +150,7 @@ export default function DetailsScreen() {
           <Text style={styles.statusButtonText}>Search</Text>
         </TouchableOpacity>
 
-        <Text style={styles.caseStatusLabel}>YOUR CASE STATUS</Text>
+        <Text style={styles.caseStatusLabel}>STATUS</Text>
 
         {loading && (
           <ActivityIndicator

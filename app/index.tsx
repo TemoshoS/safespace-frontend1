@@ -12,6 +12,8 @@ import {
   View,
 } from "react-native";
 
+import { SafeAreaView } from "react-native-safe-area-context";
+
 const { width, height } = Dimensions.get("window");
 
 export default function Index() {
@@ -19,10 +21,12 @@ export default function Index() {
   const scrollRef = useRef<ScrollView>(null);
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#fff" }}>
+    
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
       <ScrollView
         ref={scrollRef}
-        contentContainerStyle={[styles.container, { paddingTop: 70 }]}
+        
+        contentContainerStyle={styles.container}
         showsVerticalScrollIndicator={false}
       >
         {/* Logo */}
@@ -36,14 +40,10 @@ export default function Index() {
 
         {/* Hero Section */}
         <View style={styles.heroSection}>
-          <Text style={styles.heroTitle}>
-            Report Abuse{"\n"}Safely and{"\n"}Anonymously
-          </Text>
-
           <Image
             source={require("../assets/images/schoolgirls.jpeg")}
             style={styles.heroImage}
-            resizeMode="cover"
+            resizeMode="contain"
           />
 
           {/* Action Buttons */}
@@ -82,7 +82,8 @@ export default function Index() {
           </View>
         </View>
       </ScrollView>
-    </View>
+    </SafeAreaView>
+    // 4. Ensure you run: npx expo install react-native-safe-area-context
   );
 }
 
@@ -125,6 +126,7 @@ const styles = StyleSheet.create({
     width: "100%",
     height: height * 0.35,
     borderRadius: 10,
+    marginTop: height * 0.03,
     marginBottom: 30,
   },
 

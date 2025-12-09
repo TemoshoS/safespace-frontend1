@@ -62,7 +62,7 @@ export default function ReportCaseScreen() {
 
       {/* Centered content */}
       <View style={styles.centerContent}>
-        <Text style={styles.questionText}>REPORT ANONYMOUSLY?</Text>
+        <Text style={styles.questionText}>PROVIDE US WITH YOUR DETAILS</Text>
 
         <View style={styles.conditionBox}>
           <View style={styles.buttonRow}>
