@@ -107,11 +107,11 @@ export default function DetailsScreen() {
       const message = err.response?.data?.message?.toLowerCase() || "";
 
       if (status === 404 || message.includes("not found")) {
-        setError("Case not found");
+        setError("Reference number not found");
       } else if (status === 403 || message.includes("malicious") || message.includes("forbidden")) {
         router.replace("/access-denied");
       } else {
-        setError("Failed to fetch case. Check backend/network.");
+        setError("Failed to fetch reference number. Check backend/network.");
       }
     } finally {
       setLoading(false);
@@ -128,7 +128,7 @@ export default function DetailsScreen() {
       />
 
       {anonymous === "yes" && (
-        <Text style={styles.anonymousText}>You’re reporting anonymously</Text>
+        <Text style={styles.anonymousText}>You’re details are not required</Text>
       )}
 
       {/* Title */}
