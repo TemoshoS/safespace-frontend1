@@ -201,7 +201,7 @@ export default function EditReportScreen() {
       <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
         <View style={{ alignItems: "center", marginBottom: 20 }}>
           <Text style={styles.title}>Edit Report</Text>
-          <Text style={{ marginTop: 5, fontSize: 16, color: "#555" }}>Case Number: {case_number}</Text>
+          <Text style={{ marginTop: 5, fontSize: 16, color: "#555" }}>Reference Number: {case_number}</Text>
         </View>
 
         <View style={styles.formWrapper}>

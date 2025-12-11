@@ -73,7 +73,7 @@ export default function ReportCaseScreen() {
                 start={[0, 0]}
                 end={[1, 1]}
               >
-                <Text style={styles.choiceText}>Yes</Text>
+                <Text style={styles.choiceText}>No</Text>
               </LinearGradient>
             </TouchableOpacity>
 
@@ -84,7 +84,7 @@ export default function ReportCaseScreen() {
                 start={[0, 0]}
                 end={[1, 1]}
               >
-                <Text style={styles.choiceText}>No</Text>
+                <Text style={styles.choiceText}>Yes</Text>
               </LinearGradient>
             </TouchableOpacity>
           </View>

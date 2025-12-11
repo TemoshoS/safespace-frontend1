@@ -162,7 +162,7 @@ const styles = StyleSheet.create({
         color: "black",
         marginBottom: height * 0.02,
         fontWeight: "500",
-        fontSize: width * 0.04,
+        fontSize: width * 0.03,
         fontFamily: 'Montserrat'
     },
     abuseBox: {
@@ -182,7 +182,7 @@ const styles = StyleSheet.create({
         borderWidth: 2,
         borderRadius: width * 0.06,
         width: "48%",
-        height: height * 0.05, // FIXED HEIGHT (equal boxes)
+        height: height * 0.07, // FIXED HEIGHT (equal boxes)
         justifyContent: "center",
         alignItems: "center",
         marginBottom: height * 0.02,
