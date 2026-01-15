@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "safespace",
+    "name": "Safe Space",
     "slug": "safespace",
-    "version": "1.0.0",
+    "version": "1.0.2",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
@@ -11,7 +11,7 @@
 
     "ios": {
       "supportsTablet": true,
-      "buildNumber": "2",
+      "buildNumber": "5",
       "bundleIdentifier": "com.moepipublishing.safespace",
       "icon": "./assets/images/IOS-icon.png",
       "infoPlist": {
@@ -22,7 +22,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/icon.png",
-        "backgroundColor": "#fff"
+        "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
       "package": "com.moepipublishing.safespace"

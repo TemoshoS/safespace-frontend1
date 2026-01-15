@@ -89,10 +89,10 @@ export default function AbuseTypesScreen() {
                 </View>
             ) : (
                 <View style={styles.centeredContent}>
-                    <Text style={styles.title}>REPORT TYPE</Text>
+                    <Text style={styles.title}>TYPES OF ABUSE</Text>
 
                     {anonymous === "yes" && (
-                        <Text style={styles.anonymousText}>Your details are not required</Text>
+                        <Text style={styles.anonymousText}>You are reporting anonymously</Text>
                     )}
                     {anonymous === "no" && (
                         <Text style={styles.anonymousText}>You are reporting with details</Text>
@@ -162,7 +162,7 @@ const styles = StyleSheet.create({
         color: "black",
         marginBottom: height * 0.02,
         fontWeight: "500",
-        fontSize: width * 0.03,
+        fontSize: width * 0.02,
         fontFamily: 'Montserrat'
     },
     abuseBox: {
@@ -182,7 +182,7 @@ const styles = StyleSheet.create({
         borderWidth: 2,
         borderRadius: width * 0.06,
         width: "48%",
-        height: height * 0.07, // FIXED HEIGHT (equal boxes)
+        height: height * 0.07, 
         justifyContent: "center",
         alignItems: "center",
         marginBottom: height * 0.02,

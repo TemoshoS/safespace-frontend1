@@ -20,7 +20,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
 
@@ -194,14 +194,13 @@ export default function EditReportScreen() {
     );
 
   return (
-    <>
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : undefined}>
       <TopBar menuVisible={menuVisible} onBack={() => router.back()} onToggleMenu={toggleMenu} />
 
       <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
         <View style={{ alignItems: "center", marginBottom: 20 }}>
           <Text style={styles.title}>Edit Report</Text>
-          <Text style={{ marginTop: 5, fontSize: 16, color: "#555" }}>Reference Number: {case_number}</Text>
+          <Text style={{ marginTop: 5, fontSize: 16, color: "#555" }}>Case Number: {case_number}</Text>
         </View>
 
         <View style={styles.formWrapper}>
@@ -352,41 +351,42 @@ export default function EditReportScreen() {
       </ScrollView>
 
       {/* Modals */}
-     
-      {/* Loading and Success Modal */}
       <Modal visible={loading || successModalVisible} transparent animationType="fade">
-          {loading && (
-            <View style={styles.loadingOverlay}>
-              <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#c7da30" />
-                <Text style={styles.loadingText}>Submitting report…</Text>
-              </View>
-            </View>
-          )}
+  {/* Loading overlay */}
+  {loading && (
+    <View style={styles.loadingOverlay}>
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#c7da30" />
+        <Text style={styles.loadingText}>Updating report...</Text>
+      </View>
+    </View>
+  )}
 
-          {successModalVisible && !loading && (
-            <View style={styles.modalOverlay}>
-              <View style={styles.modalContainer}>
-                <Text style={styles.modalTitle}>DETAILS UPDATED SUCCESSFULLY</Text>
-                <Image
-                  source={require("../assets/images/right.jpeg")}
-                  style={{ width: 60, height: 60, marginBottom: 15 }}
-                  resizeMode="contain"
-                />
-                <Text style={styles.modalCase}>REFERENCE NUMBER: {case_number}</Text>
-                <TouchableOpacity
-                  style={styles.modalButton}
-                  onPress={() => {
-                    setSuccessModalVisible(false);
-                    router.replace("/");
-                  }}
-                >
-                  <Text style={styles.modalButtonText}>OK</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          )}
-        </Modal>
+  {/* Success modal */}
+  {successModalVisible && !loading && (
+    <View style={styles.modalOverlay}>
+      <View style={styles.modalContainer}>
+        <Text style={styles.modalTitle}>REPORT UPDATED SUCCESSFULLY</Text>
+        <Image
+          source={require("../assets/images/right.jpeg")}
+          style={{ width: 60, height: 60, marginBottom: 15 }}
+          resizeMode="contain"
+        />
+        <Text style={styles.modalCase}>CASE NUMBER: {case_number}</Text>
+        <TouchableOpacity
+          style={styles.modalButton}
+          onPress={() => {
+            setSuccessModalVisible(false);
+            router.replace("/"); // Navigate home
+          }}
+        >
+          <Text style={styles.modalButtonText}>Ok</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  )}
+</Modal>
+
 
       {menuVisible && <TouchableOpacity style={styles.overlay} onPress={toggleMenu} />}
 
@@ -404,9 +404,6 @@ export default function EditReportScreen() {
               onClose={() => setMenuVisible(false)}
             />
     </KeyboardAvoidingView>
-
-
-    </>
   );
 }
 
@@ -470,8 +467,8 @@ const styles = StyleSheet.create({
 
   modalOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", alignItems: "center" },
   modalContainer: { width: "85%", backgroundColor: "#fff", borderRadius: 12, padding: 25, alignItems: "center" },
-  modalTitle: { fontSize: 15, color: "#000", textAlign: "center", marginBottom: 10, fontFamily: "Montserrat" },
-  modalCase: { fontSize: 14, color: "#000", marginBottom: 25, textAlign: "center", fontFamily: "Montserrat" },
+  modalTitle: { fontSize: 16, color: "#000", textAlign: "center", marginBottom: 10, fontFamily: "Montserrat" },
+  modalCase: { fontSize: 16, color: "#000", marginBottom: 25, textAlign: "center", fontFamily: "Montserrat" },
   modalButton: {
     backgroundColor: "#fff",
     width: "100%",

@@ -12,8 +12,6 @@ import {
   View,
 } from "react-native";
 
-import { SafeAreaView } from "react-native-safe-area-context";
-
 const { width, height } = Dimensions.get("window");
 
 export default function Index() {
@@ -21,12 +19,10 @@ export default function Index() {
   const scrollRef = useRef<ScrollView>(null);
 
   return (
-    
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
+    <View style={{ flex: 1, backgroundColor: "#fff" }}>
       <ScrollView
         ref={scrollRef}
-        
-        contentContainerStyle={styles.container}
+        contentContainerStyle={[styles.container, { paddingTop: 70 }]}
         showsVerticalScrollIndicator={false}
       >
         {/* Logo */}
@@ -39,12 +35,15 @@ export default function Index() {
         </View>
 
         {/* Hero Section */}
-        
         <View style={styles.heroSection}>
+          <Text style={styles.heroTitle}>
+            Report Abuse{"\n"}Safely and{"\n"}Anonymously
+          </Text>
+
           <Image
             source={require("../assets/images/schoolgirls.jpeg")}
             style={styles.heroImage}
-            resizeMode="contain"
+            resizeMode="cover"
           />
 
           {/* Action Buttons */}
@@ -80,11 +79,10 @@ export default function Index() {
                 <Text style={styles.choiceText}>Check Status</Text>
               </LinearGradient>
             </TouchableOpacity>
-            </View>
+          </View>
         </View>
       </ScrollView>
-    </SafeAreaView>
-    // 4. Ensure you run: npx expo install react-native-safe-area-context
+    </View>
   );
 }
 
@@ -122,13 +120,13 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 10,
   },
+
   heroImage: {
     width: "100%",
-    height: height * 0.45,
-    alignSelf: "center",     
-    marginBottom: 50,
+    height: height * 0.35,
+    borderRadius: 10,
+    marginBottom: 30,
   },
-  
 
   /* Equal buttons row */
   buttonsContainer: {

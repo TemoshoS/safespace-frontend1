@@ -62,7 +62,7 @@ export default function ReportCaseScreen() {
 
       {/* Centered content */}
       <View style={styles.centerContent}>
-        <Text style={styles.questionText}>PROVIDE US WITH YOUR DETAILS</Text>
+        <Text style={styles.questionText}>REPORT ANONYMOUSLY?</Text>
 
         <View style={styles.conditionBox}>
           <View style={styles.buttonRow}>
@@ -73,7 +73,7 @@ export default function ReportCaseScreen() {
                 start={[0, 0]}
                 end={[1, 1]}
               >
-                <Text style={styles.choiceText}>No</Text>
+                <Text style={styles.choiceText}>Yes</Text>
               </LinearGradient>
             </TouchableOpacity>
 
@@ -84,7 +84,7 @@ export default function ReportCaseScreen() {
                 start={[0, 0]}
                 end={[1, 1]}
               >
-                <Text style={styles.choiceText}>Yes</Text>
+                <Text style={styles.choiceText}>No</Text>
               </LinearGradient>
             </TouchableOpacity>
           </View>
@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   questionText: {
-    fontSize: width * 0.05, // scales with screen width
+    fontSize: width * 0.06, // scales with screen width
     fontWeight: "bold",
     marginBottom: height * 0.05,
     textAlign: "center",

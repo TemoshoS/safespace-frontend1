@@ -3,4 +3,7 @@ export const BACKEND_URL: string = "https://mobile.teketesafespace.co.za";
 
 //export const BACKEND_URL: string = "http://10.0.2.2:3000";
 
-//export const BACKEND_URL: string = "http://192.168.2.116:3000";
+//export const BACKEND_URL: string = "http://192.168.21.2:3000";
+
+//export const BACKEND_URL: string = "http://172.20.10.7:3000";
+//export const BACKEND_URL = "http://192.168.137.1:3000";

@@ -107,11 +107,11 @@ export default function DetailsScreen() {
       const message = err.response?.data?.message?.toLowerCase() || "";
 
       if (status === 404 || message.includes("not found")) {
-        setError("Reference number not found");
+        setError("Case not found");
       } else if (status === 403 || message.includes("malicious") || message.includes("forbidden")) {
         router.replace("/access-denied");
       } else {
-        setError("Failed to fetch reference number. Check backend/network.");
+        setError("Failed to fetch case. Check backend/network.");
       }
     } finally {
       setLoading(false);
@@ -128,7 +128,7 @@ export default function DetailsScreen() {
       />
 
       {anonymous === "yes" && (
-        <Text style={styles.anonymousText}>You’re details are not required</Text>
+        <Text style={styles.anonymousText}>You’re reporting anonymously</Text>
       )}
 
       {/* Title */}
@@ -138,7 +138,7 @@ export default function DetailsScreen() {
       <View style={styles.formContainer}>
         <TextInput
           style={styles.input}
-          placeholder="Reference Number"
+          placeholder="CASE NUMBER"
           placeholderTextColor="#999"
           value={searchQuery}
           onChangeText={setSearchQuery}
@@ -150,7 +150,7 @@ export default function DetailsScreen() {
           <Text style={styles.statusButtonText}>Search</Text>
         </TouchableOpacity>
 
-        <Text style={styles.caseStatusLabel}>STATUS</Text>
+        <Text style={styles.caseStatusLabel}>YOUR CASE STATUS</Text>
 
         {loading && (
           <ActivityIndicator
@@ -184,18 +184,6 @@ export default function DetailsScreen() {
                   {String(searchResult.status || "")}
                 </Text>
               </Text>
-
-              <Text style={styles.detail}>
-                <Text style={styles.detailLabel}>Age: </Text>
-                {String(searchResult.age || "")}
-              </Text>
-
-              <Text style={styles.detail}>
-                <Text style={styles.detailLabel}>Email: </Text>
-                {String(searchResult.reporter_email || "")}
-              </Text>
-
-
 
               <Text style={styles.detail}>
                 <Text style={styles.detailLabel}>Submitted: </Text>
