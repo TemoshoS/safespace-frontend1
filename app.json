@@ -25,7 +25,10 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.moepipublishing.safespace"
+      "package": "com.moepipublishing.safespace",
+      "config": {
+        "googleMobileAdsAppId": "ca-app-pub-3359117038124437~6115207896"
+      }
     },
 
     "web": {
