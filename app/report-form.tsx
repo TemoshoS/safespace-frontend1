@@ -28,6 +28,10 @@ import TopBar from "@/components/toBar";
 
 const { width, height } = Dimensions.get("window");
 
+// Allow common address characters 
+const ADDRESS_REGEX = /^[a-zA-Z0-9\s@#.,\-\/()]+$/;
+
+
 export default function CreateReportScreen() {
   const { abuseTypeId, abuseTypeName, anonymous } = useLocalSearchParams();
   const router = useRouter();
@@ -174,9 +178,15 @@ export default function CreateReportScreen() {
     if (descriptionRequired && !description.trim())
       newErrors.description = "Description is required for this report.";
 
-    // Location optional but length constraints if provided
-    if (location && (location.length < 5 || location.length > 50))
-      newErrors.location = "Address must be between 5 and 50 characters.";
+    // Location allows special characters like @ ( ) , . - /
+    if (location) {
+      if (location.length < 5 || location.length > 50) {
+         newErrors.location = "Address must be between 5 and 50 characters.";
+   } else if (!ADDRESS_REGEX.test(location)) {
+    newErrors.location = "Address contains invalid characters.";
+  }
+}
+
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;

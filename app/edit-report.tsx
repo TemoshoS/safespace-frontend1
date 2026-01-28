@@ -26,6 +26,9 @@ import DropDownPicker from "react-native-dropdown-picker";
 
 const { width } = Dimensions.get("window");
 
+// Allow common address characters
+const ADDRESS_REGEX = /^[a-zA-Z0-9\s@#.,\-\/()]+$/;
+
 export default function EditReportScreen() {
   const { case_number } = useLocalSearchParams();
   const router = useRouter();
@@ -118,8 +121,14 @@ export default function EditReportScreen() {
     if (report.description && report.description.length > 500)
       newErrors.description = "Description must be under 500 characters.";
 
-    if (report.location && /[^\w\s,.-]/.test(report.location))
-      newErrors.location = "Location cannot contain special characters.";
+    // Location allows special characters like @ ( ) , . - /
+    if (report.location) {
+      if (report.location.length < 5 || report.location.length > 50) {
+        newErrors.location = "Address must be between 5 and 50 characters.";
+      } else if (!ADDRESS_REGEX.test(report.location)) {
+        newErrors.location = "Address contains invalid characters.";
+      }
+    }
 
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) return;
