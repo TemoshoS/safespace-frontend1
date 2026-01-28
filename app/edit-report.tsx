@@ -154,14 +154,14 @@ export default function EditReportScreen() {
 
       // If malicious, backend returns 403
       if (response.status === 403) {
-        router.replace("/access-denied");
+        router.push("/access-denied");
         return;
       }
 
       setSuccessModalVisible(true);
     } catch (err: any) {
       if (err.response?.status === 403) {
-        router.replace("/access-denied");
+        router.push("/access-denied");
         return;
       }
       console.error("Update error:", err);
@@ -183,7 +183,7 @@ export default function EditReportScreen() {
 
   const handleNavigate = (path: string) => {
     toggleMenu();
-    setTimeout(() => router.replace({ pathname: path as any }), 250);
+    setTimeout(() => router.rush({ pathname: path as any }), 250);
   };
 
   if (!report)
@@ -377,7 +377,7 @@ export default function EditReportScreen() {
           style={styles.modalButton}
           onPress={() => {
             setSuccessModalVisible(false);
-            router.replace("/"); // Navigate home
+            router.push("/"); // Navigate home
           }}
         >
           <Text style={styles.modalButtonText}>Ok</Text>

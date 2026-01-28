@@ -95,7 +95,7 @@ export default function DetailsScreen() {
 
       // Extra safety: backend might return a 200 but a malicious message
       if (res.data?.message?.toLowerCase().includes("malicious")) {
-        router.replace("/access-denied");
+        router.push("/access-denied");
         return;
       }
 
@@ -109,7 +109,7 @@ export default function DetailsScreen() {
       if (status === 404 || message.includes("not found")) {
         setError("Case not found");
       } else if (status === 403 || message.includes("malicious") || message.includes("forbidden")) {
-        router.replace("/access-denied");
+        router.push("/access-denied");
       } else {
         setError("Failed to fetch case. Check backend/network.");
       }
@@ -274,7 +274,7 @@ export default function DetailsScreen() {
               <TouchableOpacity
                 style={styles.editButton}
                 onPress={() =>
-                  router.replace({
+                  router.push({
                     pathname: "/edit-report",
                     params: { case_number: searchResult.case_number },
                   })
@@ -302,7 +302,7 @@ export default function DetailsScreen() {
           if (router.canGoBack()) {
             router.back();
           } else {
-            router.replace("/"); // Go home if no back screen
+            router.push("/"); // Go home if no back screen
           }
         }}
         onClose={() => setMenuVisible(false)}

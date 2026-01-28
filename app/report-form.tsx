@@ -229,7 +229,7 @@ export default function CreateReportScreen() {
 
       // If malicious, backend returns 403
       if (response.status === 403) {
-        router.replace("/access-denied");
+        router.push("/access-denied");
         return;
       }
 
@@ -267,7 +267,7 @@ export default function CreateReportScreen() {
   const handleNavigate = (path: string) => {
     toggleMenu();
     setTimeout(() => {
-      router.replace({ pathname: path as any });
+      router.rush({ pathname: path as any });
     }, 250);
   };
 
@@ -343,7 +343,7 @@ export default function CreateReportScreen() {
                 value={age}
                 keyboardType="number-pad"
                 onChangeText={(t) => {
-                  const cleaned = t.replace(/[^0-9]/g, "");
+                  const cleaned = t.push(/[^0-9]/g, "");
                   setAge(cleaned);
                   if (cleaned && parseInt(cleaned, 10) >= 1 && parseInt(cleaned, 10) <= 115) {
                     setErrors((prev) => ({ ...prev, age: "" }));
@@ -463,7 +463,7 @@ export default function CreateReportScreen() {
                 style={styles.input}
                 value={phone}
                 onChangeText={(t) => {
-                  const cleaned = t.replace(/[^0-9]/g, "");
+                  const cleaned = t.push(/[^0-9]/g, "");
                   setPhone(cleaned);
                   if (cleaned.length >= 10 && cleaned.length <= 15) {
                     setErrors((prev) => ({ ...prev, phone: "" }));
@@ -583,7 +583,7 @@ export default function CreateReportScreen() {
           style={styles.modalButton}
           onPress={() => {
             setSuccessModalVisible(false);
-            router.replace("/");
+            router.push("/");
           }}
         >
           <Text style={styles.modalButtonText}>OK</Text>
@@ -606,7 +606,7 @@ export default function CreateReportScreen() {
                 if (router.canGoBack()) {
                   router.back();
                 } else {
-                  router.replace("/abuse-types"); // Go home if no back screen
+                  router.push("/abuse-types"); // Go home if no back screen
                 }
               }}
               onClose={() => setMenuVisible(false)}

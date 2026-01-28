@@ -16,7 +16,7 @@ export default function AccessDeniedScreen() {
       </Text>
 
       <TouchableOpacity
-        onPress={() => router.replace("/")}
+        onPress={() => router.push("/")}
         style={{
           backgroundColor: "#c7da30",
           padding: 12,

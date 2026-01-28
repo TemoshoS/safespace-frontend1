@@ -52,7 +52,7 @@ export default function Index() {
             <TouchableOpacity
               style={styles.buttonWrapper}
               activeOpacity={0.8}
-              onPress={() => router.replace("/report-screen")}
+              onPress={() => router.push("/report-screen")}
             >
               <LinearGradient
                 colors={["#FFFFFF", "#FFFFFF"]}
@@ -68,7 +68,7 @@ export default function Index() {
             <TouchableOpacity
               style={styles.buttonWrapper}
               activeOpacity={0.8}
-              onPress={() => router.replace("/check-status")}
+              onPress={() => router.push("/check-status")}
             >
               <LinearGradient
                 colors={["#FFFFFF", "#FFFFFF"]}

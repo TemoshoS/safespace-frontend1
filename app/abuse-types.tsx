@@ -56,12 +56,12 @@ export default function AbuseTypesScreen() {
     const handleNavigate = (path: string) => {
         toggleMenu();
         setTimeout(() => {
-            router.replace({ pathname: path as any });
+            router.push({ pathname: path as any });
         }, 250);
     };
 
     const handleAbuseTypeSelect = (type: any) => {
-        router.replace({
+        router.push({
             pathname: "/report-form",
             params: {
                 abuseTypeId: type.id,
@@ -124,7 +124,7 @@ export default function AbuseTypesScreen() {
                 if (router.canGoBack()) {
                   router.back();
                 } else {
-                  router.replace("/report-screen"); // Go home if no back screen
+                  router.rush("/report-screen"); // Go home if no back screen
                 }
               }}
               onClose={() => setMenuVisible(false)}

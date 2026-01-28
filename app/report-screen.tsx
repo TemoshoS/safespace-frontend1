@@ -20,7 +20,7 @@ export default function ReportCaseScreen() {
   const slideAnim = useState(new Animated.Value(width))[0];
 
   const handleSelect = (choice: string) => {
-    router.replace({
+    router.push({
       pathname: "/abuse-types",
       params: { anonymous: choice },
     });
@@ -46,7 +46,7 @@ export default function ReportCaseScreen() {
   const handleNavigate = (path: string) => {
     toggleMenu();
     setTimeout(() => {
-      router.replace({ pathname: path as any });
+      router.push({ pathname: path as any });
     }, 250);
   };
 
@@ -103,7 +103,7 @@ export default function ReportCaseScreen() {
                 if (router.canGoBack()) {
                   router.back();
                 } else {
-                  router.replace("/"); 
+                  router.push("/"); 
                 }
               }}
               onClose={() => setMenuVisible(false)}
