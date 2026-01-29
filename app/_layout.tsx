@@ -1,66 +1,125 @@
-import { Montserrat_400Regular, Montserrat_700Bold, useFonts } from '@expo-google-fonts/montserrat';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Stack } from 'expo-router';
-import React, { useEffect, useState } from 'react';
-import { Dimensions, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-
-const { width, height } = Dimensions.get('window');
+import {
+  Montserrat_400Regular,
+  Montserrat_700Bold,
+  useFonts,
+} from "@expo-google-fonts/montserrat";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Stack } from "expo-router";
+import React, { useEffect, useState } from "react";
+import {
+  Platform,
+  StyleSheet,
+  Text,
+  View,
+  Modal,
+  TouchableOpacity,
+} from "react-native";
 
 export default function RootLayout() {
+  // 🔥 TOP-LEVEL RENDER LOG
+  console.log("🟢 [_layout] RootLayout rendered");
+
   const [showCookie, setShowCookie] = useState(false);
 
-  // Load fonts globally
+  // 🔤 FONT LOADING
   const [fontsLoaded] = useFonts({
     Montserrat: Montserrat_400Regular,
     MontserratBold: Montserrat_700Bold,
   });
 
+  console.log("🟡 [_layout] fontsLoaded =", fontsLoaded);
+
+  // 🍪 COOKIE MODAL EFFECT
   useEffect(() => {
+    console.log("🟣 [_layout] useEffect(showCookie) fired");
+
     setShowCookie(true);
+
+    return () => {
+      console.log("❌ [_layout] cleanup(showCookie effect)");
+    };
   }, []);
 
-  const acceptCookies = async () => {
-    await AsyncStorage.setItem('cookieConsent', 'all');
-    setShowCookie(false);
-  };
+  // 🧪 PLATFORM CHECK
+  useEffect(() => {
+    console.log("🧪 [_layout] Platform.OS =", Platform.OS);
+  }, []);
 
-  const rejectAll = async () => {
-    await AsyncStorage.setItem('cookieConsent', 'rejected');
-    setShowCookie(false);
-  };
+  // ⛔ BLOCK RENDER UNTIL FONTS LOAD
+  if (!fontsLoaded) {
+    console.log("⏳ [_layout] Fonts not loaded yet — returning null");
+    return null;
+  }
 
-  if (!fontsLoaded) return null;
+  console.log("✅ [_layout] Fonts loaded — rendering app");
 
   return (
     <View style={{ flex: 1 }}>
-      {/* Apply Montserrat globally */}
-      <View style={{ flex: 1, fontFamily: 'Montserrat' }}>
-        <Stack screenOptions={{ headerShown: false }} />
+      {/* 🧭 STACK NAVIGATOR */}
+      <Stack
+        screenOptions={{ headerShown: false }}
+      />
 
-        <Modal visible={showCookie} transparent animationType="fade">
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalBox}>
-              <Text style={styles.modalTitle}>Cookies Policy</Text>
+      {/* 🍪 COOKIE MODAL */}
+      <Modal
+        visible={showCookie}
+        transparent
+        animationType="fade"
+        onShow={() => console.log("📦 [_layout] Cookie modal SHOWN")}
+        onDismiss={() => console.log("📦 [_layout] Cookie modal DISMISSED")}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalBox}>
+            <Text style={styles.modalTitle}>Cookies Policy</Text>
 
-              <Text style={styles.modalText}>
-                We use essential cookies to keep Safe Space secure and working properly.
-                This includes safety features like anonymous sessions, secure logins,
-                and improving support services. By continuing, you accept these cookies.
-              </Text>
+            <Text style={styles.modalText}>
+              We use essential cookies to keep Safe Space secure and working
+              properly.
+            </Text>
 
-              <View style={styles.modalButtons}>
-                <TouchableOpacity style={styles.modalButton} onPress={acceptCookies}>
-                  <Text style={styles.modalButtonAccept}>Accept All</Text>
-                </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.modalButton}
+              onPress={async () => {
+                console.log("🍪 [_layout] Accept cookies pressed");
+                try {
+                  await AsyncStorage.setItem("cookieConsent", "all");
+                  console.log("✅ [_layout] Cookies saved to AsyncStorage");
+                } catch (err) {
+                  console.error(
+                    "❌ [_layout] Error saving cookies:",
+                    err
+                  );
+                }
+                setShowCookie(false);
+              }}
+            >
+              <Text style={styles.modalButtonAccept}>Accept All</Text>
+            </TouchableOpacity>
 
-                <TouchableOpacity style={styles.modalButton} onPress={rejectAll}>
-                  <Text style={styles.modalButtonReject}>Reject All</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
+            <TouchableOpacity
+              style={styles.modalButton}
+              onPress={async () => {
+                console.log("🍪 [_layout] Reject cookies pressed");
+                try {
+                  await AsyncStorage.setItem(
+                    "cookieConsent",
+                    "rejected"
+                  );
+                  console.log("✅ [_layout] Rejection saved");
+                } catch (err) {
+                  console.error(
+                    "❌ [_layout] Error rejecting cookies:",
+                    err
+                  );
+                }
+                setShowCookie(false);
+              }}
+            >
+              <Text style={styles.modalButtonReject}>Reject All</Text>
+            </TouchableOpacity>
           </View>
-        </Modal>
-      </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -68,52 +127,49 @@ export default function RootLayout() {
 const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    alignItems: 'center'
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   modalBox: {
-    width: '85%',
-    backgroundColor: '#fff',
+    width: "85%",
+    backgroundColor: "#fff",
     borderRadius: 12,
-    padding: 20
+    padding: 20,
   },
   modalTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 10,
-    textAlign: 'center',
-    color: '#1aaed3ff',
-    fontFamily: 'Montserrat'
+    textAlign: "center",
+    color: "#1aaed3ff",
+    fontFamily: "Montserrat",
   },
   modalText: {
     fontSize: 14,
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: 20,
-    color: '#444',
-    fontFamily: 'Montserrat'
-  },
-  modalButtons: {
-    width: '100%'
+    color: "#444",
+    fontFamily: "Montserrat",
   },
   modalButton: {
     paddingVertical: 12,
     borderRadius: 50,
     marginBottom: 10,
-    backgroundColor: '#fff',
-    borderColor: '#c7da30',
-    borderWidth: 2
+    backgroundColor: "#fff",
+    borderColor: "#c7da30",
+    borderWidth: 2,
   },
   modalButtonAccept: {
-    color: '#1aaed3ff',
-    textAlign: 'center',
+    color: "#1aaed3ff",
+    textAlign: "center",
     fontSize: 15,
-    fontFamily: 'Montserrat'
+    fontFamily: "Montserrat",
   },
   modalButtonReject: {
-    color: 'red',
-    textAlign: 'center',
+    color: "red",
+    textAlign: "center",
     fontSize: 15,
-    fontFamily: 'Montserrat'
+    fontFamily: "Montserrat",
   },
 });
