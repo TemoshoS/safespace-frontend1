@@ -12,26 +12,44 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import {
-  NativeAd,
-  NativeAdView,
-  NativeAsset,
-  NativeMediaView,
-  TestIds,
-} from "react-native-google-mobile-ads";
+
+/* ---------- SAFE GOOGLE ADS SETUP (OPTION A) ---------- */
+let NativeAdView: any = null;
+let NativeAsset: any = null;
+let NativeMediaView: any = null;
+let TestIds: any = null;
+let NativeAd: any = null;
+
+const isNative = Platform.OS === "android" || Platform.OS === "ios";
+
+if (isNative) {
+  try {
+    const ads = require("react-native-google-mobile-ads");
+    NativeAdView = ads.NativeAdView;
+    NativeAsset = ads.NativeAsset;
+    NativeMediaView = ads.NativeMediaView;
+    TestIds = ads.TestIds;
+    NativeAd = ads.NativeAd;
+  } catch (e) {
+    // Ads not available (Expo Go / not installed)
+  }
+}
+/* ----------------------------------------------------- */
 
 const { width, height } = Dimensions.get("window");
 
 export default function Index() {
   const router = useRouter();
   const scrollRef = useRef<ScrollView>(null);
-  const [nativeAd, setNativeAd] = useState<NativeAd | null>(null);
+  const [nativeAd, setNativeAd] = useState<any>(null);
 
-  /* Load Native Advanced Test Ad */
+  /* Load Native Ad ONLY if available */
   useEffect(() => {
-    NativeAd.createForAdRequest(TestIds.NATIVE, {
-      requestNonPersonalizedAdsOnly: true,
-    }).then(setNativeAd);
+    if (NativeAd && TestIds) {
+      NativeAd.createForAdRequest(TestIds.NATIVE, {
+        requestNonPersonalizedAdsOnly: true,
+      }).then(setNativeAd).catch(() => {});
+    }
   }, []);
 
   return (
@@ -58,8 +76,8 @@ export default function Index() {
             resizeMode="contain"
           />
 
-          {/* Native Advanced Ad */}
-          {nativeAd && (
+          {/* Native Ad (only renders if supported) */}
+          {nativeAd && NativeAdView && (
             <NativeAdView nativeAd={nativeAd} style={styles.adContainer}>
               <NativeMediaView style={styles.adMedia} />
 
@@ -115,6 +133,8 @@ export default function Index() {
   );
 }
 
+/* -------------------- STYLES -------------------- */
+
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
@@ -146,7 +166,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
 
-  /* Ad styles */
   adContainer: {
     width: "100%",
     backgroundColor: "#f5f5f5",
