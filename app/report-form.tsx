@@ -31,6 +31,34 @@ const { width, height } = Dimensions.get("window");
 // Allow common address characters 
 const ADDRESS_REGEX = /^[a-zA-Z0-9\s@#.,\-\/()]+$/;
 
+// Age–Grade ranges 
+const GRADE_AGE_RANGES: Record<string, { min: number; max: number }> = {
+  Creche: { min: 0, max: 5 },
+  "Grade R": { min: 5, max: 7 },
+  "Grade 1": { min: 6, max: 10 },
+  "Grade 2": { min: 7, max: 13 },
+  "Grade 3": { min: 8, max: 14 },
+  "Grade 4": { min: 9, max: 15 },
+  "Grade 5": { min: 10, max: 16 },
+  "Grade 6": { min: 11, max: 16 },
+  "Grade 7": { min: 12, max: 16 },
+  "Grade 8": { min: 13, max: 20 },
+  "Grade 9": { min: 14, max: 20 },
+  "Grade 10": { min: 15, max: 20 },
+  "Grade 11": { min: 16, max: 20 },
+  "Grade 12": { min: 17, max: 22 },
+  College: { min: 16, max: 99 },
+};
+
+const validateAgeGrade = (age: number, grade: string) => {
+  const normalizedGrade = grade?.trim();
+  const range = GRADE_AGE_RANGES[normalizedGrade];
+  if (!range) return { status: "error", message: "Invalid grade supplied" };
+  if (age < range.min || age > range.max)
+    return { status: "warning", message: `Age ${age} is unusual for ${normalizedGrade}` };
+  return { status: "ok" };
+};
+
 
 export default function CreateReportScreen() {
   const { abuseTypeId, abuseTypeName, anonymous } = useLocalSearchParams();
@@ -133,62 +161,72 @@ export default function CreateReportScreen() {
   const validateForm = () => {
     const newErrors: typeof errors = {};
 
-    // Subtype required
+    // --- Subtype required ---
     if (!selectedSubtype) newErrors.subtype = "Please select a subtype.";
 
-    // Full name required only if not anonymous
+    // --- Full name required only if not anonymous ---
     if (!isAnonymous) {
       if (!fullName.trim()) newErrors.fullName = "Full name is required.";
       else if (fullName.length > 50)
         newErrors.fullName = "Full name must be less than 50 characters.";
     }
 
-    // Email required + format
+    // --- Email required + format ---
     if (!email.trim()) newErrors.email = "Email is required.";
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()))
       newErrors.email = "Enter a valid email address.";
 
-    // Phone required and length
+    // --- Phone required and length ---
     if (!phone.trim()) newErrors.phone = "Phone number is required.";
     else if (phone.length < 10 || phone.length > 15)
       newErrors.phone = "Phone number must be 10-15 digits.";
 
-    // Age required and range
-    if (!age.trim()) newErrors.age = "Age is required.";
-    else {
-      const ageNum = parseInt(age, 10);
-      if (isNaN(ageNum) || ageNum < 1 || ageNum > 115)
-        newErrors.age = "Enter a valid age (1-115).";
+    // --- Grade required before age ---
+    if (!grade) {
+      newErrors.grade = "Grade is required.";
+    } else {
+      // --- Age required and range check ---
+      if (!age.trim()) {
+        newErrors.age = "Age is required.";
+      } else {
+        const ageNum = parseInt(age, 10);
+        const check = validateAgeGrade(ageNum, grade);
+
+        if (check.status === "error") {
+          newErrors.age = check.message; // block submission
+        } else if (check.status === "warning") {
+          // show warning but allow submission
+          newErrors.age = check.message;
+        }
+      }
     }
 
-    // School required and validations
+    // --- School required + validations ---
     if (!school.trim()) newErrors.school = "School name is required.";
     else if (school.length > 50)
       newErrors.school = "School name must be less than 50 characters.";
     else if (/[^a-zA-Z0-9\s]/.test(school))
       newErrors.school = "School name contains invalid characters.";
 
-    // Grade required
-    if (!grade) newErrors.grade = "Grade is required.";
-
-    // Description required for certain subtype (e.g. "Other")
+    // --- Description required for "Other" subtype ---
     const descriptionRequired =
       subtypes.find((s) => String(s.id) === selectedSubtype)
         ?.sub_type_name === "Other";
     if (descriptionRequired && !description.trim())
       newErrors.description = "Description is required for this report.";
 
-    // Location allows special characters like @ ( ) , . - /
+    // --- Location validation (special characters allowed) ---
     if (location) {
       if (location.length < 5 || location.length > 50) {
-         newErrors.location = "Address must be between 5 and 50 characters.";
-   } else if (!ADDRESS_REGEX.test(location)) {
-    newErrors.location = "Address contains invalid characters.";
-  }
-}
-
+        newErrors.location = "Address must be between 5 and 50 characters.";
+      } else if (!ADDRESS_REGEX.test(location)) {
+        newErrors.location = "Address contains invalid characters.";
+      }
+    }
 
     setErrors(newErrors);
+
+    // Return true if no errors
     return Object.keys(newErrors).length === 0;
   };
 
@@ -277,7 +315,7 @@ export default function CreateReportScreen() {
   const handleNavigate = (path: string) => {
     toggleMenu();
     setTimeout(() => {
-      router.rush({ pathname: path as any });
+      router.push({ pathname: path as any });
     }, 250);
   };
 
@@ -353,7 +391,7 @@ export default function CreateReportScreen() {
                 value={age}
                 keyboardType="number-pad"
                 onChangeText={(t) => {
-                  const cleaned = t.push(/[^0-9]/g, "");
+                  const cleaned = t.replace(/[^0-9]/g, "");
                   setAge(cleaned);
                   if (cleaned && parseInt(cleaned, 10) >= 1 && parseInt(cleaned, 10) <= 115) {
                     setErrors((prev) => ({ ...prev, age: "" }));
@@ -373,7 +411,7 @@ export default function CreateReportScreen() {
                     setErrors((prev) => ({ ...prev, school: "" }));
                   }
                 }}
-                placeholder="start typing school name..."
+                placeholder="Start typing school name..."
                 placeholderTextColor="#999"
               />
               {errors.school ? <Text style={styles.errorText}>{errors.school}</Text> : null}
@@ -473,7 +511,7 @@ export default function CreateReportScreen() {
                 style={styles.input}
                 value={phone}
                 onChangeText={(t) => {
-                  const cleaned = t.push(/[^0-9]/g, "");
+                  const cleaned = t.replace(/[^0-9]/g, "");
                   setPhone(cleaned);
                   if (cleaned.length >= 10 && cleaned.length <= 15) {
                     setErrors((prev) => ({ ...prev, phone: "" }));
@@ -631,20 +669,20 @@ const styles = StyleSheet.create({
     paddingBottom: height * 0.03,
     alignItems: "center",
     width: "100%",
-    paddingHorizontal: width * 0.03
+    paddingHorizontal: width * 0.03,
   },
 
   title: {
     fontSize: width * 0.07,
     fontWeight: "bold",
     marginBottom: height * 0.02,
-    color: "black"
+    color: "black",
   },
 
   abuseTypeText: {
     fontSize: width * 0.045,
     fontWeight: "bold",
-    marginBottom: height * 0.01
+    marginBottom: height * 0.01,
   },
 
   formWrapper: {
@@ -661,29 +699,70 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 3 },
     shadowRadius: 5,
     elevation: 3,
-    alignSelf: "center",           // center on larger screens
+    alignSelf: "center",
   },
 
+  row: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: height * 0.02,
+  },
 
-  row: { flexDirection: "row", justifyContent: "space-between", marginBottom: height * 0.02 },
-  field: { flex: 1, marginRight: width * 0.02 },
-  fieldLast: { flex: 1, marginRight: 0 },
-  fullField: { width: "100%", marginBottom: height * 0.02 },
+  field: {
+    flex: 1,
+    marginRight: width * 0.02,
+  },
 
-  label: { color: "black", marginBottom: height * 0.005 },
+  fieldLast: {
+    flex: 1,
+    marginRight: 0,
+  },
+
+  fullField: {
+    width: "100%",
+    marginBottom: height * 0.02,
+  },
+
+  label: {
+    color: "black",
+    marginBottom: height * 0.005,
+  },
+
   input: {
     borderWidth: 2,
     borderColor: "#c7da30",
     borderRadius: 8,
     padding: width * 0.02,
     fontSize: width * 0.04,
-    backgroundColor: "#fff"
+    backgroundColor: "#fff",
   },
-  pickerWrapper: { borderWidth: 2, borderColor: "#c7da30", borderRadius: 8, overflow: "hidden" },
-  descriptionInput: { height: height * 0.12, textAlignVertical: "top" },
 
-  fileInput: { borderWidth: 2, borderColor: "#c7da30", borderRadius: 8, backgroundColor: "#fff", paddingVertical: height * 0.015, paddingHorizontal: width * 0.03, justifyContent: "center" },
-  fileInputText: { color: "#555", fontWeight: "500" },
+  pickerWrapper: {
+    borderWidth: 2,
+    borderColor: "#c7da30",
+    borderRadius: 8,
+    overflow: "hidden",
+  },
+
+  descriptionInput: {
+    height: height * 0.12,
+    textAlignVertical: "top",
+  },
+
+  fileInput: {
+    borderWidth: 2,
+    borderColor: "#c7da30",
+    borderRadius: 8,
+    backgroundColor: "#fff",
+    paddingVertical: height * 0.015,
+    paddingHorizontal: width * 0.03,
+    justifyContent: "center",
+  },
+
+  fileInputText: {
+    color: "#555",
+    fontWeight: "500",
+  },
 
   submitButton: {
     backgroundColor: "#fff",
@@ -693,31 +772,100 @@ const styles = StyleSheet.create({
     width: "100%",
     marginTop: height * 0.015,
     borderWidth: 2,
-    borderColor: "#c7da30"
+    borderColor: "#c7da30",
   },
-  submitText: { color: "#1aaed3ff", fontSize: width * 0.045 },
+
+  submitText: {
+    color: "#1aaed3ff",
+    fontSize: width * 0.045,
+  },
 
   suggestionsOverlay: {
-    position: "absolute", top: 0, left: 0, right: 0, bottom: 0,
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     backgroundColor: "rgba(0, 0, 0, 0.5)",
     zIndex: 1000,
-    justifyContent: "center", alignItems: "center", padding: width * 0.05
+    justifyContent: "center",
+    alignItems: "center",
+    padding: width * 0.05,
   },
-  suggestionsContainer: {
-    backgroundColor: "#fff", borderRadius: 12, padding: width * 0.04,
-    width: "90%", maxHeight: "50%", borderWidth: 2, borderColor: "#c7da30",
-    shadowColor: "#000", shadowOpacity: 0.3, shadowOffset: { width: 0, height: 5 }, shadowRadius: 10, elevation: 10
-  },
-  suggestionsTitle: { fontSize: width * 0.045, fontWeight: "bold", marginBottom: height * 0.01,fontFamily: 'Montserrat'  },
-  suggestionItem: { paddingVertical: height * 0.008 },
-  suggestionText: { fontSize: width * 0.04 ,fontFamily: 'Montserrat' },
-  closeSuggestionsButton: { marginTop: height * 0.01, alignSelf: "center" },
-  closeSuggestionsText: { color: "#c7da30", fontWeight: "bold", fontFamily: 'Montserrat'  },
 
-  modalOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", alignItems: "center" },
-  modalContainer: { backgroundColor: "#fff", padding: width * 0.08, borderRadius: 12, alignItems: "center", width: "85%" },
-  modalTitle: { fontSize: 16,  color: "#000", textAlign: "center", marginBottom: 10, fontFamily: "Montserrat" },
-  modalCase: { fontSize: 16,  color: "#000", marginBottom: 25, textAlign: "center", fontFamily: "Montserrat" },
+  suggestionsContainer: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: width * 0.04,
+    width: "90%",
+    maxHeight: "50%",
+    borderWidth: 2,
+    borderColor: "#c7da30",
+    shadowColor: "#000",
+    shadowOpacity: 0.3,
+    shadowOffset: { width: 0, height: 5 },
+    shadowRadius: 10,
+    elevation: 10,
+  },
+
+  suggestionsTitle: {
+    fontSize: width * 0.045,
+    fontWeight: "bold",
+    marginBottom: height * 0.01,
+    fontFamily: "Montserrat",
+  },
+
+  suggestionItem: {
+    paddingVertical: height * 0.008,
+  },
+
+  suggestionText: {
+    fontSize: width * 0.04,
+    fontFamily: "Montserrat",
+  },
+
+  closeSuggestionsButton: {
+    marginTop: height * 0.01,
+    alignSelf: "center",
+  },
+
+  closeSuggestionsText: {
+    color: "#c7da30",
+    fontWeight: "bold",
+    fontFamily: "Montserrat",
+  },
+
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  modalContainer: {
+    backgroundColor: "#fff",
+    padding: width * 0.08,
+    borderRadius: 12,
+    alignItems: "center",
+    width: "85%",
+  },
+
+  modalTitle: {
+    fontSize: 16,
+    color: "#000",
+    textAlign: "center",
+    marginBottom: 10,
+    fontFamily: "Montserrat",
+  },
+
+  modalCase: {
+    fontSize: 16,
+    color: "#000",
+    marginBottom: 25,
+    textAlign: "center",
+    fontFamily: "Montserrat",
+  },
+
   modalButton: {
     backgroundColor: "#fff",
     width: "100%",
@@ -729,22 +877,113 @@ const styles = StyleSheet.create({
     borderColor: "#c7da30",
     borderWidth: 2,
   },
-  modalButtonText: { color: "#1aaed3ff", fontWeight: "500", fontSize: 16, fontFamily: 'Montserrat'  },
 
-  overlay: { position: "absolute", top: 0, left: 0, width: "100%", height: "100%", backgroundColor: "rgba(0,0,0,0.3)", zIndex: 5 },
+  modalButtonText: {
+    color: "#1aaed3ff",
+    fontWeight: "500",
+    fontSize: 16,
+    fontFamily: "Montserrat",
+  },
 
-  filePickerWrapper: { flexDirection: "row", alignItems: "center", borderWidth: 2, borderColor: "#c7da30", borderRadius: 8, overflow: "hidden", backgroundColor: "#f0f0f0", height: height * 0.06, marginBottom: height * 0.01 },
-  chooseFileButton: { backgroundColor: "#d3d3d3", paddingHorizontal: width * 0.04, justifyContent: "center", alignItems: "center", height: "100%" },
-  chooseFileText: { color: "#000", fontWeight: "500" ,fontFamily: 'Montserrat' },
-  fileNameText: { flex: 1, paddingHorizontal: width * 0.03, color: "#555",fontFamily: 'Montserrat'  },
-  imagePreview: { width: "100%", height: height * 0.15, borderRadius: 8, borderWidth: 2, borderColor: "#c7da30", marginTop: height * 0.005 },
-  videoPreview: { width: "100%", height: height * 0.23, borderRadius: 8, borderWidth: 2, borderColor: "#c7da30" },
+  overlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+    backgroundColor: "rgba(0,0,0,0.3)",
+    zIndex: 5,
+  },
 
-  loadingOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", alignItems: "center", zIndex: 10000 },
-  loadingContainer: { backgroundColor: "#fff", padding: width * 0.08, borderRadius: 12, justifyContent: "center", alignItems: "center", width: "80%", shadowColor: "#000", shadowOffset: { width: 0, height: 5 }, shadowOpacity: 0.3, shadowRadius: 10, elevation: 10 },
-  loadingText: { marginTop: height * 0.015, fontSize: width * 0.045, fontWeight: "bold", color: "black",fontFamily: 'Montserrat'  },
+  filePickerWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: "#c7da30",
+    borderRadius: 8,
+    overflow: "hidden",
+    backgroundColor: "#f0f0f0",
+    height: height * 0.06,
+    marginBottom: height * 0.01,
+  },
 
-  activeItem: { backgroundColor: "#87CEEB", borderRadius: 25 },
+  chooseFileButton: {
+    backgroundColor: "#d3d3d3",
+    paddingHorizontal: width * 0.04,
+    justifyContent: "center",
+    alignItems: "center",
+    height: "100%",
+  },
 
-  errorText: { color: "red", fontSize: width * 0.035, marginTop: height * 0.003,fontFamily: 'Montserrat'  },
+  chooseFileText: {
+    color: "#000",
+    fontWeight: "500",
+    fontFamily: "Montserrat",
+  },
+
+  fileNameText: {
+    flex: 1,
+    paddingHorizontal: width * 0.03,
+    color: "#555",
+    fontFamily: "Montserrat",
+  },
+
+  imagePreview: {
+    width: "100%",
+    height: height * 0.15,
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: "#c7da30",
+    marginTop: height * 0.005,
+  },
+
+  videoPreview: {
+    width: "100%",
+    height: height * 0.23,
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: "#c7da30",
+  },
+
+  loadingOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 10000,
+  },
+
+  loadingContainer: {
+    backgroundColor: "#fff",
+    padding: width * 0.08,
+    borderRadius: 12,
+    justifyContent: "center",
+    alignItems: "center",
+    width: "80%",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 10,
+  },
+
+  loadingText: {
+    marginTop: height * 0.015,
+    fontSize: width * 0.045,
+    fontWeight: "bold",
+    color: "black",
+    fontFamily: "Montserrat",
+  },
+
+  activeItem: {
+    backgroundColor: "#87CEEB",
+    borderRadius: 25,
+  },
+
+  errorText: {
+    color: "red",
+    fontSize: width * 0.035,
+    marginTop: height * 0.003,
+    fontFamily: "Montserrat",
+  },
 });
