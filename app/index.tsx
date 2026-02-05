@@ -211,33 +211,34 @@ const styles = StyleSheet.create({
   buttonsContainer: {
     width: "100%",
     flexDirection: "row",
-    justifyContent: "space-between",
     gap: 10,
-    paddingHorizontal: 10,
   },
 
   buttonWrapper: {
     flex: 1,
     maxWidth: "48%",
+    
   },
 
   gradientButton: {
     paddingVertical: height * 0.015,
     borderRadius: 255,
-    alignItems: "center",
-    justifyContent: "center",
     borderWidth: 2,
     borderColor: "#c7da30",
+    alignItems: "center",
   },
 
   choiceText: {
     color: "#1aaed3ff",
     fontSize: width * 0.04,
     fontWeight: "bold",
-    textAlign: "center",
-    fontFamily:
-      Platform.OS === "web"
-        ? `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif`
-        : "System",
+  },
+
+  bannerWrapper: {
+    width: "100%",
+    alignItems: "center",
+    paddingVertical: 8,
+    backgroundColor: "#fff",
   },
 });
+

@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "Safe Space",
+    "name": "Tekete Safespace",
     "slug": "safespace",
-    "version": "1.0.2",
+    "version": "1.0.4",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
@@ -25,10 +25,7 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.moepipublishing.safespace",
-      "config": {
-        "googleMobileAdsAppId": "ca-app-pub-3359117038124437~6115207896"
-      }
+      "package": "com.moepipublishing.safespace"
     },
 
     "web": {
@@ -49,7 +46,15 @@
         }
       ],
       "expo-font",
-      "expo-web-browser"
+      "expo-web-browser",
+      [
+        "react-native-google-mobile-ads",
+        {
+          "androidAppId": "ca-app-pub-3359117038124437~6115207896",
+          "iosAppId": "ca-app-pub-3359117038124437~6115207896"
+        }
+      ]         
+      
     ],
 
     "experiments": {

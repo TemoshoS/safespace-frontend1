@@ -7,12 +7,12 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Stack } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
+  Modal,
   Platform,
   StyleSheet,
   Text,
-  View,
-  Modal,
   TouchableOpacity,
+  View,
 } from "react-native";
 
 export default function RootLayout() {
