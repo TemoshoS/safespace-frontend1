@@ -2,6 +2,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
+  AppState,
   Dimensions,
   Image,
   Platform,
@@ -13,43 +14,43 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-/* ---------- SAFE GOOGLE ADS SETUP (OPTION A) ---------- */
-let NativeAdView: any = null;
-let NativeAsset: any = null;
-let NativeMediaView: any = null;
-let TestIds: any = null;
-let NativeAd: any = null;
+/* ---------- GOOGLE ADS SETUP ---------- */
+let BannerAd: any = null;
+let BannerAdSize: any = null;
 
 const isNative = Platform.OS === "android" || Platform.OS === "ios";
 
 if (isNative) {
   try {
     const ads = require("react-native-google-mobile-ads");
-    NativeAdView = ads.NativeAdView;
-    NativeAsset = ads.NativeAsset;
-    NativeMediaView = ads.NativeMediaView;
-    TestIds = ads.TestIds;
-    NativeAd = ads.NativeAd;
-  } catch (e) {
-    // Ads not available (Expo Go / not installed)
-  }
+    BannerAd = ads.BannerAd;
+    BannerAdSize = ads.BannerAdSize;
+  } catch {}
 }
-/* ----------------------------------------------------- */
+/* ------------------------------------- */
 
 const { width, height } = Dimensions.get("window");
 
 export default function Index() {
   const router = useRouter();
   const scrollRef = useRef<ScrollView>(null);
-  const [nativeAd, setNativeAd] = useState<any>(null);
+  const [showAd, setShowAd] = useState(false);
 
-  /* Load Native Ad ONLY if available */
+  // Initial delayed load
   useEffect(() => {
-    if (NativeAd && TestIds) {
-      NativeAd.createForAdRequest(TestIds.NATIVE, {
-        requestNonPersonalizedAdsOnly: true,
-      }).then(setNativeAd).catch(() => {});
-    }
+    const t = setTimeout(() => setShowAd(true), 1200);
+    return () => clearTimeout(t);
+  }, []);
+
+  // Reload ad when app becomes active (midnight / resume fix)
+  useEffect(() => {
+    const sub = AppState.addEventListener("change", state => {
+      if (state === "active") {
+        setShowAd(false);
+        setTimeout(() => setShowAd(true), 600);
+      }
+    });
+    return () => sub.remove();
   }, []);
 
   return (
@@ -76,29 +77,7 @@ export default function Index() {
             resizeMode="contain"
           />
 
-          {/* Native Ad (only renders if supported) */}
-          {nativeAd && NativeAdView && (
-            <NativeAdView nativeAd={nativeAd} style={styles.adContainer}>
-              <NativeMediaView style={styles.adMedia} />
-
-              <View style={styles.adContent}>
-                <NativeAsset assetType="headline">
-                  <Text style={styles.adHeadline} />
-                </NativeAsset>
-
-                <NativeAsset assetType="body">
-                  <Text style={styles.adBody} />
-                </NativeAsset>
-
-                <NativeAsset assetType="callToAction">
-                  <View style={styles.ctaButton}>
-                    <Text style={styles.ctaText} />
-                  </View>
-                </NativeAsset>
-              </View>
-            </NativeAdView>
-          )}
-
+      
           {/* Action Buttons */}
           <View style={styles.buttonsContainer}>
             <TouchableOpacity
@@ -129,6 +108,24 @@ export default function Index() {
           </View>
         </View>
       </ScrollView>
+       {/* Banner Ad */}
+       {BannerAd && showAd && (
+        <View style={styles.bannerWrapper}>
+          <BannerAd
+            unitId="ca-app-pub-3359117038124437/3952350421"
+            size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+
+            onAdFailedToLoad={() => {
+              // retry after failure (important at night)
+              setTimeout(() => setShowAd(true), 3000);
+            }}
+            requestOptions={{
+              requestNonPersonalizedAdsOnly: true,
+            }}
+          />
+        </View>
+      )}
+
     </SafeAreaView>
   );
 }
