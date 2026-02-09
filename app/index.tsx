@@ -1,8 +1,7 @@
 import { LinearGradient } from "expo-linear-gradient";
-import { useFocusEffect, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
-  AppState,
   Dimensions,
   Image,
   Platform,
@@ -13,81 +12,55 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  BannerAd,
+  BannerAdSize,
+  TestIds,
+} from "react-native-google-mobile-ads";
 
-/* ---------- GOOGLE ADS SETUP ---------- */
-let BannerAd: any = null;
-let BannerAdSize: any = null;
+/* ---------- SAFE GOOGLE ADS SETUP ---------- */
+let NativeAdView: any = null;
+let NativeAsset: any = null;
+let NativeMediaView: any = null;
+let NativeAd: any = null;
 
 const isNative = Platform.OS === "android" || Platform.OS === "ios";
 
 if (isNative) {
   try {
-    const ads = require("react-native-google-mobile-ads");
-    BannerAd = ads.BannerAd;
-    BannerAdSize = ads.BannerAdSize;
-  } catch {}
+    const ads = require("react-native-google-mobile-ads") as any;
+    NativeAdView = ads.NativeAdView;
+    NativeAsset = ads.NativeAsset;
+    NativeMediaView = ads.NativeMediaView;
+    NativeAd = ads.NativeAd;
+  } catch (e) {
+    // Expo Go safe fallback
+  }
 }
-/* ------------------------------------- */
+/* ------------------------------------------ */
 
 const { width, height } = Dimensions.get("window");
 
 export default function Index() {
   const router = useRouter();
+  const scrollRef = useRef<ScrollView>(null);
+  const [nativeAd, setNativeAd] = useState<any>(null);
 
-  const [showAd, setShowAd] = useState(false);
-  const [adLoaded, setAdLoaded] = useState(false);
-
-  // Retry timer reference
-  const retryTimer = useRef<any>(null);
-
-  // Prevent constant reload
-  const lastRetryTime = useRef<number>(0);
-
-  const loadAd = () => {
-    setAdLoaded(false);
-    setShowAd(true);
-  };
-
-  const scheduleRetry = () => {
-    const now = Date.now();
-
-    // Only retry if 30 seconds have passed since last retry
-    if (now - lastRetryTime.current < 30000) return;
-
-    lastRetryTime.current = now;
-
-    if (retryTimer.current) clearTimeout(retryTimer.current);
-
-    retryTimer.current = setTimeout(() => {
-      loadAd();
-    }, 30000); // retry every 30 seconds
-  };
-
+  /* Load Native Test Ad */
   useEffect(() => {
-    loadAd();
-    return () => {
-      if (retryTimer.current) clearTimeout(retryTimer.current);
-    };
+    if (NativeAd) {
+      NativeAd.createForAdRequest(TestIds.NATIVE, {
+        requestNonPersonalizedAdsOnly: true,
+      })
+        .then(setNativeAd)
+        .catch(() => {});
+    }
   }, []);
-
-  useEffect(() => {
-    const sub = AppState.addEventListener("change", (state) => {
-      if (state === "active") {
-        loadAd();
-      }
-    });
-    return () => sub.remove();
-  }, []);
-
-  useFocusEffect(
-    React.useCallback(() => {
-      loadAd();
-    }, [])
-  );
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
       <ScrollView
+        ref={scrollRef}
         contentContainerStyle={styles.container}
         showsVerticalScrollIndicator={false}
       >
@@ -108,11 +81,33 @@ export default function Index() {
             resizeMode="contain"
           />
 
-          {/* Action Buttons */}
+          {/* Native TEST Ad */}
+          {nativeAd && NativeAdView && (
+            <NativeAdView nativeAd={nativeAd} style={styles.adContainer}>
+              <NativeMediaView style={styles.adMedia} />
+
+              <View style={styles.adContent}>
+                <NativeAsset assetType="headline">
+                  <Text style={styles.adHeadline} />
+                </NativeAsset>
+
+                <NativeAsset assetType="body">
+                  <Text style={styles.adBody} />
+                </NativeAsset>
+
+                <NativeAsset assetType="callToAction">
+                  <View style={styles.ctaButton}>
+                    <Text style={styles.ctaText} />
+                  </View>
+                </NativeAsset>
+              </View>
+            </NativeAdView>
+          )}
+
+          {/* Buttons */}
           <View style={styles.buttonsContainer}>
             <TouchableOpacity
               style={styles.buttonWrapper}
-              activeOpacity={0.8}
               onPress={() => router.push("/report-screen")}
             >
               <LinearGradient
@@ -125,7 +120,6 @@ export default function Index() {
 
             <TouchableOpacity
               style={styles.buttonWrapper}
-              activeOpacity={0.8}
               onPress={() => router.push("/check-status")}
             >
               <LinearGradient
@@ -136,90 +130,131 @@ export default function Index() {
               </LinearGradient>
             </TouchableOpacity>
           </View>
+
+          {/* TEST Banner Ad */}
+          <View style={styles.bannerAdContainer}>
+            <BannerAd
+              unitId={TestIds.BANNER}
+              size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+              requestOptions={{
+                requestNonPersonalizedAdsOnly: true,
+              }}
+            />
+          </View>
         </View>
       </ScrollView>
-
-      {/* Banner Ad */}
-      {BannerAd && showAd && (
-        <View style={styles.bannerWrapper}>
-          <BannerAd
-            unitId="ca-app-pub-3359117038124437/3952350421"
-            size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
-
-            onAdLoaded={() => {
-              setAdLoaded(true);
-            }}
-
-            onAdFailedToLoad={() => {
-              setAdLoaded(false);
-              setShowAd(false);
-
-              // retry only every 30 seconds
-              scheduleRetry();
-            }}
-
-            requestOptions={{
-              requestNonPersonalizedAdsOnly: true,
-            }}
-          />
-        </View>
-      )}
     </SafeAreaView>
   );
 }
 
 /* -------------------- STYLES -------------------- */
+
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     backgroundColor: "#FFFFFF",
   },
+
   heroSection: {
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: height * 0.05,
     paddingHorizontal: width * 0.05,
   },
+
   logo: {
     width: width * 0.35,
     height: width * 0.35,
   },
+
   logoWrapper: {
     width: "100%",
     alignItems: "flex-start",
     paddingLeft: width * 0.08,
   },
+
   heroImage: {
     width: "100%",
     height: height * 0.45,
     alignSelf: "center",
     marginBottom: 20,
   },
+
+  adContainer: {
+    width: "100%",
+    backgroundColor: "#f5f5f5",
+    borderRadius: 12,
+    overflow: "hidden",
+    marginBottom: 30,
+  },
+
+  adMedia: {
+    width: "100%",
+    height: 180,
+  },
+
+  adContent: {
+    padding: 12,
+  },
+
+  adHeadline: {
+    fontSize: 16,
+    fontWeight: "600",
+  },
+
+  adBody: {
+    fontSize: 13,
+    color: "#555",
+    marginVertical: 6,
+  },
+
+  ctaButton: {
+    alignSelf: "flex-start",
+    backgroundColor: "#1aaed3ff",
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 6,
+    marginTop: 6,
+  },
+
+  ctaText: {
+    color: "#fff",
+    fontWeight: "600",
+  },
+
   buttonsContainer: {
     width: "100%",
     flexDirection: "row",
+    justifyContent: "space-between",
     gap: 10,
+    paddingHorizontal: 10,
   },
+
   buttonWrapper: {
     flex: 1,
     maxWidth: "48%",
   },
+
   gradientButton: {
     paddingVertical: height * 0.015,
     borderRadius: 255,
+    alignItems: "center",
+    justifyContent: "center",
     borderWidth: 2,
     borderColor: "#c7da30",
-    alignItems: "center",
   },
+
   choiceText: {
     color: "#1aaed3ff",
     fontSize: width * 0.04,
     fontWeight: "bold",
+    textAlign: "center",
   },
-  bannerWrapper: {
+
+  bannerAdContainer: {
     width: "100%",
     alignItems: "center",
-    paddingVertical: 8,
-    backgroundColor: "#fff",
+    marginTop: height * 0.02,
+    marginBottom: height * 0.01,
   },
 });
