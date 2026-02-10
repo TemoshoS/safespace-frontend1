@@ -2,7 +2,7 @@
   "expo": {
     "name": "Tekete Safespace",
     "slug": "safespace",
-    "version": "1.0.4",
+    "version": "1.0.5",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
@@ -11,7 +11,7 @@
 
     "ios": {
       "supportsTablet": true,
-      "buildNumber": "5",
+      "buildNumber": "6",
       "bundleIdentifier": "com.moepipublishing.safespace",
       "icon": "./assets/images/IOS-icon.png",
       "infoPlist": {

@@ -89,7 +89,7 @@ export default function AbuseTypesScreen() {
                 </View>
             ) : (
                 <View style={styles.centeredContent}>
-                    <Text style={styles.title}>TYPES OF ABUSE</Text>
+                    <Text style={styles.title}>TYPES OF REPORT</Text>
 
                     {anonymous === "yes" && (
                         <Text style={styles.anonymousText}>You are reporting anonymously</Text>
@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
         textAlign: "center",
         color: "black",
         marginBottom: height * 0.02,
-        fontWeight: "500",
+        fontWeight: "bold",
         fontSize: width * 0.02,
         fontFamily: 'Montserrat'
     },

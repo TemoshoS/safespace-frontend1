@@ -338,7 +338,7 @@ export default function CreateReportScreen() {
 
   return (
     <KeyboardAvoidingView
-      style={{ flex: 1 ,backgroundColor: "#fff"}}
+      style={{ flex: 1, backgroundColor: "#fff" }}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0}
     >
@@ -428,13 +428,16 @@ export default function CreateReportScreen() {
                   renderItem={({ item }) => (
                     <TouchableOpacity
                       onPress={() => {
-                        setSchool(item.name);
+                        setSchool(item.school_name);
                         setSchoolSuggestions([]);
                         setErrors((prev) => ({ ...prev, school: "" }));
                       }}
                       style={styles.suggestionItem}
                     >
-                      <Text style={styles.suggestionText}>{item.name}</Text>
+                      <Text style={styles.suggestionText}>
+                        {item.school_name} ({item.province})
+                      </Text>
+
                     </TouchableOpacity>
                   )}
                 />
@@ -606,59 +609,59 @@ export default function CreateReportScreen() {
       </ScrollView>
 
       {/* Big Loading Modal (keeps your design & logic) */}
-     
-      <Modal visible={loading || successModalVisible} transparent animationType="fade">
-  {loading && (
-    <View style={styles.loadingOverlay}>
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#c7da30" />
-        <Text style={styles.loadingText}>Submitting report…</Text>
-      </View>
-    </View>
-  )}
 
-  {successModalVisible && !loading && (
-    <View style={styles.modalOverlay}>
-      <View style={styles.modalContainer}>
-        <Text style={styles.modalTitle}>DETAILS SUBMITTED SUCCESSFULLY</Text>
-        <Image
-          source={require("../assets/images/right.jpeg")}
-          style={{ width: 60, height: 60, marginBottom: 15 }}
-          resizeMode="contain"
-        />
-        <Text style={styles.modalCase}>REFERENCE NUMBER: {submittedCaseNumber}</Text>
-        <TouchableOpacity
-          style={styles.modalButton}
-          onPress={() => {
-            setSuccessModalVisible(false);
-            router.push("/");
-          }}
-        >
-          <Text style={styles.modalButtonText}>OK</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  )}
-</Modal>
+      <Modal visible={loading || successModalVisible} transparent animationType="fade">
+        {loading && (
+          <View style={styles.loadingOverlay}>
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#c7da30" />
+              <Text style={styles.loadingText}>Submitting report…</Text>
+            </View>
+          </View>
+        )}
+
+        {successModalVisible && !loading && (
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContainer}>
+              <Text style={styles.modalTitle}>DETAILS SUBMITTED SUCCESSFULLY</Text>
+              <Image
+                source={require("../assets/images/right.jpeg")}
+                style={{ width: 60, height: 60, marginBottom: 15 }}
+                resizeMode="contain"
+              />
+              <Text style={styles.modalCase}>REFERENCE NUMBER: {submittedCaseNumber}</Text>
+              <TouchableOpacity
+                style={styles.modalButton}
+                onPress={() => {
+                  setSuccessModalVisible(false);
+                  router.push("/");
+                }}
+              >
+                <Text style={styles.modalButtonText}>OK</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+      </Modal>
 
 
       {/* Slide-in menu from right */}
       {menuVisible && (
         <TouchableOpacity style={styles.overlay} onPress={toggleMenu} />
       )}
-     <MenuToggle
-              menuVisible={menuVisible}
-              slideAnim={slideAnim}
-              onNavigate={handleNavigate}
-              onBack={() => {
-                if (router.canGoBack()) {
-                  router.back();
-                } else {
-                  router.push("/abuse-types"); // Go home if no back screen
-                }
-              }}
-              onClose={() => setMenuVisible(false)}
-            />
+      <MenuToggle
+        menuVisible={menuVisible}
+        slideAnim={slideAnim}
+        onNavigate={handleNavigate}
+        onBack={() => {
+          if (router.canGoBack()) {
+            router.back();
+          } else {
+            router.push("/abuse-types"); // Go home if no back screen
+          }
+        }}
+        onClose={() => setMenuVisible(false)}
+      />
 
     </KeyboardAvoidingView>
   );
