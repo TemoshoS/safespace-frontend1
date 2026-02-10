@@ -1,7 +1,7 @@
 import { BACKEND_URL } from "@/utils/config";
 import axios from "axios";
 import { Video } from "expo-av";
-import * as ImagePicker from "expo-image-picker";
+import * as DocumentPicker from "expo-document-picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
@@ -133,15 +133,25 @@ export default function CreateReportScreen() {
 
   // pick image or video
   const pickMedia = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
-      quality: 0.5,
+    const result = await DocumentPicker.getDocumentAsync({
+      type: ["image/*", "video/*", "audio/*"],
+      copyToCacheDirectory: true,
     });
 
-    if (!result.canceled) {
-      const file = result.assets[0];
-      setAttachment(file);
-    }
+    if (result.canceled) return;
+
+    const file = result.assets[0];
+
+    setAttachment({
+      uri: file.uri,
+      name: file.name,
+      type: file.mimeType?.startsWith("image")
+        ? "image"
+        : file.mimeType?.startsWith("video")
+          ? "video"
+          : "audio",
+      mimeType: file.mimeType,
+    });
   };
 
   const searchSchools = async (text: string) => {
@@ -598,6 +608,12 @@ export default function CreateReportScreen() {
                 resizeMode={"contain" as any}
               />
             )}
+            {attachment?.type === "audio" && (
+              <Text style={{ marginTop: 10, color: "green" }}>
+                🎵 Audio file selected
+              </Text>
+            )}
+
           </View>
 
           <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
