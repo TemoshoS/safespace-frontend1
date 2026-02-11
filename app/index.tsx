@@ -33,10 +33,15 @@ const { width, height } = Dimensions.get("window");
 
 export default function Index() {
   const router = useRouter();
+
   const [showAd, setShowAd] = useState(false);
   const [adLoaded, setAdLoaded] = useState(false);
 
+  // Retry timer reference
   const retryTimer = useRef<any>(null);
+
+  // Prevent constant reload
+  const lastRetryTime = useRef<number>(0);
 
   const loadAd = () => {
     setAdLoaded(false);
@@ -44,11 +49,18 @@ export default function Index() {
   };
 
   const scheduleRetry = () => {
+    const now = Date.now();
+
+    // Only retry if 30 seconds have passed since last retry
+    if (now - lastRetryTime.current < 30000) return;
+
+    lastRetryTime.current = now;
+
     if (retryTimer.current) clearTimeout(retryTimer.current);
 
     retryTimer.current = setTimeout(() => {
       loadAd();
-    }, 3000);
+    }, 30000); // retry every 30 seconds
   };
 
   useEffect(() => {
@@ -67,7 +79,6 @@ export default function Index() {
     return () => sub.remove();
   }, []);
 
-  // **Reload ad every time screen is focused**
   useFocusEffect(
     React.useCallback(() => {
       loadAd();
@@ -134,12 +145,19 @@ export default function Index() {
           <BannerAd
             unitId="ca-app-pub-3359117038124437/3952350421"
             size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
-            onAdLoaded={() => setAdLoaded(true)}
+
+            onAdLoaded={() => {
+              setAdLoaded(true);
+            }}
+
             onAdFailedToLoad={() => {
               setAdLoaded(false);
               setShowAd(false);
+
+              // retry only every 30 seconds
               scheduleRetry();
             }}
+
             requestOptions={{
               requestNonPersonalizedAdsOnly: true,
             }}
@@ -149,7 +167,6 @@ export default function Index() {
     </SafeAreaView>
   );
 }
-
 
 /* -------------------- STYLES -------------------- */
 const styles = StyleSheet.create({
