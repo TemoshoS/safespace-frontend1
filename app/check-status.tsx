@@ -2,9 +2,9 @@ import MenuToggle from "@/components/menuToggle";
 import TopBar from "@/components/toBar";
 import { BACKEND_URL } from "@/utils/config";
 import axios from "axios";
-import { Video } from "expo-av";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useState } from "react";
+import { Audio, ResizeMode, Video } from "expo-av";
+import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Animated,
@@ -17,11 +17,10 @@ import {
   TouchableOpacity,
   View
 } from "react-native";
+
 const { width } = Dimensions.get("window");
 
 export default function DetailsScreen() {
-
-
   const router = useRouter();
   const params = useLocalSearchParams();
   const anonymous = params.anonymous;
@@ -33,6 +32,81 @@ export default function DetailsScreen() {
 
   const [menuVisible, setMenuVisible] = useState(false);
   const slideAnim = useState(new Animated.Value(width))[0];
+
+  // 🎵 AUDIO STATE
+  const soundRef = useRef<Audio.Sound | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [duration, setDuration] = useState(0);
+  const [position, setPosition] = useState(0);
+
+  const stopAndUnloadAudio = async () => {
+    if (soundRef.current) {
+      try {
+        await soundRef.current.stopAsync();
+        await soundRef.current.unloadAsync();
+      } catch {}
+      soundRef.current = null;
+      setIsPlaying(false);
+      setDuration(0);
+      setPosition(0);
+    }
+  };
+
+  // Stop when leaving screen
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+        stopAndUnloadAudio();
+      };
+    }, [])
+  );
+
+  // Stop on component unmount
+  useEffect(() => {
+    return () => {
+      stopAndUnloadAudio();
+    };
+  }, []);
+
+  const formatTime = (millis: number) => {
+    const totalSeconds = Math.floor(millis / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+  };
+
+  const togglePlay = async (uri: string) => {
+    try {
+      if (!soundRef.current) {
+        const { sound } = await Audio.Sound.createAsync(
+          { uri },
+          { shouldPlay: true }
+        );
+
+        soundRef.current = sound;
+        setIsPlaying(true);
+
+        sound.setOnPlaybackStatusUpdate((status: any) => {
+          if (status.isLoaded) {
+            setPosition(status.positionMillis);
+            setDuration(status.durationMillis || 0);
+            setIsPlaying(status.isPlaying);
+          }
+        });
+      } else {
+        const status = await soundRef.current.getStatusAsync();
+        if (status.isPlaying) {
+          await soundRef.current.pauseAsync();
+          setIsPlaying(false);
+        } else {
+          await soundRef.current.playAsync();
+          setIsPlaying(true);
+        }
+      }
+    } catch (err) {
+      console.log("Audio error:", err);
+    }
+  };
 
   const toggleMenu = () => {
     if (menuVisible) {
@@ -58,10 +132,8 @@ export default function DetailsScreen() {
     }, 250);
   };
 
-
   const getStatusColor = (status: string) => {
     const normalizedStatus = status.trim().toLowerCase();
-
     switch (normalizedStatus) {
       case "awaiting-resolution":
         return "#EF4444";
@@ -86,6 +158,9 @@ export default function DetailsScreen() {
       return;
     }
 
+    // 🔥 Stop audio before new search
+    await stopAndUnloadAudio();
+
     setLoading(true);
     setError("");
     setSearchResult(null);
@@ -93,7 +168,6 @@ export default function DetailsScreen() {
     try {
       const res = await axios.get(`${BACKEND_URL}/reports/case/${searchQuery}`);
 
-      // Extra safety: backend might return a 200 but a malicious message
       if (res.data?.message?.toLowerCase().includes("malicious")) {
         router.push("/access-denied");
         return;
@@ -101,14 +175,16 @@ export default function DetailsScreen() {
 
       setSearchResult(res.data);
     } catch (err: any) {
-      console.error("Search error:", err);
-
       const status = err.response?.status;
       const message = err.response?.data?.message?.toLowerCase() || "";
 
       if (status === 404 || message.includes("not found")) {
         setError("Case not found");
-      } else if (status === 403 || message.includes("malicious") || message.includes("forbidden")) {
+      } else if (
+        status === 403 ||
+        message.includes("malicious") ||
+        message.includes("forbidden")
+      ) {
         router.push("/access-denied");
       } else {
         setError("Failed to fetch case. Check backend/network.");
@@ -118,9 +194,9 @@ export default function DetailsScreen() {
     }
   };
 
+
   return (
     <View style={styles.container}>
-      {/* Top bar: logo + menu */}
       <TopBar
         menuVisible={menuVisible}
         onBack={() => router.back()}
@@ -128,13 +204,13 @@ export default function DetailsScreen() {
       />
 
       {anonymous === "yes" && (
-        <Text style={styles.anonymousText}>You’re reporting anonymously</Text>
+        <Text style={styles.anonymousText}>
+          You’re reporting anonymously
+        </Text>
       )}
 
-      {/* Title */}
       <Text style={styles.title}>TRACK STATUS</Text>
 
-      {/* Form */}
       <View style={styles.formContainer}>
         <TextInput
           style={styles.input}
@@ -153,11 +229,7 @@ export default function DetailsScreen() {
         <Text style={styles.caseStatusLabel}>YOUR CASE STATUS</Text>
 
         {loading && (
-          <ActivityIndicator
-            size="small"
-            color="#c7da30"
-            style={{ marginTop: 10 }}
-          />
+          <ActivityIndicator size="small" color="#c7da30" style={{ marginTop: 10 }} />
         )}
 
         {error && <Text style={{ color: "red", marginTop: 10 }}>{error}</Text>}
@@ -168,6 +240,7 @@ export default function DetailsScreen() {
               <Text style={styles.caseNumber}>
                 {String(searchResult.case_number || "")}
               </Text>
+
               <Text style={styles.detail}>
                 <Text style={styles.detailLabel}>Status: </Text>
                 <Text
@@ -189,7 +262,6 @@ export default function DetailsScreen() {
                 <Text style={styles.detailLabel}>Submitted: </Text>
                 {new Date(searchResult.created_at || "").toLocaleDateString()}
               </Text>
-
 
               <Text style={styles.detail}>
                 <Text style={styles.detailLabel}>Abuse Type: </Text>
@@ -243,33 +315,82 @@ export default function DetailsScreen() {
                 {String(searchResult.school_name || "")}
               </Text>
 
-
-              {searchResult.latest_status_reason ? (
+              {searchResult.latest_status_reason && (
                 <Text style={styles.detail}>
                   <Text style={styles.detailLabel}>Reason: </Text>
                   {searchResult.latest_status_reason}
                 </Text>
-              ) : null}
+              )}
 
+              {/* MEDIA SECTION */}
+              {searchResult.image_path && (() => {
+                const fileUrl = `${BACKEND_URL}${searchResult.image_path}`;
+                const lowerPath = searchResult.image_path.toLowerCase();
 
-              {searchResult.image_path && (
-                searchResult.image_path.endsWith(".mp4") ||
-                  searchResult.image_path.endsWith(".mov") ? (
-                  <Video
-                    source={{ uri: `${BACKEND_URL}${searchResult.image_path}` }}
-                    style={styles.reporterVideo}
-                    useNativeControls
-                    resizeMode={"contain" as any}
-                    isLooping
-                  />
-                ) : (
+                const isVideo =
+                  lowerPath.endsWith(".mp4") ||
+                  lowerPath.endsWith(".mov") ||
+                  lowerPath.endsWith(".m4v");
+
+                const isAudio =
+                  lowerPath.endsWith(".mp3") ||
+                  lowerPath.endsWith(".wav") ||
+                  lowerPath.endsWith(".aac") ||
+                  lowerPath.endsWith(".m4a");
+
+                if (isVideo) {
+                  return (
+                    <Video
+                      source={{ uri: fileUrl }}
+                      style={styles.reporterVideo}
+                      useNativeControls
+                      resizeMode={ResizeMode.CONTAIN}
+                    />
+                  );
+                }
+
+                if (isAudio) {
+                  return (
+                    <View style={{ marginTop: 10 }}>
+                      <Text style={{ marginBottom: 5 }}>Audio Attachment:</Text>
+
+                      <TouchableOpacity
+                        style={styles.playButton}
+                        onPress={() => togglePlay(fileUrl)}
+                      >
+                        <Text style={styles.playButtonText}>
+                          {isPlaying ? "⏸" : "▶"}
+                        </Text>
+                      </TouchableOpacity>
+
+                      <View style={styles.progressBar}>
+                        <View
+                          style={[
+                            styles.progressFill,
+                            {
+                              width: duration
+                                ? `${(position / duration) * 100}%`
+                                : "0%",
+                            },
+                          ]}
+                        />
+                      </View>
+
+                      <Text style={styles.timeText}>
+                        {formatTime(position)} / {formatTime(duration)}
+                      </Text>
+                    </View>
+                  );
+                }
+
+                return (
                   <Image
-                    source={{ uri: `${BACKEND_URL}${searchResult.image_path}` }}
+                    source={{ uri: fileUrl }}
                     style={styles.reporterImage}
                     resizeMode="cover"
                   />
-                )
-              )}
+                );
+              })()}
 
               <TouchableOpacity
                 style={styles.editButton}
@@ -287,23 +408,17 @@ export default function DetailsScreen() {
         )}
       </View>
 
+      {menuVisible && (
+        <TouchableOpacity style={styles.overlay} onPress={toggleMenu} />
+      )}
 
-
-      {/* Overlay */}
-      {menuVisible && <TouchableOpacity style={styles.overlay} onPress={toggleMenu} />}
-
-      {/* Slide-in Menu */}
-  
       <MenuToggle
         menuVisible={menuVisible}
         slideAnim={slideAnim}
         onNavigate={handleNavigate}
         onBack={() => {
-          if (router.canGoBack()) {
-            router.back();
-          } else {
-            router.push("/"); // Go home if no back screen
-          }
+          if (router.canGoBack()) router.back();
+          else router.push("/");
         }}
         onClose={() => setMenuVisible(false)}
       />
@@ -311,166 +426,38 @@ export default function DetailsScreen() {
   );
 }
 
-
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    paddingHorizontal: 20,
-  },
-  anonymousText: {
-    textAlign: "center",
-    color: "black",
-    marginBottom: 10,
-    fontFamily: "Montserrat"
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginVertical: 10,
-    fontFamily: "Montserrat"
-  },
-  formContainer: {
-    width: "100%",
-    borderWidth: 2,
-    borderColor: "#c7da30",
-    borderRadius: 10,
-    padding: 20,
-    backgroundColor: "#fff",
-  },
-  input: {
-    width: "100%",
+  container: { flex: 1, backgroundColor: "#fff", paddingHorizontal: 20 },
+  anonymousText: { textAlign: "center", color: "black", marginBottom: 10, fontFamily: "Montserrat" },
+  title: { fontSize: 20, fontWeight: "bold", textAlign: "center", marginVertical: 10, fontFamily: "Montserrat" },
+  formContainer: { width: "100%", borderWidth: 2, borderColor: "#c7da30", borderRadius: 10, padding: 20, backgroundColor: "#fff" },
+  input: { width: "100%", height: 50, borderWidth: 2, borderColor: "#c7da30", borderRadius: 8, paddingHorizontal: 15, fontSize: 16, marginBottom: 10, fontFamily: "Montserrat" },
+  statusButton: { backgroundColor: "#fff", width: "100%", padding: 10, borderRadius: 48, justifyContent: "center", alignItems: "center", marginBottom: 10, borderColor: "#c7da30", borderWidth: 2 },
+  statusButtonText: { color: "#1aaed3ff", fontWeight: "500", fontSize: 16, fontFamily: "Montserrat" },
+  caseStatusLabel: { fontSize: 16, fontWeight: "bold", marginVertical: 10, textAlign: "center", fontFamily: "Montserrat" },
+  statusContainer: { width: "100%", maxHeight: 300, marginTop: 10, flexGrow: 0 },
+  caseItem: { backgroundColor: "#f9f9f9", padding: 15, borderRadius: 8, borderWidth: 1, borderColor: "#eee", marginBottom: 10 },
+  caseNumber: { fontSize: 16, fontWeight: "bold", fontFamily: "Montserrat" },
+  detail: { fontSize: 14, color: "#333", marginBottom: 3, fontFamily: "Montserrat" },
+  detailLabel: { fontWeight: "bold", fontFamily: "Montserrat" },
+  editButton: { marginTop: 15, borderWidth: 2, borderColor: "#c7da30", padding: 12, borderRadius: 50, alignItems: "center" },
+  editButtonText: { color: "#1aaed3ff", fontWeight: "500", fontSize: 16, fontFamily: "Montserrat" },
+  reporterImage: { width: 300, height: 200, marginBottom: 10 },
+  reporterVideo: { width: 300, height: 200, marginBottom: 10 },
+  overlay: { position: "absolute", top: 0, left: 0, width: "100%", height: "100%", backgroundColor: "rgba(0,0,0,0.3)", zIndex: 5 },
+
+  playButton: {
+    backgroundColor: "#c7da30",
+    width: 50,
     height: 50,
-    borderWidth: 2,
-    borderColor: "#c7da30",
-    borderRadius: 8,
-    paddingHorizontal: 15,
-    fontSize: 16,
-    marginBottom: 10,
-    fontFamily: "Montserrat",
-  },
-  statusButton: {
-    backgroundColor: "#fff",
-    width: "100%",
-    padding: 10,
-    borderRadius: 48,
+    borderRadius: 25,
     justifyContent: "center",
     alignItems: "center",
+    alignSelf: "center",
     marginBottom: 10,
-    borderColor: "#c7da30",
-    borderWidth: 2,
   },
-  statusButtonText: {
-    color: "#1aaed3ff",
-    fontWeight: "500",
-    fontSize: 16,
-    fontFamily: "Montserrat"
-  },
-  caseStatusLabel: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginVertical: 10,
-    textAlign: "center",
-    fontFamily: "Montserrat"
-  },
-  statusContainer: {
-    width: "100%",
-    maxHeight: 300,
-    marginTop: 10,
-    flexGrow: 0
-  },
-  caseItem: {
-    backgroundColor: "#f9f9f9",
-    padding: 15,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "#eee",
-    marginBottom: 10
-  },
-  caseHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 5
-  },
-  caseNumber: {
-    fontSize: 16,
-    fontWeight: "bold",
-    fontFamily: "Montserrat"
-  },
-  statusBadge: {
-    color: "black",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-    fontSize: 12,
-    fontWeight: "bold",
-    overflow: "hidden",
-    fontFamily: "Montserrat",
-  },
-  caseDate: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: "#333",
-    marginBottom: 3,
-    fontFamily: "Montserrat"
-  },
-  detail: {
-    fontSize: 14,
-    color: "#333",
-    marginBottom: 3,
-    fontFamily: "Montserrat"
-  },
-  detailLabel: {
-    fontWeight: "bold",
-    fontFamily: "Montserrat"
-  },
-  button: {
-    backgroundColor: "#fff",
-    borderColor: "#c7da30",
-    padding: 15,
-    borderRadius: 40,
-    marginTop: 20,
-    alignItems: "center",
-    borderWidth: 2
-  },
-  buttonText: {
-    color: "#333",
-    fontSize: 15,
-    fontFamily: "Montserrat"
-  },
-  editButton: {
-    marginTop: 15,
-    borderWidth: 2,
-    borderColor: "#c7da30",
-    padding: 12,
-    borderRadius: 50,
-    alignItems: "center"
-  },
-  editButtonText: {
-    color: "#1aaed3ff",
-    fontWeight: "500",
-    fontSize: 16,
-    fontFamily: "Montserrat"
-  },
-  reporterImage: {
-    width: 300,
-    height: 200,
-    marginBottom: 10
-  },
-  reporterVideo: {
-    width: 300,
-    height: 200,
-    marginBottom: 10
-  },
-  overlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    width: "100%",
-    height: "100%",
-    backgroundColor: "rgba(0,0,0,0.3)",
-    zIndex: 5,
-  },
+  playButtonText: { fontSize: 20, fontWeight: "bold" },
+  progressBar: { width: "100%", height: 6, backgroundColor: "#eee", borderRadius: 3, overflow: "hidden", marginBottom: 5 },
+  progressFill: { height: "100%", backgroundColor: "#1aaed3ff" },
+  timeText: { fontSize: 12, color: "#333", textAlign: "center" },
 });

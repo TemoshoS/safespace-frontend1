@@ -1,6 +1,6 @@
 import { BACKEND_URL } from "@/utils/config";
 import axios from "axios";
-import { Video } from "expo-av";
+import { Audio, Video } from "expo-av";
 import * as DocumentPicker from "expo-document-picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
@@ -59,7 +59,6 @@ const validateAgeGrade = (age: number, grade: string) => {
   return { status: "ok" };
 };
 
-
 export default function CreateReportScreen() {
   const { abuseTypeId, abuseTypeName, anonymous } = useLocalSearchParams();
   const router = useRouter();
@@ -97,6 +96,10 @@ export default function CreateReportScreen() {
   const [submittedCaseNumber, setSubmittedCaseNumber] = useState("");
   const [activeMenuItem, setActiveMenuItem] = useState<string | null>(null);
 
+  // 🎵 AUDIO STATE
+  const [sound, setSound] = useState<Audio.Sound | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+
   // errors state for inline messages
   const [errors, setErrors] = useState<{
     subtype?: string;
@@ -131,8 +134,28 @@ export default function CreateReportScreen() {
     else setIsAnonymous(false);
   }, [anonymous]);
 
+  // 🎵 AUDIO CLEANUP ON SCREEN EXIT
+  useEffect(() => {
+    return () => {
+      if (sound) {
+        sound.unloadAsync();
+      }
+    };
+  }, [sound]);
+
+  // 🎵 STOP AUDIO WHEN NEW CASE IS SEARCHED OR ATTACHMENT CHANGED
+  const stopAudio = async () => {
+    if (sound) {
+      await sound.unloadAsync();
+      setSound(null);
+      setIsPlaying(false);
+    }
+  };
+
   // pick image or video
   const pickMedia = async () => {
+    await stopAudio();
+
     const result = await DocumentPicker.getDocumentAsync({
       type: ["image/*", "video/*", "audio/*"],
       copyToCacheDirectory: true,
@@ -215,7 +238,7 @@ export default function CreateReportScreen() {
     if (!school.trim()) newErrors.school = "School name is required.";
     else if (school.length > 50)
       newErrors.school = "School name must be less than 50 characters.";
-    else if (/[^a-zA-Z0-9\s]/.test(school))
+    else if (/[^a-zA-Z0-9\s()]/.test(school))
       newErrors.school = "School name contains invalid characters.";
 
     // --- Description required for "Other" subtype ---
@@ -313,6 +336,9 @@ export default function CreateReportScreen() {
       setAttachment(null);
       setSchoolSuggestions([]);
       setErrors({});
+
+      // Stop audio when form resets
+      await stopAudio();
     } catch (err: any) {
       console.error("Submission error:", err);
       setErrors((prev) => ({ ...prev, description: "Failed to create report." }));
@@ -321,6 +347,39 @@ export default function CreateReportScreen() {
     }
   };
 
+  // 🎵 Play/Pause Audio
+  const toggleAudioPreview = async () => {
+    try {
+      if (!attachment?.uri) return;
+
+      if (!sound) {
+        const { sound: newSound } = await Audio.Sound.createAsync(
+          { uri: attachment.uri },
+          { shouldPlay: true }
+        );
+
+        setSound(newSound);
+        setIsPlaying(true);
+
+        newSound.setOnPlaybackStatusUpdate((status: any) => {
+          if (status.didJustFinish) {
+            setIsPlaying(false);
+          }
+        });
+      } else {
+        const status = await sound.getStatusAsync();
+        if (status.isPlaying) {
+          await sound.pauseAsync();
+          setIsPlaying(false);
+        } else {
+          await sound.playAsync();
+          setIsPlaying(true);
+        }
+      }
+    } catch (error) {
+      console.log("Audio preview error:", error);
+    }
+  };
 
   const handleNavigate = (path: string) => {
     toggleMenu();
@@ -447,7 +506,6 @@ export default function CreateReportScreen() {
                       <Text style={styles.suggestionText}>
                         {item.school_name} ({item.province})
                       </Text>
-
                     </TouchableOpacity>
                   )}
                 />
@@ -608,10 +666,26 @@ export default function CreateReportScreen() {
                 resizeMode={"contain" as any}
               />
             )}
+
+            {/* 🎵 UPDATED AUDIO SECTION */}
             {attachment?.type === "audio" && (
-              <Text style={{ marginTop: 10, color: "green" }}>
-                🎵 Audio file selected
-              </Text>
+              <View style={{ marginTop: 10 }}>
+                <TouchableOpacity
+                  onPress={toggleAudioPreview}
+                  style={{
+                    borderWidth: 2,
+                    borderColor: "#c7da30",
+                    borderRadius: 8,
+                    paddingVertical: 12,
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Text style={{ color: "#1aaed3ff", fontWeight: "600" }}>
+                    {isPlaying ? "⏸ Pause Audio" : "▶ Play Audio"}
+                  </Text>
+                </TouchableOpacity>
+              </View>
             )}
 
           </View>
