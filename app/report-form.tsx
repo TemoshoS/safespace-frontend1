@@ -881,25 +881,23 @@ const styles = StyleSheet.create({
     bottom: 0,
     backgroundColor: "rgba(0, 0, 0, 0.5)",
     zIndex: 1000,
-    justifyContent: "center",
+    justifyContent: "flex-start",   
     alignItems: "center",
-    padding: width * 0.05,
+    paddingTop: height * 0.15,    
+    paddingHorizontal: width * 0.05,
   },
-
+  
   suggestionsContainer: {
     backgroundColor: "#fff",
     borderRadius: 12,
     padding: width * 0.04,
     width: "90%",
-    maxHeight: "50%",
+    maxHeight: height * 0.4,  
     borderWidth: 2,
     borderColor: "#c7da30",
-    shadowColor: "#000",
-    shadowOpacity: 0.3,
-    shadowOffset: { width: 0, height: 5 },
-    shadowRadius: 10,
     elevation: 10,
   },
+  
 
   suggestionsTitle: {
     fontSize: width * 0.045,
