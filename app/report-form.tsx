@@ -210,10 +210,12 @@ export default function CreateReportScreen() {
       newErrors.email = "Enter a valid email address.";
 
     // --- Phone required and length ---
-    if (!phone.trim()) newErrors.phone = "Phone number is required.";
-    else if (phone.length < 10 || phone.length > 15)
-      newErrors.phone = "Phone number must be 10-15 digits.";
-
+    if (!phone.trim()) {
+      newErrors.phone = "Phone number is required.";
+    } else if (!/^\d{10}$/.test(phone)) {
+      newErrors.phone = "Phone number must be exactly 10 digits.";
+    }
+    
     // --- Grade required before age ---
     if (!grade) {
       newErrors.grade = "Grade is required.";
@@ -238,8 +240,7 @@ export default function CreateReportScreen() {
     if (!school.trim()) newErrors.school = "School name is required.";
     else if (school.length > 50)
       newErrors.school = "School name must be less than 50 characters.";
-    else if (/[^a-zA-Z0-9\s()]/.test(school))
-      newErrors.school = "School name contains invalid characters.";
+   
 
     // --- Description required for "Other" subtype ---
     const descriptionRequired =
@@ -881,23 +882,23 @@ const styles = StyleSheet.create({
     bottom: 0,
     backgroundColor: "rgba(0, 0, 0, 0.5)",
     zIndex: 1000,
-    justifyContent: "flex-start",   
+    justifyContent: "flex-start",
     alignItems: "center",
-    paddingTop: height * 0.15,    
+    paddingTop: height * 0.15,
     paddingHorizontal: width * 0.05,
   },
-  
+
   suggestionsContainer: {
     backgroundColor: "#fff",
     borderRadius: 12,
     padding: width * 0.04,
     width: "90%",
-    maxHeight: height * 0.4,  
+    maxHeight: height * 0.4,
     borderWidth: 2,
     borderColor: "#c7da30",
     elevation: 10,
   },
-  
+
 
   suggestionsTitle: {
     fontSize: width * 0.045,

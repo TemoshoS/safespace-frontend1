@@ -115,9 +115,10 @@ export default function EditReportScreen() {
     if (report.age && !/^\d+$/.test(report.age))
       newErrors.age = "Age must contain numbers only.";
 
-    if (report.phone_number && !/^\d{7,15}$/.test(report.phone_number))
-      newErrors.phone_number = "Enter a valid phone number (7-15 digits).";
-
+    if (report.phone_number && !/^\d{10}$/.test(report.phone_number)) {
+      newErrors.phone_number = "Phone number must be exactly 10 digits.";
+    }
+    
     if (report.description && report.description.length > 500)
       newErrors.description = "Description must be under 500 characters.";
 
@@ -192,7 +193,8 @@ export default function EditReportScreen() {
 
   const handleNavigate = (path: string) => {
     toggleMenu();
-    setTimeout(() => router.rush({ pathname: path as any }), 250);
+    setTimeout(() => router.push(path), 250);
+
   };
 
   if (!report)
