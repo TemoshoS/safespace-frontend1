@@ -1,8 +1,7 @@
 import { LinearGradient } from "expo-linear-gradient";
-import { useFocusEffect, useRouter } from "expo-router";
-import React, { useEffect, useRef, useState } from "react";
+import { useRouter } from "expo-router";
+import React from "react";
 import {
-  AppState,
   Dimensions,
   Image,
   Platform,
@@ -33,57 +32,6 @@ const { width, height } = Dimensions.get("window");
 
 export default function Index() {
   const router = useRouter();
-
-  const [showAd, setShowAd] = useState(false);
-  const [adLoaded, setAdLoaded] = useState(false);
-
-  // Retry timer reference
-  const retryTimer = useRef<any>(null);
-
-  // Prevent constant reload
-  const lastRetryTime = useRef<number>(0);
-
-  const loadAd = () => {
-    setAdLoaded(false);
-    setShowAd(true);
-  };
-
-  const scheduleRetry = () => {
-    const now = Date.now();
-
-    // Only retry if 30 seconds have passed since last retry
-    if (now - lastRetryTime.current < 30000) return;
-
-    lastRetryTime.current = now;
-
-    if (retryTimer.current) clearTimeout(retryTimer.current);
-
-    retryTimer.current = setTimeout(() => {
-      loadAd();
-    }, 30000); // retry every 30 seconds
-  };
-
-  useEffect(() => {
-    loadAd();
-    return () => {
-      if (retryTimer.current) clearTimeout(retryTimer.current);
-    };
-  }, []);
-
-  useEffect(() => {
-    const sub = AppState.addEventListener("change", (state) => {
-      if (state === "active") {
-        loadAd();
-      }
-    });
-    return () => sub.remove();
-  }, []);
-
-  useFocusEffect(
-    React.useCallback(() => {
-      loadAd();
-    }, [])
-  );
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
@@ -139,28 +87,12 @@ export default function Index() {
         </View>
       </ScrollView>
 
-      {/* Banner Ad */}
-      {BannerAd && showAd && (
+      {/* Banner Ad (Persistent – No Manual Reload) */}
+      {BannerAd && (
         <View style={styles.bannerWrapper}>
           <BannerAd
             unitId="ca-app-pub-3359117038124437/3952350421"
             size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
-
-            onAdLoaded={() => {
-              setAdLoaded(true);
-            }}
-
-            onAdFailedToLoad={() => {
-              setAdLoaded(false);
-              setShowAd(false);
-
-              // retry only every 30 seconds
-              scheduleRetry();
-            }}
-
-            requestOptions={{
-              requestNonPersonalizedAdsOnly: true,
-            }}
           />
         </View>
       )}
