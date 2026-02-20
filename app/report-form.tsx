@@ -28,10 +28,10 @@ import TopBar from "@/components/toBar";
 
 const { width, height } = Dimensions.get("window");
 
-// Allow common address characters 
+// Allow common address characters
 const ADDRESS_REGEX = /^[a-zA-Z0-9\s@#.,\-\/()]+$/;
 
-// Age–Grade ranges 
+// Age–Grade ranges
 const GRADE_AGE_RANGES: Record<string, { min: number; max: number }> = {
   Creche: { min: 0, max: 5 },
   "Grade R": { min: 5, max: 7 },
@@ -54,10 +54,11 @@ const validateAgeGrade = (age: number, grade: string) => {
   const normalizedGrade = grade?.trim();
   const range = GRADE_AGE_RANGES[normalizedGrade];
   if (!range) return { status: "error", message: "Invalid grade supplied" };
-  if (age < range.min || age > range.max)
+ if (age < range.min || age > range.max)
     return { status: "warning", message: `Age ${age} is unusual for ${normalizedGrade}` };
-  return { status: "ok" };
+    return { status: "ok" };
 };
+
 
 export default function CreateReportScreen() {
   const { abuseTypeId, abuseTypeName, anonymous } = useLocalSearchParams();
@@ -94,7 +95,7 @@ export default function CreateReportScreen() {
   const slideAnim = useState(new Animated.Value(width))[0];
   const [successModalVisible, setSuccessModalVisible] = useState(false);
   const [submittedCaseNumber, setSubmittedCaseNumber] = useState("");
-  const [activeMenuItem, setActiveMenuItem] = useState<string | null>(null);
+   const [activeMenuItem, setActiveMenuItem] = useState<string | null>(null);
 
   // 🎵 AUDIO STATE
   const [sound, setSound] = useState<Audio.Sound | null>(null);
@@ -122,7 +123,7 @@ export default function CreateReportScreen() {
       .catch((err) => console.error("Error fetching subtypes:", err));
   }, [abuseTypeId]);
 
-  // Convert subtypes to dropdown items
+ // Convert subtypes to dropdown items
   useEffect(() => {
     setSubtypeItems(
       subtypes.map((s) => ({ label: s.sub_type_name, value: String(s.id) }))
@@ -155,7 +156,6 @@ export default function CreateReportScreen() {
   // pick image or video
   const pickMedia = async () => {
     await stopAudio();
-
     const result = await DocumentPicker.getDocumentAsync({
       type: ["image/*", "video/*", "audio/*"],
       copyToCacheDirectory: true,
@@ -209,13 +209,13 @@ export default function CreateReportScreen() {
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()))
       newErrors.email = "Enter a valid email address.";
 
-    // --- Phone required and length ---
+   // --- Phone required and length ---
     if (!phone.trim()) {
       newErrors.phone = "Phone number is required.";
     } else if (!/^\d{10}$/.test(phone)) {
       newErrors.phone = "Phone number must be exactly 10 digits.";
     }
-    
+
     // --- Grade required before age ---
     if (!grade) {
       newErrors.grade = "Grade is required.";
@@ -240,7 +240,6 @@ export default function CreateReportScreen() {
     if (!school.trim()) newErrors.school = "School name is required.";
     else if (school.length > 50)
       newErrors.school = "School name must be less than 50 characters.";
-   
 
     // --- Description required for "Other" subtype ---
     const descriptionRequired =
@@ -259,6 +258,8 @@ export default function CreateReportScreen() {
     }
 
     setErrors(newErrors);
+
+    
 
     // Return true if no errors
     return Object.keys(newErrors).length === 0;
@@ -291,9 +292,12 @@ export default function CreateReportScreen() {
       if (attachment) {
         const uriParts = attachment.uri.split("/");
         const fileName = uriParts[uriParts.length - 1];
-        const fileType = (attachment.type && attachment.type.startsWith && attachment.type.startsWith("video"))
-          ? "video/mp4"
-          : "image/jpeg";
+        const fileType =
+          attachment.type &&
+          attachment.type.startsWith &&
+          attachment.type.startsWith("video")
+            ? "video/mp4"
+            : "image/jpeg";
 
         formData.append("file", {
           uri: attachment.uri,
@@ -307,7 +311,6 @@ export default function CreateReportScreen() {
         body: formData,
         headers: { Accept: "application/json" },
       });
-
 
       // If malicious, backend returns 403
       if (response.status === 403) {
@@ -338,7 +341,7 @@ export default function CreateReportScreen() {
       setSchoolSuggestions([]);
       setErrors({});
 
-      // Stop audio when form resets
+     // Stop audio when form resets
       await stopAudio();
     } catch (err: any) {
       console.error("Submission error:", err);
@@ -348,7 +351,7 @@ export default function CreateReportScreen() {
     }
   };
 
-  // 🎵 Play/Pause Audio
+   // 🎵 Play/Pause Audio
   const toggleAudioPreview = async () => {
     try {
       if (!attachment?.uri) return;
@@ -421,6 +424,8 @@ export default function CreateReportScreen() {
       <ScrollView
         contentContainerStyle={styles.container}
         scrollEnabled={!subtypeOpen && !gradeOpen && schoolSuggestions.length === 0}
+
+
         keyboardShouldPersistTaps="handled"
       >
         <Text style={styles.title}>REPORT CASE</Text>
@@ -443,6 +448,8 @@ export default function CreateReportScreen() {
                 setOpen={setSubtypeOpen}
                 setValue={setSelectedSubtype}
                 onChangeValue={(val) => setErrors((prev) => ({ ...prev, subtype: "" }))}
+
+
                 setItems={setSubtypeItems}
                 placeholder="Select Subtype"
                 style={styles.pickerWrapper}
@@ -450,6 +457,8 @@ export default function CreateReportScreen() {
                 zIndex={5000}
               />
               {errors.subtype ? <Text style={styles.errorText}>{errors.subtype}</Text> : null}
+
+
             </View>
           )}
 
@@ -464,11 +473,17 @@ export default function CreateReportScreen() {
                   const cleaned = t.replace(/[^0-9]/g, "");
                   setAge(cleaned);
                   if (cleaned && parseInt(cleaned, 10) >= 1 && parseInt(cleaned, 10) <= 115) {
+
+
+
+
                     setErrors((prev) => ({ ...prev, age: "" }));
                   }
                 }}
               />
               {errors.age ? <Text style={styles.errorText}>{errors.age}</Text> : null}
+
+
             </View>
             <View style={styles.fieldLast}>
               <Text style={styles.label}>School Name</Text>
@@ -485,6 +500,8 @@ export default function CreateReportScreen() {
                 placeholderTextColor="#999"
               />
               {errors.school ? <Text style={styles.errorText}>{errors.school}</Text> : null}
+
+
             </View>
           </View>
 
@@ -506,6 +523,7 @@ export default function CreateReportScreen() {
                     >
                       <Text style={styles.suggestionText}>
                         {item.school_name} ({item.province})
+
                       </Text>
                     </TouchableOpacity>
                   )}
@@ -532,6 +550,8 @@ export default function CreateReportScreen() {
                   setOpen={setGradeOpen}
                   setValue={setGrade}
                   onChangeValue={(val) => setErrors((prev) => ({ ...prev, grade: "" }))}
+
+
                   setItems={setGradeItems}
                   placeholder="Select Grade"
                   style={styles.pickerWrapper}
@@ -539,6 +559,8 @@ export default function CreateReportScreen() {
                   zIndex={4000}
                 />
                 {errors.grade ? <Text style={styles.errorText}>{errors.grade}</Text> : null}
+
+
               </View>
             </View>
           )}
@@ -558,6 +580,8 @@ export default function CreateReportScreen() {
                 }}
               />
               {errors.fullName ? <Text style={styles.errorText}>{errors.fullName}</Text> : null}
+
+
             </View>
           )}
 
@@ -576,6 +600,8 @@ export default function CreateReportScreen() {
                 keyboardType="email-address"
               />
               {errors.email ? <Text style={styles.errorText}>{errors.email}</Text> : null}
+
+
             </View>
             <View style={styles.fieldLast}>
               <Text style={styles.label}>Phone Number</Text>
@@ -592,6 +618,8 @@ export default function CreateReportScreen() {
                 keyboardType="number-pad"
               />
               {errors.phone ? <Text style={styles.errorText}>{errors.phone}</Text> : null}
+
+
             </View>
           </View>
 
@@ -608,6 +636,8 @@ export default function CreateReportScreen() {
               }}
             />
             {errors.location ? <Text style={styles.errorText}>{errors.location}</Text> : null}
+
+
           </View>
 
           <View style={styles.fullField}>
@@ -627,6 +657,7 @@ export default function CreateReportScreen() {
                 setDescription(t);
                 const subtypeName = subtypes.find((s) => String(s.id) === selectedSubtype)
                   ?.sub_type_name;
+
                 if (subtypeName !== "Other") {
                   setErrors((prev) => ({ ...prev, description: "" }));
                 } else if (t.trim().length > 0) {
@@ -636,6 +667,8 @@ export default function CreateReportScreen() {
               multiline
             />
             {errors.description ? <Text style={styles.errorText}>{errors.description}</Text> : null}
+
+
           </View>
 
           {/* Attachment */}
@@ -650,6 +683,8 @@ export default function CreateReportScreen() {
               </TouchableOpacity>
               <Text style={styles.fileNameText}>
                 {attachment ? attachment.uri.split("/").pop() : "No file chosen"}
+
+
               </Text>
             </View>
 
@@ -702,6 +737,10 @@ export default function CreateReportScreen() {
       {/* Big Loading Modal (keeps your design & logic) */}
 
       <Modal visible={loading || successModalVisible} transparent animationType="fade">
+
+
+
+
         {loading && (
           <View style={styles.loadingOverlay}>
             <View style={styles.loadingContainer}>
@@ -715,12 +754,16 @@ export default function CreateReportScreen() {
           <View style={styles.modalOverlay}>
             <View style={styles.modalContainer}>
               <Text style={styles.modalTitle}>DETAILS SUBMITTED SUCCESSFULLY</Text>
+
+
               <Image
                 source={require("../assets/images/right.jpeg")}
                 style={{ width: 60, height: 60, marginBottom: 15 }}
                 resizeMode="contain"
               />
               <Text style={styles.modalCase}>REFERENCE NUMBER: {submittedCaseNumber}</Text>
+
+
               <TouchableOpacity
                 style={styles.modalButton}
                 onPress={() => {
@@ -896,6 +939,10 @@ const styles = StyleSheet.create({
     maxHeight: height * 0.4,
     borderWidth: 2,
     borderColor: "#c7da30",
+
+
+
+
     elevation: 10,
   },
 
