@@ -29,6 +29,37 @@ const { width } = Dimensions.get("window");
 // Allow common address characters
 const ADDRESS_REGEX = /^[a-zA-Z0-9\s@#.,\-\/()]+$/;
 
+// Age–Grade ranges
+const GRADE_AGE_RANGES: Record<string, { min: number; max: number }> = {
+  Creche: { min: 0, max: 5 },
+  "Grade R": { min: 5, max: 7 },
+  "Grade 1": { min: 6, max: 10 },
+  "Grade 2": { min: 7, max: 13 },
+  "Grade 3": { min: 8, max: 14 },
+  "Grade 4": { min: 9, max: 15 },
+  "Grade 5": { min: 10, max: 16 },
+  "Grade 6": { min: 11, max: 16 },
+  "Grade 7": { min: 12, max: 16 },
+  "Grade 8": { min: 13, max: 20 },
+  "Grade 9": { min: 14, max: 20 },
+  "Grade 10": { min: 15, max: 20 },
+  "Grade 11": { min: 16, max: 20 },
+  "Grade 12": { min: 17, max: 22 },
+  College: { min: 16, max: 99 },
+};
+
+const validateAgeGrade = (age: number, grade: string) => {
+  const normalizedGrade = grade?.trim();
+  const range = GRADE_AGE_RANGES[normalizedGrade];
+  if (!range) return { status: "error", message: "Invalid grade supplied" };
+  if (age < range.min || age > range.max)
+    return {
+      status: "warning",
+      message: `Age ${age} is unusual for ${normalizedGrade}`,
+    };
+  return { status: "ok" };
+};
+
 export default function EditReportScreen() {
   const { case_number } = useLocalSearchParams();
   const router = useRouter();
@@ -99,36 +130,68 @@ export default function EditReportScreen() {
 
     const newErrors: any = {};
 
-    // Required fields
-    if (!selectedSubtype) newErrors.subtype = "Subtype is required.";
+    // --- Subtype required ---
+    if (!selectedSubtype) newErrors.subtype = "Please select a subtype.";
+
+    // --- Email required + format ---
     if (!report.reporter_email) newErrors.reporter_email = "Email is required.";
-    if (!report.phone_number) newErrors.phone_number = "Phone number is required.";
-    if (!report.age) newErrors.age = "Age is required.";
-    if (!report.location) newErrors.location = "Address is required.";
-    if (!report.school_name) newErrors.school_name = "School name is required.";
-    if (!report.status) newErrors.status = "Status is required.";
-    if (!report.grade) newErrors.grade = "Grade is required.";
-    if (report.is_anonymous == 0 && !report.full_name)
-      newErrors.full_name = "Full name is required.";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(report.reporter_email))
+      newErrors.reporter_email = "Enter a valid email address.";
 
-    // Validations
-    if (report.age && !/^\d+$/.test(report.age))
-      newErrors.age = "Age must contain numbers only.";
-
-    if (report.phone_number && !/^\d{10}$/.test(report.phone_number)) {
+    // --- Phone required and length ---
+    if (!report.phone_number) {
+      newErrors.phone_number = "Phone number is required.";
+    } else if (!/^\d{10}$/.test(report.phone_number)) {
       newErrors.phone_number = "Phone number must be exactly 10 digits.";
     }
-    
+
+    // --- Grade required before age ---
+    if (!report.grade) {
+      newErrors.grade = "Grade is required.";
+    } else {
+      // --- Age required and range check ---
+      if (!report.age) {
+        newErrors.age = "Age is required.";
+      } else {
+        const ageNum = parseInt(String(report.age), 10);
+        const check = validateAgeGrade(ageNum, report.grade);
+
+        if (check.status === "error") {
+          newErrors.age = check.message; // block submission
+        } else if (check.status === "warning") {
+          // show warning but allow submission
+          newErrors.age = check.message;
+        }
+      }
+    }
+
+    // --- Full Name required only if not anonymous ---
+    if (report.is_anonymous == 0 && !report.full_name)
+      newErrors.full_name = "Full name is required.";
+    else if (report.full_name && report.full_name.length > 50)
+      newErrors.full_name = "Full name must be less than 50 characters.";
+
+    // --- School required + validations ---
+    if (!report.school_name) newErrors.school_name = "School name is required.";
+    else if (report.school_name.length > 50)
+      newErrors.school_name = "School name must be less than 50 characters.";
+
+    // --- Status required ---
+    if (!report.status) newErrors.status = "Status is required.";
+
+    // --- Description validation ---
     if (report.description && report.description.length > 500)
       newErrors.description = "Description must be under 500 characters.";
 
-    // Location allows special characters like @ ( ) , . - /
+    // --- Location validation (special characters allowed) ---
     if (report.location) {
       if (report.location.length < 5 || report.location.length > 50) {
         newErrors.location = "Address must be between 5 and 50 characters.";
       } else if (!ADDRESS_REGEX.test(report.location)) {
         newErrors.location = "Address contains invalid characters.";
       }
+    } else {
+      newErrors.location = "Address is required.";
     }
 
     setErrors(newErrors);
@@ -193,8 +256,7 @@ export default function EditReportScreen() {
 
   const handleNavigate = (path: string) => {
     toggleMenu();
-    setTimeout(() => router.push(path), 250);
-
+    setTimeout(() => router.rush({ pathname: path as any }), 250);
   };
 
   if (!report)
