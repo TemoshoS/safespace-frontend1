@@ -124,7 +124,7 @@ export default function AbuseTypesScreen() {
                 if (router.canGoBack()) {
                   router.back();
                 } else {
-                  router.rush("/report-screen"); // Go home if no back screen
+                  router.push("/report-screen"); // Go home if no back screen
                 }
               }}
               onClose={() => setMenuVisible(false)}
@@ -162,7 +162,7 @@ const styles = StyleSheet.create({
         color: "black",
         marginBottom: height * 0.02,
         fontWeight: "bold",
-        fontSize: width * 0.02,
+        fontSize: width * 0.04,
         fontFamily: 'Montserrat'
     },
     abuseBox: {

@@ -88,7 +88,7 @@ export default function Index() {
         {/* Logo */}
         <View style={styles.logoWrapper}>
           <Image
-            source={require("../assets/images/Logo.jpg")}
+            source={require("../assets/images/Logo.png")}
             style={styles.logo}
             resizeMode="contain"
           />
@@ -162,8 +162,8 @@ const styles = StyleSheet.create({
   },
 
   logo: {
-    width: width * 0.35,
-    height: width * 0.35,
+    width: width * 0.37,
+    height: width * 0.37,
   },
 
   logoWrapper: {

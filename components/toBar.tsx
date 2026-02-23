@@ -17,7 +17,7 @@ export default function TopBar({ menuVisible, onBack, onToggleMenu }: TopBarProp
         <>
 
           <Image
-            source={require("../assets/images/Logo.jpg")}
+            source={require("../assets/images/Logo.png")}
             style={styles.logo}
             resizeMode="contain"
           />
@@ -44,7 +44,7 @@ const styles = StyleSheet.create({
     zIndex: 100,
   },
   logo: {
-    width: width * 0.25,
-    height: height * 0.1,
+    width: width * 0.37,
+    height: height * 0.2,
   },
 });

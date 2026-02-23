@@ -256,7 +256,7 @@ export default function EditReportScreen() {
 
   const handleNavigate = (path: string) => {
     toggleMenu();
-    setTimeout(() => router.rush({ pathname: path as any }), 250);
+    setTimeout(() => router.push({ pathname: path as any }), 250);
   };
 
   if (!report)
